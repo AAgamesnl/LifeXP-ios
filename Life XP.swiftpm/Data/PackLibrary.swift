@@ -2,6 +2,22 @@ import Foundation
 
 /// Static library of checklist packs used by the prototype.
 enum PackLibrary {
+    static let core: [CategoryPack] = [
+        relationshipCore,
+        glowUp,
+        breakupHealing,
+        moneyCareer,
+        adulting,
+        adventure,
+        wellnessReset,
+        creatorLab,
+        communityRoots,
+        missionControl,
+        adventurePassport,
+        legacyImpact,
+        luxuryCalm
+    ]
+
     static let relationshipCore = CategoryPack(
         id: "relationship_core",
         title: "Relationship Core",
@@ -723,21 +739,7 @@ enum PackLibrary {
 
     static let megaVault = MegaPackLibrary.vault
 
-    static let all: [CategoryPack] = [
-        relationshipCore,
-        glowUp,
-        breakupHealing,
-        moneyCareer,
-        adulting,
-        adventure,
-        wellnessReset,
-        creatorLab,
-        communityRoots,
-        missionControl,
-        adventurePassport,
-        legacyImpact,
-        luxuryCalm
-    ] + megaVault
+    static let all: [CategoryPack] = core + megaVault
 
     /// Items that should be hidden when the user enables safe mode.
     static let heavyItemIDs: Set<String> = [

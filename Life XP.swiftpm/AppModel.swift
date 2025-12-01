@@ -8,12 +8,20 @@ struct SpotlightTheme {
     let focus: LifeDimension
 }
 
+enum MegaVaultState: Equatable {
+    case notLoaded
+    case loading
+    case loaded
+    case failed(String)
+}
+
 /// Central source of truth for Life XP state, progress, and preferences.
 final class AppModel: ObservableObject {
     // MARK: - Published data
     @Published var packs: [CategoryPack]
     let journeys: [Journey]
     @Published private(set) var completedItemIDs: Set<String>
+    @Published private(set) var megaVaultState: MegaVaultState = .notLoaded
 
     // MARK: - Premium (placeholder for future IAP)
     @Published var premiumUnlocked: Bool = false
@@ -69,6 +77,8 @@ final class AppModel: ObservableObject {
         self.currentStreak = userDefaults.integer(forKey: Keys.currentStreak)
         self.bestStreak = userDefaults.integer(forKey: Keys.bestStreak)
         self.lastActiveDay = userDefaults.object(forKey: Keys.lastActiveDay) as? Date
+
+        loadMegaVaultIfNeeded()
     }
 
     // MARK: - Persistence
@@ -90,6 +100,32 @@ final class AppModel: ObservableObject {
         userDefaults.set(bestStreak, forKey: Keys.bestStreak)
         if let last = lastActiveDay {
             userDefaults.set(last, forKey: Keys.lastActiveDay)
+        }
+    }
+
+    // MARK: - Mega vault loading
+
+    func loadMegaVaultIfNeeded() {
+        switch megaVaultState {
+        case .loading, .loaded:
+            return
+        case .failed:
+            megaVaultState = .notLoaded
+            fallthrough
+        case .notLoaded:
+            megaVaultState = .loading
+            DispatchQueue.global(qos: .userInitiated).async {
+                let vault = PackLibrary.megaVault
+                DispatchQueue.main.async {
+                    guard !vault.isEmpty else {
+                        self.megaVaultState = .failed("Mega Vault kon niet geladen worden.")
+                        return
+                    }
+
+                    self.packs.append(contentsOf: vault)
+                    self.megaVaultState = .loaded
+                }
+            }
         }
     }
 

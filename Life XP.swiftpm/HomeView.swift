@@ -90,6 +90,8 @@ struct HomeView: View {
                         )
                         .environmentObject(model)
 
+                        megaVaultStatus
+
                         if let spotlight = model.seasonalSpotlight {
                             SeasonalSpotlightCard(theme: spotlight.theme, items: spotlight.items)
                         }
@@ -154,9 +156,59 @@ struct HomeView: View {
                         }
                     }
                     .padding()
+                    .onAppear {
+                        model.loadMegaVaultIfNeeded()
+                    }
                 }
             }
             .navigationTitle("Home")
+        }
+
+    }
+
+    @ViewBuilder
+    private var megaVaultStatus: some View {
+        switch model.megaVaultState {
+        case .loading:
+            HStack(spacing: 12) {
+                ProgressView()
+                    .tint(.accentColor)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Mega Vault wordt geladen…")
+                        .font(.headline)
+                    Text("We laden honderden nieuwe quests zonder je startscherm te vertragen.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+            }
+            .padding()
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        case .failed(let message):
+            HStack(spacing: 12) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.orange)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Vault laden mislukt")
+                        .font(.headline)
+                    Text(message)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                Button("Opnieuw") {
+                    model.loadMegaVaultIfNeeded()
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            .padding()
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        case .loaded, .notLoaded:
+            EmptyView()
         }
     }
 }
