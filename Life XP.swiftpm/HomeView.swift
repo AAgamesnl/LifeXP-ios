@@ -81,7 +81,23 @@ struct HomeView: View {
                         .background(.ultraThinMaterial)
                         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                         .shadow(radius: 14, y: 6)
-                        
+
+                        LevelCard(
+                            level: model.level,
+                            progress: model.levelProgress,
+                            xpToNext: model.xpToNextLevel,
+                            nextUnlock: model.nextUnlockMessage
+                        )
+                        .environmentObject(model)
+
+                        if let spotlight = model.seasonalSpotlight {
+                            SeasonalSpotlightCard(theme: spotlight.theme, items: spotlight.items)
+                        }
+
+                        if let legendary = model.legendaryQuest, let pack = model.pack(for: legendary.id) {
+                            LegendaryQuestCard(pack: pack, item: legendary)
+                        }
+
                         // Suggestion card
                         if let suggestion = model.suggestedItem {
                             NavigationLink(destination: PackDetailView(pack: suggestion.pack)) {
@@ -89,7 +105,11 @@ struct HomeView: View {
                             }
                             .buttonStyle(.plain)
                         }
-                        
+
+                        if let dim = model.lowestDimension, !model.focusSuggestions.isEmpty {
+                            FocusDimensionCard(dimension: dim, items: model.focusSuggestions)
+                        }
+
                         // Quick dimension bars
                         VStack(spacing: 16) {
                             HStack {
@@ -350,5 +370,216 @@ struct QuickActionRow: View {
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .shadow(radius: 6, y: 3)
+    }
+}
+
+// MARK: - Level + Focus Cards
+
+struct LevelCard: View {
+    @EnvironmentObject var model: AppModel
+    let level: Int
+    let progress: Double
+    let xpToNext: Int
+    let nextUnlock: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Level \(level)")
+                        .font(.headline)
+                    Text("XP to next: \(xpToNext)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                ProgressRing(progress: progress)
+                    .frame(width: 80, height: 80)
+            }
+
+            Text(nextUnlock)
+                .font(.footnote)
+                .foregroundColor(.secondary)
+
+            if model.currentStreak > 0 {
+                HStack(spacing: 8) {
+                    Image(systemName: "flame")
+                    Text("Momentum: \(model.currentStreak)-day streak")
+                }
+                .font(.caption)
+                .foregroundColor(.orange)
+            }
+        }
+        .padding()
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .shadow(radius: 8, y: 3)
+    }
+}
+
+struct FocusDimensionCard: View {
+    let dimension: LifeDimension
+    let items: [ChecklistItem]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label(dimension.label, systemImage: dimension.systemImage)
+                    .font(.headline)
+                Spacer()
+                Text("Focus drop")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Text("Je zwakste stat. Pak 1 ding en claim die XP.")
+                .font(.footnote)
+                .foregroundColor(.secondary)
+
+            ForEach(items) { item in
+                HStack(alignment: .top, spacing: 10) {
+                    Circle()
+                        .fill(Color.accentColor.opacity(0.15))
+                        .frame(width: 10, height: 10)
+                        .padding(.top, 6)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(item.title)
+                            .font(.subheadline.weight(.semibold))
+
+                        if let detail = item.detail {
+                            Text(detail)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .lineLimit(2)
+                        }
+                    }
+
+                    Spacer()
+
+                    Text("\(item.xp) XP")
+                        .font(.caption2.weight(.medium))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            Capsule().fill(Color(.systemGray6))
+                        )
+                }
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+}
+
+struct SeasonalSpotlightCard: View {
+    let theme: SpotlightTheme
+    let items: [ChecklistItem]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                Image(systemName: theme.iconSystemName)
+                    .font(.headline)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(theme.title)
+                        .font(.headline)
+                    Text(theme.description)
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+                Text("Season drop")
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Capsule().fill(Color.accentColor.opacity(0.16)))
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(items) { item in
+                    HStack(spacing: 8) {
+                        Image(systemName: "sparkles")
+                            .foregroundColor(.accentColor)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(item.title)
+                                .font(.subheadline.weight(.semibold))
+                            if let detail = item.detail {
+                                Text(detail)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(2)
+                            }
+                        }
+                        Spacer()
+                        Text("\(item.xp) XP")
+                            .font(.caption2.weight(.medium))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Capsule().fill(Color(.systemGray6)))
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(radius: 10, y: 4)
+    }
+}
+
+struct LegendaryQuestCard: View {
+    let pack: CategoryPack
+    let item: ChecklistItem
+
+    var body: some View {
+        let accent = Color(hex: pack.accentColorHex, default: .accentColor)
+
+        VStack(alignment: .leading, spacing: 10) {
+            HStack { 
+                Label("Boss fight", systemImage: "bolt.circle.fill")
+                    .font(.headline)
+                Spacer()
+                Text("High XP")
+                    .font(.caption)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(Color.orange.opacity(0.15)))
+                    .foregroundColor(.orange)
+            }
+
+            Text(item.title)
+                .font(.title3.weight(.semibold))
+            if let detail = item.detail {
+                Text(detail)
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
+
+            HStack(spacing: 10) {
+                HStack(spacing: 6) {
+                    Image(systemName: pack.iconSystemName)
+                    Text(pack.title)
+                        .font(.caption.weight(.semibold))
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Capsule().fill(accent.opacity(0.16)))
+                .foregroundColor(accent)
+
+                Text("\(item.xp) XP")
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(Color(.systemGray6)))
+            }
+        }
+        .padding()
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .shadow(radius: 8, y: 3)
     }
 }

@@ -1,6 +1,13 @@
 import SwiftUI
 import Foundation
 
+struct SpotlightTheme {
+    let title: String
+    let description: String
+    let iconSystemName: String
+    let focus: LifeDimension
+}
+
 /// Central source of truth for Life XP state, progress, and preferences.
 final class AppModel: ObservableObject {
     // MARK: - Published data
@@ -113,6 +120,13 @@ final class AppModel: ObservableObject {
         return nil
     }
 
+    /// Returns the pack that contains a given item ID.
+    func pack(for itemID: String) -> CategoryPack? {
+        packs.first { pack in
+            pack.items.contains(where: { $0.id == itemID })
+        }
+    }
+
     // MARK: - Completion & XP
 
     /// Whether a given checklist item has been completed.
@@ -217,6 +231,11 @@ final class AppModel: ObservableObject {
         journey.stepItemIDs.compactMap { item(withID: $0) }.count
     }
 
+    /// Journeys fully completed (all steps done).
+    var completedJourneys: [Journey] {
+        journeys.filter { journeyProgress($0) >= 1 }
+    }
+
     // MARK: - Suggestions & coaching
 
     /// Random incomplete item suggestion that respects premium access.
@@ -246,6 +265,46 @@ final class AppModel: ObservableObject {
         return candidates.min(by: { ratio(for: $0) < ratio(for: $1) })
     }
 
+    /// Curated list of incomplete items that match the weakest dimension.
+    var focusSuggestions: [ChecklistItem] {
+        guard let dim = lowestDimension else { return [] }
+        let candidates = allVisibleItems.filter { item in
+            item.dimensions.contains(dim) && !completedItemIDs.contains(item.id)
+        }
+        return Array(candidates.prefix(3))
+    }
+
+    /// High XP item to pitch as eenmalige "boss fight".
+    var legendaryQuest: ChecklistItem? {
+        allVisibleItems
+            .filter { !completedItemIDs.contains($0.id) }
+            .sorted(by: { $0.xp > $1.xp })
+            .first
+    }
+
+    /// Weekly spotlight theme that rotates om de gebruiker een hoofdstuk te geven.
+    var seasonalSpotlight: (theme: SpotlightTheme, items: [ChecklistItem])? {
+        let themes: [SpotlightTheme] = [
+            SpotlightTheme(title: "Adventure Season", description: "Elke week minstens één herinnering maken die opvalt.", iconSystemName: "safari.fill", focus: .adventure),
+            SpotlightTheme(title: "Soft Power", description: "Rustige discipline: slaap, boundaries, beauty rituals.", iconSystemName: "sparkles.tv.fill", focus: .mind),
+            SpotlightTheme(title: "Glow with friends", description: "Samen leren, bouwen en vieren.", iconSystemName: "person.3.sequence.fill", focus: .love),
+            SpotlightTheme(title: "Money Play", description: "Cashflow, skills en kansen unlocken.", iconSystemName: "creditcard.fill", focus: .money)
+        ]
+
+        guard !themes.isEmpty else { return nil }
+        let week = calendar.component(.weekOfYear, from: Date())
+        let theme = themes[week % themes.count]
+
+        let themedItems = allVisibleItems.filter {
+            $0.dimensions.contains(theme.focus) && !completedItemIDs.contains($0.id)
+        }
+
+        let picks = themedItems.isEmpty ? Array(allVisibleItems.shuffled().prefix(3)) : Array(themedItems.shuffled().prefix(3))
+        guard !picks.isEmpty else { return nil }
+
+        return (theme: theme, items: picks)
+    }
+
     /// Tone-aware coaching message based on overall progress.
     var coachMessage: String {
         let score = Int(globalProgress * 100)
@@ -269,6 +328,46 @@ final class AppModel: ObservableObject {
                 return "Je bent aan het levellen. Nu niet achteroverleunen en alles laten rotten. Blijf consequent."
             }
         }
+    }
+
+    // MARK: - Leveling
+
+    /// Lightweight RPG-style level derived from total XP.
+    var level: Int {
+        max(1, totalXP / 120 + 1)
+    }
+
+    private var levelStartXP: Int {
+        (level - 1) * 120
+    }
+
+    /// Progress (0...1) through the current level.
+    var levelProgress: Double {
+        let span = 120
+        let current = totalXP - levelStartXP
+        return Double(max(0, min(current, span))) / Double(span)
+    }
+
+    /// How much XP is needed to reach the next level.
+    var xpToNextLevel: Int {
+        max(0, level * 120 - totalXP)
+    }
+
+    /// A bite-sized hint of what unlocks next.
+    var nextUnlockMessage: String {
+        let milestones: [(Bool, String)] = [
+            (totalXP < 50, "Nog \(50 - totalXP) XP tot badge ‘Getting Started’."),
+            (totalXP < 200, "Nog \(200 - totalXP) XP tot badge ‘Leveling Up’."),
+            (totalXP < 500, "\(500 - totalXP) XP te gaan tot ‘Life Architect’."),
+            (totalXP < 1000, "Legend status komt dichterbij: nog \(1000 - totalXP) XP."),
+            (xp(for: .adventure) < 120 && maxXP(for: .adventure) > 0, "Focus adventure voor badge ‘Explorer’."),
+            (xp(for: .mind) < 150 && maxXP(for: .mind) > 0, "Mind-work badge ‘Inner Work’ staat klaar als je nog \(150 - xp(for: .mind)) XP pakt."),
+            (completedJourneys.isEmpty, "Speel een journey uit om badge ‘Story Arc’ te claimen."),
+            (currentStreak < 7, "\(max(0, 7 - currentStreak)) dagen tot je ‘Consistency Era’ badge terugziet."),
+            (bestStreak < 21, "Ga voor 21 dagen streak om ‘Unstoppable’ te claimen."),
+        ]
+
+        return milestones.first(where: { $0.0 })?.1 ?? "Je hebt de grote milestones gehaald. Tijd voor je eigen legendarische side quest."
     }
 
     // MARK: - Badges
@@ -295,6 +394,24 @@ final class AppModel: ObservableObject {
             ))
         }
 
+        if totalXP >= 500 {
+            result.append(Badge(
+                id: "badge_architect",
+                name: "Life Architect",
+                description: "500+ XP: je leven is een designproject geworden.",
+                iconSystemName: "rectangle.3.group.fill"
+            ))
+        }
+
+        if totalXP >= 1000 {
+            result.append(Badge(
+                id: "badge_legend",
+                name: "Level 100 Vibes",
+                description: "1000+ XP verzameld. Je speelt nu op Legendary.",
+                iconSystemName: "star.circle.fill"
+            ))
+        }
+
         if xp(for: .love) >= 80 {
             result.append(Badge(
                 id: "badge_soft_lover",
@@ -313,6 +430,24 @@ final class AppModel: ObservableObject {
             ))
         }
 
+        if xp(for: .adventure) >= 120 {
+            result.append(Badge(
+                id: "badge_explorer",
+                name: "Explorer",
+                description: "Je verzamelt actief nieuwe herinneringen en micro-avonturen.",
+                iconSystemName: "safari.fill"
+            ))
+        }
+
+        if xp(for: .mind) >= 150 {
+            result.append(Badge(
+                id: "badge_inner_work",
+                name: "Inner Work",
+                description: "Mind-work is priority. Reflectie, therapie en routines zijn geland.",
+                iconSystemName: "brain"
+            ))
+        }
+
         if currentStreak >= 3 {
             result.append(Badge(
                 id: "badge_streak_3",
@@ -328,6 +463,43 @@ final class AppModel: ObservableObject {
                 name: "Consistency Era",
                 description: "Je hebt een streak van 7+ dagen gehaald.",
                 iconSystemName: "calendar.badge.checkmark"
+            ))
+        }
+
+        if bestStreak >= 21 {
+            result.append(Badge(
+                id: "badge_unstoppable",
+                name: "Unstoppable",
+                description: "21+ dagen streak. Dit is hoe momentum voelt.",
+                iconSystemName: "bolt.fill"
+            ))
+        }
+
+        if completedJourneys.count >= 1 {
+            result.append(Badge(
+                id: "badge_story_arc",
+                name: "Story Arc",
+                description: "Je hebt minstens één journey volledig uitgespeeld.",
+                iconSystemName: "book.circle.fill"
+            ))
+        }
+
+        if completedJourneys.count >= 3 {
+            result.append(Badge(
+                id: "badge_arc_collector",
+                name: "Arc Collector",
+                description: "Drie journeys gecompleteerd: je leeft in seizoenen.",
+                iconSystemName: "rectangle.stack.fill"
+            ))
+        }
+
+        let ratios = LifeDimension.allCases.map { ratio(for: $0) }
+        if ratios.allSatisfy({ $0 >= 0.6 }) && !ratios.isEmpty {
+            result.append(Badge(
+                id: "badge_balanced", 
+                name: "Balanced", 
+                description: "Elke dimensie staat op 60%+ van zijn potentieel.",
+                iconSystemName: "circle.grid.cross"
             ))
         }
 
