@@ -174,6 +174,42 @@ enum JourneyLibrary {
         ]
     )
 
+    static let healthRebuild = Journey(
+        id: "journey_health_rebuild",
+        title: "Health Rebuild (12 dagen)",
+        subtitle: "Basis health kit + energie terugwinnen.",
+        iconSystemName: "cross.case.fill",
+        accentColorHex: "#0EA4BF",
+        durationDays: 12,
+        focusDimensions: [.mind],
+        stepItemIDs: [
+            "health_baseline_checks",
+            "health_sleep_consistency",
+            "health_steps_tracking",
+            "health_meal_prep",
+            "health_mobility_reset",
+            "health_morning_light"
+        ]
+    )
+
+    static let socialGlow = Journey(
+        id: "journey_social_glow",
+        title: "Social Glow-Up (10 dagen)",
+        subtitle: "Meer verbinding, minder awkward.",
+        iconSystemName: "person.3.sequence.fill",
+        accentColorHex: "#F97316",
+        durationDays: 10,
+        focusDimensions: [.love, .adventure],
+        stepItemIDs: [
+            "social_coffee_chat",
+            "social_micro_event",
+            "community_host",
+            "social_public_question",
+            "social_followups",
+            "social_feedback_round"
+        ]
+    )
+
     static let all: [Journey] = [
         breakupGlowUp,
         getTogether,
@@ -184,6 +220,8 @@ enum JourneyLibrary {
         adventureSeason,
         missionRunway,
         legacyArc,
-        luxuryReset
+        luxuryReset,
+        healthRebuild,
+        socialGlow
     ]
 }

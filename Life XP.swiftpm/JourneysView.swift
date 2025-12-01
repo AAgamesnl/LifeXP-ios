@@ -2,28 +2,46 @@ import SwiftUI
 
 struct JourneysView: View {
     @EnvironmentObject var model: AppModel
-    
+
+    private var activeJourney: Journey? {
+        guard let startID = model.journeyStartDates.keys.first,
+              let journey = model.journeys.first(where: { $0.id == startID }) else { return nil }
+        return journey
+    }
+
     var body: some View {
         NavigationView {
             List {
+                Section(header: Text("Live tracker")) {
+                    if let active = activeJourney {
+                        JourneyLiveTracker(journey: active)
+                    } else {
+                        Text("Start een journey om live progress en de countdown te zien.")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
                 Section(header: Text("Journeys")) {
                     ForEach(model.journeys) { journey in
                         NavigationLink(destination: JourneyDetailView(journey: journey)) {
                             JourneyCardView(journey: journey)
                         }
+                        .buttonStyle(.plain)
                     }
                 }
-                
+
                 Section(header: Text("Tools")) {
                     NavigationLink(destination: ChallengeView()) {
                         Label("Weekend Challenge", systemImage: "flag.checkered")
                     }
-                    
+
                     NavigationLink(destination: BadgesView()) {
                         Label("Badges", systemImage: "rosette")
                     }
                 }
             }
+            .listStyle(.insetGrouped)
             .navigationTitle("Journeys")
         }
     }
@@ -32,46 +50,135 @@ struct JourneysView: View {
 struct JourneyCardView: View {
     @EnvironmentObject var model: AppModel
     let journey: Journey
-    
+
     var body: some View {
         let accent = Color(hex: journey.accentColorHex, default: .accentColor)
         let progress = model.journeyProgress(journey)
         let done = model.journeyCompletedCount(journey)
         let total = model.journeyTotalCount(journey)
-        
-        HStack(spacing: 14) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(accent.opacity(0.16))
-                Image(systemName: journey.iconSystemName)
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundColor(accent)
+        let currentDay = model.journeyDay(for: journey)
+
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .center, spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(accent.opacity(0.16))
+                    Image(systemName: journey.iconSystemName)
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundColor(accent)
+                }
+                .frame(width: 56, height: 56)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(journey.title)
+                        .font(.subheadline.weight(.semibold))
+
+                    Text(journey.subtitle)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+
+                    HStack(spacing: 6) {
+                        ForEach(journey.focusDimensions) { dim in
+                            Label(dim.label, systemImage: dim.systemImage)
+                                .font(.caption2)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Capsule().fill(accent.opacity(0.12)))
+                        }
+                    }
+                }
+
+                Spacer()
             }
-            .frame(width: 56, height: 56)
-            
-            VStack(alignment: .leading, spacing: 6) {
+
+            ProgressView(value: progress) {
+                Text("\(done)/\(total) steps")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .tint(accent)
+
+            HStack {
+                if let day = currentDay {
+                    Label("Dag \(day) van \(journey.durationDays)", systemImage: "clock.arrow.circlepath")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(accent)
+                } else {
+                    Label("Nog niet gestart", systemImage: "play.fill")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                Button {
+                    model.startJourneyIfNeeded(journey)
+                } label: {
+                    Text(currentDay == nil ? "Start" : "Ga verder")
+                        .font(.caption.weight(.bold))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Capsule().fill(accent.opacity(0.2)))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(12)
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+}
+
+struct JourneyLiveTracker: View {
+    @EnvironmentObject var model: AppModel
+    let journey: Journey
+
+    var body: some View {
+        let accent = Color(hex: journey.accentColorHex, default: .accentColor)
+
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            let day = model.journeyDay(for: journey, date: context.date) ?? 1
+            let remaining = model.journeyDaysRemaining(for: journey, date: context.date) ?? journey.durationDays
+
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Label("Live journey tracker", systemImage: "stopwatch")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text("Dag \(day) / \(journey.durationDays)")
+                        .font(.caption.weight(.bold))
+                        .foregroundColor(accent)
+                }
+
                 Text(journey.title)
-                    .font(.subheadline.weight(.semibold))
-                
+                    .font(.headline)
                 Text(journey.subtitle)
                     .font(.caption)
                     .foregroundColor(.secondary)
-                    .lineLimit(2)
-                
-                ProgressView(value: progress)
+
+                ProgressView(value: Double(day), total: Double(max(1, journey.durationDays)))
                     .tint(accent)
-                
+
                 HStack {
-                    Text("\(done)/\(total) steps • \(journey.durationDays) days")
-                        .font(.caption2)
+                    Label("\(max(0, remaining)) dagen te gaan", systemImage: "calendar")
+                        .font(.caption)
                         .foregroundColor(.secondary)
                     Spacer()
+                    if let start = model.journeyStartDates[journey.id] {
+                        Text("Gestart: \(start, style: .date)")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
-            
-            Spacer()
+            .padding()
+            .background(
+                LinearGradient(colors: [accent.opacity(0.18), Color(.systemBackground)], startPoint: .topLeading, endPoint: .bottomTrailing)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         }
-        .padding(10)
     }
 }
 
@@ -107,16 +214,35 @@ struct JourneyDetailView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
-                            
+
                             ProgressView(value: progress)
                                 .tint(accent)
-                            
+
                             Text("\(Int(progress * 100))% • \(model.journeyCompletedCount(journey))/\(model.journeyTotalCount(journey)) steps")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                     }
-                    
+
+                    HStack(spacing: 10) {
+                        Button {
+                            model.startJourneyIfNeeded(journey)
+                        } label: {
+                            Label(model.journeyStartDates[journey.id] == nil ? "Start journey" : "Ga verder", systemImage: "play.fill")
+                                .font(.footnote.weight(.semibold))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Capsule().fill(accent.opacity(0.18)))
+                        }
+                        .buttonStyle(.plain)
+
+                        if let day = model.journeyDay(for: journey) {
+                            Text("Live dag \(day) • \(model.journeyDaysRemaining(for: journey) ?? 0) te gaan")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
                     if !journey.focusDimensions.isEmpty {
                         HStack(spacing: 8) {
                             ForEach(journey.focusDimensions) { dim in

@@ -30,10 +30,34 @@ final class AppModel: ObservableObject {
     @Published var primaryFocus: LifeDimension? = nil
     @Published var overwhelmedLevel: Int = 3
 
+    // MARK: - Home customization
+    @Published var showEnergyCard: Bool {
+        didSet { persistHomePrefs() }
+    }
+
+    @Published var showMomentumGrid: Bool {
+        didSet { persistHomePrefs() }
+    }
+
+    @Published var showQuickActions: Bool {
+        didSet { persistHomePrefs() }
+    }
+
+    @Published var compactHomeLayout: Bool {
+        didSet { persistHomePrefs() }
+    }
+
+    @Published var expandHomeCardsByDefault: Bool {
+        didSet { persistHomePrefs() }
+    }
+
     // MARK: - Streaks
     @Published private(set) var currentStreak: Int
     @Published private(set) var bestStreak: Int
     private var lastActiveDay: Date?
+
+    // MARK: - Journeys
+    @Published private(set) var journeyStartDates: [String: Date]
 
     // MARK: - Environment
     private let calendar: Calendar
@@ -46,6 +70,12 @@ final class AppModel: ObservableObject {
         static let currentStreak = "lifeXP.currentStreak"
         static let bestStreak = "lifeXP.bestStreak"
         static let lastActiveDay = "lifeXP.lastActiveDay"
+        static let homeEnergy = "lifeXP.homeEnergy"
+        static let homeMomentum = "lifeXP.homeMomentum"
+        static let homeQuickActions = "lifeXP.homeQuickActions"
+        static let homeCompact = "lifeXP.homeCompact"
+        static let homeExpanded = "lifeXP.homeExpanded"
+        static let journeyStarts = "lifeXP.journeyStarts"
     }
 
     // MARK: - Lifecycle
@@ -69,6 +99,22 @@ final class AppModel: ObservableObject {
         self.currentStreak = userDefaults.integer(forKey: Keys.currentStreak)
         self.bestStreak = userDefaults.integer(forKey: Keys.bestStreak)
         self.lastActiveDay = userDefaults.object(forKey: Keys.lastActiveDay) as? Date
+
+        self.showEnergyCard = userDefaults.object(forKey: Keys.homeEnergy) as? Bool ?? true
+        self.showMomentumGrid = userDefaults.object(forKey: Keys.homeMomentum) as? Bool ?? true
+        self.showQuickActions = userDefaults.object(forKey: Keys.homeQuickActions) as? Bool ?? true
+        self.compactHomeLayout = userDefaults.object(forKey: Keys.homeCompact) as? Bool ?? false
+        self.expandHomeCardsByDefault = userDefaults.object(forKey: Keys.homeExpanded) as? Bool ?? true
+
+        if let storedStarts = userDefaults.dictionary(forKey: Keys.journeyStarts) as? [String: TimeInterval] {
+            var hydrated: [String: Date] = [:]
+            for (key, timestamp) in storedStarts {
+                hydrated[key] = Date(timeIntervalSince1970: timestamp)
+            }
+            self.journeyStartDates = hydrated
+        } else {
+            self.journeyStartDates = [:]
+        }
     }
 
     // MARK: - Persistence
@@ -91,6 +137,19 @@ final class AppModel: ObservableObject {
         if let last = lastActiveDay {
             userDefaults.set(last, forKey: Keys.lastActiveDay)
         }
+    }
+
+    private func persistHomePrefs() {
+        userDefaults.set(showEnergyCard, forKey: Keys.homeEnergy)
+        userDefaults.set(showMomentumGrid, forKey: Keys.homeMomentum)
+        userDefaults.set(showQuickActions, forKey: Keys.homeQuickActions)
+        userDefaults.set(compactHomeLayout, forKey: Keys.homeCompact)
+        userDefaults.set(expandHomeCardsByDefault, forKey: Keys.homeExpanded)
+    }
+
+    private func persistJourneyStarts() {
+        let payload = journeyStartDates.mapValues { $0.timeIntervalSince1970 }
+        userDefaults.set(payload, forKey: Keys.journeyStarts)
     }
 
     // MARK: - Data helpers
@@ -197,6 +256,32 @@ final class AppModel: ObservableObject {
     /// Number of completed quests.
     var completedCount: Int {
         completedItemIDs.count
+    }
+
+    // MARK: - Journey pacing
+
+    func startJourneyIfNeeded(_ journey: Journey, date: Date = Date()) {
+        guard journeyStartDates[journey.id] == nil else { return }
+        journeyStartDates[journey.id] = date
+        persistJourneyStarts()
+    }
+
+    func resetJourneyStart(_ journey: Journey) {
+        journeyStartDates.removeValue(forKey: journey.id)
+        persistJourneyStarts()
+    }
+
+    func journeyDay(for journey: Journey, date: Date = Date()) -> Int? {
+        guard let start = journeyStartDates[journey.id] else { return nil }
+        let startDay = calendar.startOfDay(for: start)
+        let current = calendar.startOfDay(for: date)
+        let diff = calendar.dateComponents([.day], from: startDay, to: current).day ?? 0
+        return max(1, diff + 1)
+    }
+
+    func journeyDaysRemaining(for journey: Journey, date: Date = Date()) -> Int? {
+        guard let day = journeyDay(for: journey, date: date) else { return nil }
+        return max(0, journey.durationDays - day)
     }
 
     /// Remaining quests available in the visible packs.

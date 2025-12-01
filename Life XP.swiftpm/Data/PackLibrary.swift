@@ -721,6 +721,116 @@ enum PackLibrary {
         ]
     )
 
+    static let healthKit = CategoryPack(
+        id: "health_kit",
+        title: "Health Kit",
+        subtitle: "Core health basics voor elke speler",
+        iconSystemName: "cross.case.fill",
+        accentColorHex: "#0EA4BF",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "health_baseline_checks",
+                title: "Baseline check-up",
+                detail: "Bloedonderzoek, tandarts en huisarts in de afgelopen 12 maanden geregeld.",
+                xp: 28,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "health_sleep_consistency",
+                title: "Sleep consistency",
+                detail: "14 dagen lang binnen hetzelfde 60-minutenvenster naar bed en opstaan.",
+                xp: 24,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "health_steps_tracking",
+                title: "7k stappen streak",
+                detail: "Minstens 7.000 stappen per dag, 10 dagen achter elkaar gehaald.",
+                xp: 22,
+                dimensions: [.mind, .adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "health_meal_prep",
+                title: "Meal prep ready",
+                detail: "Twee weken achter elkaar 3 gezonde lunches of diners per week voorbereid.",
+                xp: 20,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "health_mobility_reset",
+                title: "Mobility reset",
+                detail: "10 minuten mobiliteit of stretchen op 10 verschillende dagen gedaan.",
+                xp: 16,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "health_morning_light",
+                title: "Morning sunlight",
+                detail: "7 dagen op rij binnen 60 minuten na het opstaan buiten daglicht gepakt.",
+                xp: 14,
+                dimensions: [.mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let socialConfidence = CategoryPack(
+        id: "social_confidence",
+        title: "Social Confidence",
+        subtitle: "Van awkward naar aanwezig",
+        iconSystemName: "person.3.fill",
+        accentColorHex: "#F97316",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "social_coffee_chat",
+                title: "2 coffee chats",
+                detail: "Twee mensen benaderd voor een koffietje om iets nieuws te leren of te connecten.",
+                xp: 18,
+                dimensions: [.love, .adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "social_micro_event",
+                title: "Host a micro-event",
+                detail: "Vier mensen samengebracht voor een spelletjesavond, diner of wandeling.",
+                xp: 24,
+                dimensions: [.love, .adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "social_public_question",
+                title: "Stel de eerste vraag",
+                detail: "Tijdens een event of meeting bewust de eerste vraag gesteld of gedeeld.",
+                xp: 14,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "social_followups",
+                title: "DM follow-ups",
+                detail: "Na een event drie mensen een DM gestuurd om contact te behouden.",
+                xp: 16,
+                dimensions: [.love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "social_feedback_round",
+                title: "Feedback rondje",
+                detail: "Aan drie mensen feedback gevraagd over hoe je overkomt en wat sterker kan.",
+                xp: 20,
+                dimensions: [.mind],
+                isPremium: false
+            )
+        ]
+    )
+
     static let megaMomentum = CategoryPack(
         id: "mega_momentum",
         title: "Mega Momentum Pack",
@@ -874,7 +984,9 @@ enum PackLibrary {
         adventurePassport,
         legacyImpact,
         luxuryCalm,
-        megaMomentum
+        megaMomentum,
+        healthKit,
+        socialConfidence
     ]
 
     /// Items that should be hidden when the user enables safe mode.

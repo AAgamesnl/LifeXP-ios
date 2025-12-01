@@ -129,35 +129,7 @@ struct StatsView: View {
                         .shadow(radius: 6, y: 3)
                     }
                     
-                    // Share card
-                    NavigationLink(destination: SharePreviewView()) {
-                        HStack(spacing: 12) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .fill(Color.blue.opacity(0.15))
-                                Image(systemName: "square.and.arrow.up")
-                                    .font(.system(size: 22, weight: .semibold))
-                                    .foregroundColor(.blue)
-                            }
-                            .frame(width: 54, height: 54)
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Maak een share card")
-                                    .font(.subheadline.weight(.semibold))
-                                Text("Perfect voor TikTok, Insta stories of om naar vrienden te sturen.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .lineLimit(2)
-                            }
-                            
-                            Spacer()
-                        }
-                        .padding()
-                        .background(.regularMaterial)
-                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                        .shadow(radius: 6, y: 3)
-                    }
-                    .buttonStyle(.plain)
+                    ShareEntryCard()
                 }
                 .padding()
             }
@@ -431,7 +403,7 @@ private struct SnapshotTile: View {
 
 struct SharePreviewView: View {
     @EnvironmentObject var model: AppModel
-    
+
     var body: some View {
         ZStack {
             Color.black.opacity(0.9).ignoresSafeArea()
@@ -440,19 +412,82 @@ struct SharePreviewView: View {
                 Text("Screenshot deze kaart en deel ’m in je story ✨")
                     .font(.footnote)
                     .foregroundColor(.white.opacity(0.8))
-                
+
                 ShareCardView()
                     .frame(maxWidth: 360)
-                
+
                 Text("Tip: zet je camera op full-screen, maak een screenshot en tag je app-naam.")
                     .font(.caption2)
                     .foregroundColor(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
+
+                ShareLink(item: "Mijn Life XP progress: \(Int(model.globalProgress * 100))% compleet!") {
+                    HStack {
+                        Spacer()
+                        Label("Deel deze kaart", systemImage: "arrow.up.right.square")
+                            .font(.callout.bold())
+                        Spacer()
+                    }
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.white.opacity(0.12)))
+                }
             }
             .padding()
         }
         .navigationTitle("Share card")
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct ShareEntryCard: View {
+    @EnvironmentObject var model: AppModel
+
+    private var shareText: String {
+        "Ik heb \(Int(model.globalProgress * 100))% van mijn Life XP checklist unlocked en \(model.totalXP) XP verzameld. Pak jouw kaart in de app!"
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .center, spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color.blue.opacity(0.15))
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundColor(.blue)
+                }
+                .frame(width: 54, height: 54)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Deel je progress")
+                        .font(.subheadline.weight(.semibold))
+                    Text("Story-ready kaart met jouw streak, XP en stats.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            ShareLink(item: shareText) {
+                HStack {
+                    Spacer()
+                    Label("Deel nu", systemImage: "arrow.up.right.square")
+                        .font(.footnote.bold())
+                    Spacer()
+                }
+                .padding(.vertical, 10)
+                .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.blue.opacity(0.12)))
+            }
+
+            NavigationLink(destination: SharePreviewView()) {
+                Text("Bekijk de kaart eerst")
+                    .font(.caption)
+                    .foregroundColor(.primary)
+            }
+        }
+        .padding()
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(radius: 6, y: 3)
     }
 }
 

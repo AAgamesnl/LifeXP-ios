@@ -17,7 +17,8 @@ struct HomeView: View {
                 .ignoresSafeArea()
                 
                 ScrollView {
-                    VStack(spacing: 24) {
+                    let spacing: CGFloat = model.compactHomeLayout ? 16 : 24
+                    VStack(spacing: spacing) {
                         // Life score + streak
                         VStack(spacing: 16) {
                             HStack {
@@ -87,16 +88,20 @@ struct HomeView: View {
                             ritual: model.ritualOfTheDay,
                             focusHeadline: model.focusHeadline,
                             nextUnlock: model.nextUnlockMessage,
-                            streak: model.currentStreak
+                            streak: model.currentStreak,
+                            defaultExpanded: model.expandHomeCardsByDefault
                         )
                         .environmentObject(model)
 
-                        EnergyCheckCard(
-                            headline: model.energyCheckIn,
-                            prompts: model.recoveryPrompts,
-                            remaining: model.remainingCount
-                        )
-                        .environmentObject(model)
+                        if model.showEnergyCard {
+                            EnergyCheckCard(
+                                headline: model.energyCheckIn,
+                                prompts: model.recoveryPrompts,
+                                remaining: model.remainingCount,
+                                defaultExpanded: model.expandHomeCardsByDefault
+                            )
+                            .environmentObject(model)
+                        }
 
                         LevelCard(
                             level: model.level,
@@ -148,20 +153,23 @@ struct HomeView: View {
                         .background(Color(.secondarySystemBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
 
-                        MomentumGrid(rankings: model.dimensionRankings)
-                            .environmentObject(model)
+                        if model.showMomentumGrid {
+                            MomentumGrid(rankings: model.dimensionRankings)
+                                .environmentObject(model)
+                        }
 
                         if !model.boosterPacks.isEmpty {
                             BoosterCarousel(boosterPacks: model.boosterPacks)
                         }
 
                         // Quick links
-                        VStack(spacing: 12) {
-                            HStack {
-                                Text("Quick actions")
-                                    .font(.headline)
-                                Spacer()
-                            }
+                        if model.showQuickActions {
+                            VStack(spacing: 12) {
+                                HStack {
+                                    Text("Quick actions")
+                                        .font(.headline)
+                                    Spacer()
+                                }
                             
                             NavigationLink(destination: JourneysView()) {
                                 QuickActionRow(
@@ -181,8 +189,9 @@ struct HomeView: View {
                             }
                             .buttonStyle(.plain)
 
-                            if !model.microWins.isEmpty {
-                                MicroWinsCard(items: model.microWins)
+                                if !model.microWins.isEmpty {
+                                    MicroWinsCard(items: model.microWins)
+                                }
                             }
                         }
                     }
@@ -203,6 +212,19 @@ struct DailyBriefingCard: View {
     let focusHeadline: String
     let nextUnlock: String
     let streak: Int
+    let defaultExpanded: Bool
+
+    @State private var isExpanded: Bool
+
+    init(affirmation: String, ritual: String, focusHeadline: String, nextUnlock: String, streak: Int, defaultExpanded: Bool) {
+        self.affirmation = affirmation
+        self.ritual = ritual
+        self.focusHeadline = focusHeadline
+        self.nextUnlock = nextUnlock
+        self.streak = streak
+        self.defaultExpanded = defaultExpanded
+        _isExpanded = State(initialValue: defaultExpanded)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -218,54 +240,71 @@ struct DailyBriefingCard: View {
 
                 Spacer()
 
-                if streak > 0 {
-                    VStack(alignment: .trailing, spacing: 4) {
-                        Label("\(streak) day streak", systemImage: "flame")
+                Button {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+                        isExpanded.toggle()
+                    }
+                } label: {
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .foregroundColor(.secondary)
+                        .padding(8)
+                        .background(Circle().fill(Color(.systemGray6)))
+                }
+                .buttonStyle(.plain)
+            }
+
+            if streak > 0 {
+                HStack(spacing: 10) {
+                    Image(systemName: "flame")
+                        .foregroundColor(.orange)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("\(streak) day streak")
                             .font(.caption.weight(.medium))
-                            .foregroundColor(.orange)
                         Text(focusHeadline)
                             .font(.caption2)
                             .foregroundColor(.secondary)
-                            .multilineTextAlignment(.trailing)
+                            .multilineTextAlignment(.leading)
                     }
                 }
             }
 
-            Divider()
-
-            HStack(alignment: .top, spacing: 12) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Label("Ritual van vandaag", systemImage: "sparkles")
-                        .font(.caption.weight(.semibold))
-                        .foregroundColor(.secondary)
-                    Text(ritual)
-                        .font(.subheadline)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                Spacer()
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Label("Volgende unlock", systemImage: "lock.open")
-                        .font(.caption.weight(.semibold))
-                        .foregroundColor(.secondary)
-                    Text(nextUnlock)
-                        .font(.subheadline)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-
-            if let weakest = model.lowestDimension {
+            if isExpanded {
                 Divider()
-                HStack(spacing: 10) {
-                    Image(systemName: weakest.systemImage)
-                        .foregroundColor(.accentColor)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Focus drop: \(weakest.label)")
-                            .font(.subheadline.weight(.semibold))
-                        Text("Pak één quest uit deze stat voor snelle XP.")
-                            .font(.caption)
+
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Label("Ritual van vandaag", systemImage: "sparkles")
+                            .font(.caption.weight(.semibold))
                             .foregroundColor(.secondary)
+                        Text(ritual)
+                            .font(.subheadline)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    Spacer()
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Label("Volgende unlock", systemImage: "lock.open")
+                            .font(.caption.weight(.semibold))
+                            .foregroundColor(.secondary)
+                        Text(nextUnlock)
+                            .font(.subheadline)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+
+                if let weakest = model.lowestDimension {
+                    Divider()
+                    HStack(spacing: 10) {
+                        Image(systemName: weakest.systemImage)
+                            .foregroundColor(.accentColor)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Focus drop: \(weakest.label)")
+                                .font(.subheadline.weight(.semibold))
+                            Text("Pak één quest uit deze stat voor snelle XP.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
             }
@@ -273,7 +312,7 @@ struct DailyBriefingCard: View {
         .padding()
         .background(
             LinearGradient(
-                colors: [Color(.systemBackground).opacity(0.9), Color.accentColor.opacity(0.12)],
+                colors: [Color(.systemBackground).opacity(0.95), Color.accentColor.opacity(0.12)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -574,6 +613,17 @@ struct EnergyCheckCard: View {
     let headline: String
     let prompts: [String]
     let remaining: Int
+    let defaultExpanded: Bool
+
+    @State private var isExpanded: Bool
+
+    init(headline: String, prompts: [String], remaining: Int, defaultExpanded: Bool) {
+        self.headline = headline
+        self.prompts = prompts
+        self.remaining = remaining
+        self.defaultExpanded = defaultExpanded
+        _isExpanded = State(initialValue: defaultExpanded)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -589,50 +639,68 @@ struct EnergyCheckCard: View {
 
                 Spacer()
 
-                VStack(alignment: .trailing, spacing: 4) {
-                    Label("\(remaining) open quests", systemImage: "list.star")
-                        .font(.caption.weight(.medium))
+                Button {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        isExpanded.toggle()
+                    }
+                } label: {
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .foregroundColor(.accentColor)
-                    Text("Kies er 1 en claim snelle XP.")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .padding(8)
+                        .background(Circle().fill(Color(.systemGray6)))
                 }
+                .buttonStyle(.plain)
             }
 
-            Divider()
+            if isExpanded {
+                Divider()
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Snelle resets")
-                    .font(.caption.weight(.semibold))
-                    .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Snelle resets")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.secondary)
 
-                ForEach(prompts.prefix(3), id: \.self) { prompt in
-                    HStack(spacing: 8) {
-                        Image(systemName: "sparkle.magnifyingglass")
-                            .foregroundColor(.accentColor)
-                        Text(prompt)
-                            .font(.subheadline)
-                            .fixedSize(horizontal: false, vertical: true)
+                    ForEach(prompts.prefix(3), id: \.self) { prompt in
+                        HStack(spacing: 8) {
+                            Image(systemName: "sparkle.magnifyingglass")
+                                .foregroundColor(.accentColor)
+                            Text(prompt)
+                                .font(.subheadline)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+
+                if !model.microWins.isEmpty {
+                    Divider()
+                    HStack {
+                        Image(systemName: "bolt.fill")
+                            .foregroundColor(.orange)
+                        Text("Micro win klaarstaan: \(model.microWins.first?.title ?? "Pak de kleinste taak")")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
                     }
                 }
             }
 
-            if !model.microWins.isEmpty {
-                Divider()
-                HStack {
-                    Image(systemName: "bolt.fill")
-                        .foregroundColor(.orange)
-                    Text("Micro win klaarstaan: \(model.microWins.first?.title ?? "Pak de kleinste taak")")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                }
+            HStack {
+                Label("\(remaining) open quests", systemImage: "list.star")
+                    .font(.caption.weight(.medium))
+                    .foregroundColor(.accentColor)
+                Spacer()
+                Text(isExpanded ? "Klap in" : "Bekijk prompts")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
             }
         }
         .padding()
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .shadow(radius: 8, y: 3)
+        .onAppear {
+            isExpanded = model.expandHomeCardsByDefault
+        }
     }
 }
 
@@ -871,6 +939,8 @@ struct LevelCard: View {
     let xpToNext: Int
     let nextUnlock: String
 
+    @State private var isExpanded: Bool = true
+
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
@@ -884,21 +954,35 @@ struct LevelCard: View {
 
                 Spacer()
 
-                ProgressRing(progress: progress)
-                    .frame(width: 80, height: 80)
+                Button {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        isExpanded.toggle()
+                    }
+                } label: {
+                    Image(systemName: isExpanded ? "rectangle.compress.vertical" : "rectangle.expand.vertical")
+                        .foregroundColor(.accentColor)
+                        .padding(10)
+                        .background(Circle().fill(Color(.systemGray6)))
+                }
+                .buttonStyle(.plain)
             }
 
-            Text(nextUnlock)
-                .font(.footnote)
-                .foregroundColor(.secondary)
+            if isExpanded {
+                ProgressRing(progress: progress)
+                    .frame(width: 80, height: 80)
 
-            if model.currentStreak > 0 {
-                HStack(spacing: 8) {
-                    Image(systemName: "flame")
-                    Text("Momentum: \(model.currentStreak)-day streak")
+                Text(nextUnlock)
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+
+                if model.currentStreak > 0 {
+                    HStack(spacing: 8) {
+                        Image(systemName: "flame")
+                        Text("Momentum: \(model.currentStreak)-day streak")
+                    }
+                    .font(.caption)
+                    .foregroundColor(.orange)
                 }
-                .font(.caption)
-                .foregroundColor(.orange)
             }
         }
         .padding()
