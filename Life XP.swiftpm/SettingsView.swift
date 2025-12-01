@@ -10,7 +10,7 @@ struct SettingsView: View {
                     Toggle(isOn: $model.premiumUnlocked) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Unlock PRO (dev mode)")
-                            Text("Gebruik dit om alle PRO-packs te testen. In de echte app wordt dit door een aankoop bepaald.")
+                            Text("Gebruik dit om alle PRO-packs te testen. In de echte app wordt dit door een aankoop bepaald lool.")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
