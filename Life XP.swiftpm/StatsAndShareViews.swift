@@ -7,6 +7,13 @@ struct StatsView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
+                    LevelSummaryCard(
+                        level: model.level,
+                        progress: model.levelProgress,
+                        xpToNext: model.xpToNextLevel,
+                        nextUnlock: model.nextUnlockMessage
+                    )
+
                     // Overall card
                     VStack(spacing: 8) {
                         Text("Overall")
@@ -57,7 +64,7 @@ struct StatsView: View {
                                 .font(.headline)
                             Spacer()
                         }
-                        
+
                         ForEach(LifeDimension.allCases) { dim in
                             StatsDimensionCard(dimension: dim)
                         }
@@ -65,7 +72,26 @@ struct StatsView: View {
                     .padding()
                     .background(Color(.secondarySystemBackground))
                     .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                    
+
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("Journeys & arcs")
+                                .font(.headline)
+                            Spacer()
+                            Text("\(model.completedJourneys.count) completed")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        ForEach(model.journeys) { journey in
+                            JourneyProgressRow(journey: journey)
+                        }
+                    }
+                    .padding()
+                    .background(.regularMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .shadow(radius: 6, y: 3)
+
                     // Badges quick view
                     if !model.unlockedBadges.isEmpty {
                         VStack(spacing: 12) {
@@ -171,6 +197,82 @@ struct StatsDimensionCard: View {
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: Color.black.opacity(0.04), radius: 6, y: 2)
+    }
+}
+
+struct LevelSummaryCard: View {
+    let level: Int
+    let progress: Double
+    let xpToNext: Int
+    let nextUnlock: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .center) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Level \(level)")
+                        .font(.title3.bold())
+                    Text("Nog \(xpToNext) XP tot level \(level + 1)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                ProgressRing(progress: progress)
+                    .frame(width: 90, height: 90)
+            }
+
+            Text(nextUnlock)
+                .font(.footnote)
+                .foregroundColor(.secondary)
+        }
+        .padding()
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .shadow(radius: 8, y: 4)
+    }
+}
+
+struct JourneyProgressRow: View {
+    @EnvironmentObject var model: AppModel
+    let journey: Journey
+
+    var body: some View {
+        let accent = Color(hex: journey.accentColorHex, default: .accentColor)
+        let progress = model.journeyProgress(journey)
+
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Image(systemName: journey.iconSystemName)
+                    .foregroundColor(accent)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(journey.title)
+                        .font(.subheadline.weight(.semibold))
+                    Text(journey.subtitle)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+                Text("\(Int(progress * 100))%")
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(accent.opacity(0.18)))
+            }
+
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(.systemGray5))
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(accent)
+                        .frame(width: max(8, geo.size.width * CGFloat(min(1, max(0, progress)))))
+                }
+            }
+            .frame(height: 10)
+        }
+        .padding(.vertical, 4)
     }
 }
 
