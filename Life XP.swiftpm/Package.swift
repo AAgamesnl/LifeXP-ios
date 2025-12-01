@@ -5,36 +5,48 @@
 // Do not edit it by hand because the contents will be replaced.
 
 import PackageDescription
+
+#if canImport(AppleProductTypes)
 import AppleProductTypes
+
+private let packageProducts: [Product] = [
+    .iOSApplication(
+        name: "Life XP",
+        targets: ["AppModule"],
+        bundleIdentifier: "com.ayoub.LifeXP",
+        teamIdentifier: "26TUM3453K",
+        displayVersion: "0.1",
+        bundleVersion: "1",
+        appIcon: .placeholder(icon: .checkmark),
+        accentColor: .presetColor(.cyan),
+        supportedDeviceFamilies: [
+            .pad,
+            .phone
+        ],
+        supportedInterfaceOrientations: [
+            .portrait,
+            .landscapeRight,
+            .landscapeLeft,
+            .portraitUpsideDown(.when(deviceFamilies: [.pad]))
+        ],
+        appCategory: .lifestyle
+    )
+]
+#else
+private let packageProducts: [Product] = [
+    .executable(
+        name: "Life XP",
+        targets: ["AppModule"]
+    )
+]
+#endif
 
 let package = Package(
     name: "Life XP",
     platforms: [
         .iOS("17.0")
     ],
-    products: [
-        .iOSApplication(
-            name: "Life XP",
-            targets: ["AppModule"],
-            bundleIdentifier: "com.ayoub.LifeXP",
-            teamIdentifier: "26TUM3453K",
-            displayVersion: "0.1",
-            bundleVersion: "1",
-            appIcon: .placeholder(icon: .checkmark),
-            accentColor: .presetColor(.cyan),
-            supportedDeviceFamilies: [
-                .pad,
-                .phone
-            ],
-            supportedInterfaceOrientations: [
-                .portrait,
-                .landscapeRight,
-                .landscapeLeft,
-                .portraitUpsideDown(.when(deviceFamilies: [.pad]))
-            ],
-            appCategory: .lifestyle
-        )
-    ],
+    products: packageProducts,
     targets: [
         .executableTarget(
             name: "AppModule",
