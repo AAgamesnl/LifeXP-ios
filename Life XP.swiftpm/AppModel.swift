@@ -258,6 +258,57 @@ final class AppModel: ObservableObject {
         return Double(xp(for: dimension)) / Double(max)
     }
 
+    /// Sorted overview of each dimension with its relative completion.
+    var dimensionRankings: [(dimension: LifeDimension, ratio: Double, earned: Int, total: Int)] {
+        LifeDimension.allCases
+            .map { dim in (dim, ratio(for: dim), xp(for: dim), maxXP(for: dim)) }
+            .filter { $0.total > 0 }
+            .sorted { $0.ratio > $1.ratio }
+    }
+
+    /// Aggregated balance score across all dimensions.
+    var dimensionBalanceScore: Int {
+        let ratios = dimensionRankings.map { $0.ratio }
+        guard !ratios.isEmpty else { return 0 }
+        return Int((ratios.reduce(0, +) / Double(ratios.count)) * 100)
+    }
+
+    /// Short label for where the user should aim next.
+    var focusHeadline: String {
+        if let lowest = lowestDimension {
+            return "Focus \(lowest.label) voor een betere balans."
+        }
+        return "Pak een willekeurige quest en houd de flow vast."
+    }
+
+    /// Lightweight rituals that rotate daily for extra inspiration.
+    var ritualOfTheDay: String {
+        let rituals = [
+            "Schrijf 3 zinnen over wat je vandaag wilt voelen.",
+            "Drink water, adem diep in en uit voor 60 seconden.",
+            "Stuur iemand een snelle appreciatie-voice note.",
+            "Maak je favoriete hoekje netjes; micro reset.",
+            "Plan 1 bold move voor je toekomst-self en blok het in.",
+            "Zet een timer en beweeg 7 minuten: springen, rekken, lopen.",
+            "Kies je outfit voor morgen en leg ‘m klaar (future you zegt bedankt).",
+        ]
+
+        let index = calendar.component(.day, from: Date()) % rituals.count
+        return rituals[index]
+    }
+
+    /// Smallest quests to grab dopamine without overthinking.
+    var microWins: [ChecklistItem] {
+        let available = allVisibleItems.filter { !completedItemIDs.contains($0.id) }
+        return Array(available.sorted(by: { $0.xp < $1.xp }).prefix(4))
+    }
+
+    /// High impact quests to pitch as weekly boss battles.
+    var heroQuests: [ChecklistItem] {
+        let available = allVisibleItems.filter { !completedItemIDs.contains($0.id) }
+        return Array(available.sorted(by: { $0.xp > $1.xp }).prefix(3))
+    }
+
     /// Dimension with the lowest relative progress, if any.
     var lowestDimension: LifeDimension? {
         let candidates = LifeDimension.allCases.filter { maxXP(for: $0) > 0 }
@@ -280,6 +331,27 @@ final class AppModel: ObservableObject {
             .filter { !completedItemIDs.contains($0.id) }
             .sorted(by: { $0.xp > $1.xp })
             .first
+    }
+
+    /// Soft or real-talk affirmation tuned to progress.
+    var dailyAffirmation: String {
+        let inspirationsSoft = [
+            "Je hoeft het niet perfect te doen om het toch te laten tellen.",
+            "Vandaag is een goed moment om te bouwen aan het leven dat je wilt voelen.",
+            "Rust en actie kunnen naast elkaar bestaan. Kies één mini-actie nu.",
+            "Je pace is prima. Je verschijnt; dat is de winst.",
+        ]
+
+        let inspirationsRealTalk = [
+            "Niet wachten op motivatie; bewegen creëert motivatie.",
+            "Geen zin? Prima. Doe het alsnog, maar kleiner.",
+            "De toekomst-versie van jou rekent op vandaag. Start.",
+            "Momentum > perfecte planning.", 
+        ]
+
+        let base = toneMode == .soft ? inspirationsSoft : inspirationsRealTalk
+        let index = calendar.component(.weekOfYear, from: Date()) % base.count
+        return base[index]
     }
 
     /// Weekly spotlight theme that rotates om de gebruiker een hoofdstuk te geven.

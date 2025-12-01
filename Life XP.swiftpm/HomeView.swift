@@ -82,6 +82,15 @@ struct HomeView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                         .shadow(radius: 14, y: 6)
 
+                        DailyBriefingCard(
+                            affirmation: model.dailyAffirmation,
+                            ritual: model.ritualOfTheDay,
+                            focusHeadline: model.focusHeadline,
+                            nextUnlock: model.nextUnlockMessage,
+                            streak: model.currentStreak
+                        )
+                        .environmentObject(model)
+
                         LevelCard(
                             level: model.level,
                             progress: model.levelProgress,
@@ -125,7 +134,10 @@ struct HomeView: View {
                         .padding()
                         .background(Color(.secondarySystemBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                        
+
+                        MomentumGrid(rankings: model.dimensionRankings)
+                            .environmentObject(model)
+
                         // Quick links
                         VStack(spacing: 12) {
                             HStack {
@@ -151,6 +163,10 @@ struct HomeView: View {
                                 )
                             }
                             .buttonStyle(.plain)
+
+                        if !model.microWins.isEmpty {
+                            MicroWinsCard(items: model.microWins)
+                        }
                         }
                     }
                     .padding()
@@ -158,6 +174,99 @@ struct HomeView: View {
             }
             .navigationTitle("Home")
         }
+    }
+}
+
+// MARK: - Daily Briefing
+
+struct DailyBriefingCard: View {
+    @EnvironmentObject var model: AppModel
+    let affirmation: String
+    let ritual: String
+    let focusHeadline: String
+    let nextUnlock: String
+    let streak: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Daily Briefing")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.secondary)
+                    Text(affirmation)
+                        .font(.headline)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer()
+
+                if streak > 0 {
+                    VStack(alignment: .trailing, spacing: 4) {
+                        Label("\(streak) day streak", systemImage: "flame")
+                            .font(.caption.weight(.medium))
+                            .foregroundColor(.orange)
+                        Text(focusHeadline)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.trailing)
+                    }
+                }
+            }
+
+            Divider()
+
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Label("Ritual van vandaag", systemImage: "sparkles")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.secondary)
+                    Text(ritual)
+                        .font(.subheadline)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer()
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Label("Volgende unlock", systemImage: "lock.open")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.secondary)
+                    Text(nextUnlock)
+                        .font(.subheadline)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            if let weakest = model.lowestDimension {
+                Divider()
+                HStack(spacing: 10) {
+                    Image(systemName: weakest.systemImage)
+                        .foregroundColor(.accentColor)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Focus drop: \(weakest.label)")
+                            .font(.subheadline.weight(.semibold))
+                        Text("Pak één quest uit deze stat voor snelle XP.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(
+            LinearGradient(
+                colors: [Color(.systemBackground).opacity(0.9), Color.accentColor.opacity(0.12)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(Color.accentColor.opacity(0.15), lineWidth: 1)
+        )
+        .shadow(radius: 10, y: 4)
     }
 }
 
@@ -370,6 +479,135 @@ struct QuickActionRow: View {
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .shadow(radius: 6, y: 3)
+    }
+}
+
+// MARK: - Momentum Grid & Micro Wins
+
+struct MomentumGrid: View {
+    @EnvironmentObject var model: AppModel
+    let rankings: [(dimension: LifeDimension, ratio: Double, earned: Int, total: Int)]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Momentum board")
+                    .font(.headline)
+                Spacer()
+                if model.dimensionBalanceScore > 0 {
+                    Label("\(model.dimensionBalanceScore)% balance", systemImage: "gyroscope")
+                        .font(.caption.weight(.medium))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Capsule().fill(Color.accentColor.opacity(0.12)))
+                }
+            }
+
+            Text("Zie in één oogopslag welke stats dominant zijn en waar je XP laat liggen.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                ForEach(rankings, id: \.dimension) { entry in
+                    MomentumTile(entry: entry)
+                }
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+}
+
+struct MomentumTile: View {
+    let entry: (dimension: LifeDimension, ratio: Double, earned: Int, total: Int)
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Label(entry.dimension.label, systemImage: entry.dimension.systemImage)
+                    .font(.subheadline.weight(.semibold))
+                Spacer()
+                Text("\(Int(entry.ratio * 100))%")
+                    .font(.caption.weight(.bold))
+                    .foregroundColor(.accentColor)
+            }
+
+            ProgressView(value: entry.ratio)
+                .progressViewStyle(.linear)
+
+            HStack {
+                Text("\(entry.earned) XP")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text("\(entry.total) max")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+}
+
+struct MicroWinsCard: View {
+    let items: [ChecklistItem]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Micro wins")
+                    .font(.headline)
+                Spacer()
+                Text("Snelle dopamine hits")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Text("Pak iets kleins en claim momentum binnen 5 minuten.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            ForEach(items) { item in
+                MicroWinRow(item: item)
+            }
+        }
+        .padding()
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(radius: 8, y: 3)
+    }
+}
+
+struct MicroWinRow: View {
+    let item: ChecklistItem
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "bolt.fill")
+                .foregroundColor(.yellow)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.title)
+                    .font(.subheadline.weight(.semibold))
+                if let detail = item.detail {
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                }
+            }
+
+            Spacer()
+
+            Text("\(item.xp) XP")
+                .font(.caption.weight(.medium))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Capsule().fill(Color(.systemGray6)))
+        }
     }
 }
 

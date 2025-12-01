@@ -56,7 +56,14 @@ struct StatsView: View {
                     .background(.ultraThinMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
                     .shadow(radius: 10, y: 5)
-                    
+
+                    InsightsCard(
+                        balanceScore: model.dimensionBalanceScore,
+                        focusHeadline: model.focusHeadline,
+                        ritual: model.ritualOfTheDay,
+                        heroQuests: model.heroQuests
+                    )
+
                     // Dimensions
                     VStack(spacing: 16) {
                         HStack {
@@ -197,6 +204,82 @@ struct StatsDimensionCard: View {
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: Color.black.opacity(0.04), radius: 6, y: 2)
+    }
+}
+
+struct InsightsCard: View {
+    let balanceScore: Int
+    let focusHeadline: String
+    let ritual: String
+    let heroQuests: [ChecklistItem]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Insights")
+                    .font(.headline)
+                Spacer()
+                if balanceScore > 0 {
+                    Text("Balance \(balanceScore)%")
+                        .font(.caption.weight(.semibold))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Capsule().fill(Color.accentColor.opacity(0.12)))
+                }
+            }
+
+            Text(focusHeadline)
+                .font(.subheadline)
+            Text(ritual)
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("High impact")
+                        .font(.caption.weight(.semibold))
+                    Spacer()
+                    Text("Top XP quests")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+
+                if heroQuests.isEmpty {
+                    Text("Claim eerst wat basis XP, dan droppen we je boss fights.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                } else {
+                    ForEach(heroQuests) { quest in
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: "bolt.circle.fill")
+                                .foregroundColor(.orange)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(quest.title)
+                                    .font(.subheadline.weight(.semibold))
+                                if let detail = quest.detail {
+                                    Text(detail)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(2)
+                                }
+                            }
+                            Spacer()
+                            Text("\(quest.xp) XP")
+                                .font(.caption.weight(.medium))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Capsule().fill(Color(.systemGray6)))
+                        }
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(radius: 6, y: 3)
     }
 }
 
