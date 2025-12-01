@@ -2,7 +2,7 @@ import SwiftUI
 import Foundation
 
 /// Core life dimensions used throughout the app.
-enum LifeDimension: String, CaseIterable, Codable, Identifiable {
+enum LifeDimension: String, CaseIterable, Codable, Identifiable, Hashable {
     case love
     case money
     case mind
@@ -32,7 +32,7 @@ enum LifeDimension: String, CaseIterable, Codable, Identifiable {
 }
 
 /// Coaching tone preference for in-app messaging.
-enum ToneMode: String, CaseIterable, Identifiable {
+enum ToneMode: String, CaseIterable, Identifiable, Hashable {
     case soft
     case realTalk
 
