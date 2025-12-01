@@ -721,6 +721,145 @@ enum PackLibrary {
         ]
     )
 
+    static let megaMomentum = CategoryPack(
+        id: "mega_momentum",
+        title: "Mega Momentum Pack",
+        subtitle: "Ridiculously detailed challenges to upgrade every area",
+        iconSystemName: "burst.fill",
+        accentColorHex: "#FF6B00",
+        isPremium: true,
+        items: [
+            ChecklistItem(
+                id: "mega_energy_audit",
+                title: "Energy + attention audit",
+                detail: "60 minuten al je dagelijkse prikkels in kaart gebracht en per bron beslist: keep, cut, delegate of automatiseren.",
+                xp: 30,
+                dimensions: [.mind],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "mega_weekly_rhythm",
+                title: "Weekly rhythm map",
+                detail: "Een visuele map gemaakt van je week met vaste focusblokken, recovery slots, sociale touchpoints en chore-time.",
+                xp: 26,
+                dimensions: [.mind, .love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "mega_skill_stack",
+                title: "Skill stack refresh",
+                detail: "3 skills gekozen die je in 90 dagen wil stacken, plus micro-practices en meetmomenten vastgelegd.",
+                xp: 32,
+                dimensions: [.money, .mind],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "mega_body_baseline",
+                title: "Body baseline",
+                detail: "Slaap, voeding, beweging en labs gelogd in één dashboard zodat je je echte baseline kent.",
+                xp: 28,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "mega_connection_squad",
+                title: "Connection squad",
+                detail: "Een vaste groep van 3-5 mensen samengesteld met maandelijkse meetups en een gedeelde accountability thread.",
+                xp: 24,
+                dimensions: [.love, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "mega_risk_rep",
+                title: "Risk rep",
+                detail: "Iets gedaan met berekend risico (investering, pitch, performance) en achteraf lessons & SOP genoteerd.",
+                xp: 34,
+                dimensions: [.adventure, .money],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "mega_inbox_zero",
+                title: "Inbox zero protocol",
+                detail: "Voor e-mail, DM's en to-do's één weekly protocol opgesteld en twee weken volgehouden.",
+                xp: 20,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "mega_personal_os",
+                title: "Personal OS",
+                detail: "Een eigen ‘operating system’ uitgewerkt met dashboards voor doelen, projecten, habits en reflecties.",
+                xp: 36,
+                dimensions: [.mind, .money],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "mega_rest_day",
+                title: "Deliberate rest day",
+                detail: "Een volledige dag zonder productiviteit, volledig gepland rond herstel, spel en traagheid.",
+                xp: 18,
+                dimensions: [.mind, .love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "mega_reputation_loop",
+                title: "Reputation loop",
+                detail: "Bewust 3 reputatie-moves gedaan: iets publiceren, iemand helpen, iets leren en delen.",
+                xp: 30,
+                dimensions: [.money, .adventure],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "mega_focus_retreat",
+                title: "Solo focus retreat",
+                detail: "48 uur weg (of thuis) geweest met één duidelijk deliverable en geen notificaties.",
+                xp: 26,
+                dimensions: [.mind, .adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "mega_money_flow",
+                title: "Money flow redesign",
+                detail: "Cashflow, buffers en investeringen opnieuw ingedeeld met automatische transfers en guardrails.",
+                xp: 34,
+                dimensions: [.money],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "mega_identity_script",
+                title: "Identity script",
+                detail: "Een 1-pager geschreven over wie je aan het worden bent, met bewijs-stapjes en een ritueel om het te lezen.",
+                xp: 22,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "mega_mentor_circuit",
+                title: "Mentor circuit",
+                detail: "Twee mentoren benaderd + een peer gekozen, maandelijkse check-ins gepland en verwachtingen afgestemd.",
+                xp: 28,
+                dimensions: [.love, .money],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "mega_artifact_drop",
+                title: "Artifact drop",
+                detail: "Eén tastbaar of digitaal artefact gecreëerd dat je publiekelijk gedeeld hebt (guide, mini-course, tool).",
+                xp: 32,
+                dimensions: [.adventure, .money],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "mega_legacy_note",
+                title: "Legacy note",
+                detail: "Een brief geschreven voor je toekomstige zelf of iemand die belangrijk is en in een veilige plek bewaard.",
+                xp: 20,
+                dimensions: [.love, .mind],
+                isPremium: false
+            )
+        ]
+    )
+
     static let all: [CategoryPack] = [
         relationshipCore,
         glowUp,
@@ -734,7 +873,8 @@ enum PackLibrary {
         missionControl,
         adventurePassport,
         legacyImpact,
-        luxuryCalm
+        luxuryCalm,
+        megaMomentum
     ]
 
     /// Items that should be hidden when the user enables safe mode.
