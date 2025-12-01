@@ -14,6 +14,13 @@ struct StatsView: View {
                         nextUnlock: model.nextUnlockMessage
                     )
 
+                    ProgressSnapshotCard(
+                        completed: model.completedCount,
+                        remaining: model.remainingCount,
+                        balanceScore: model.dimensionBalanceScore,
+                        streak: model.currentStreak
+                    )
+
                     // Overall card
                     VStack(spacing: 8) {
                         Text("Overall")
@@ -356,6 +363,67 @@ struct JourneyProgressRow: View {
             .frame(height: 10)
         }
         .padding(.vertical, 4)
+    }
+}
+
+struct ProgressSnapshotCard: View {
+    let completed: Int
+    let remaining: Int
+    let balanceScore: Int
+    let streak: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Momentum snapshot")
+                    .font(.headline)
+                Spacer()
+                if balanceScore > 0 {
+                    Label("Balance \(balanceScore)%", systemImage: "circle.grid.cross")
+                        .font(.caption.weight(.medium))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Capsule().fill(Color.accentColor.opacity(0.12)))
+                }
+            }
+
+            HStack(spacing: 14) {
+                SnapshotTile(title: "Completed", value: "\(completed)", subtitle: "quests done", icon: "checkmark.circle.fill", tint: .green)
+                SnapshotTile(title: "Remaining", value: "\(remaining)", subtitle: "nog te gaan", icon: "target", tint: .orange)
+                SnapshotTile(title: "Streak", value: "\(streak)d", subtitle: "lopende reeks", icon: "flame.fill", tint: .red)
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+}
+
+private struct SnapshotTile: View {
+    let title: String
+    let value: String
+    let subtitle: String
+    let icon: String
+    let tint: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label(title, systemImage: icon)
+                .font(.caption.weight(.semibold))
+                .foregroundColor(tint)
+
+            Text(value)
+                .font(.title3.bold())
+
+            Text(subtitle)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .shadow(color: Color.black.opacity(0.04), radius: 5, y: 2)
     }
 }
 

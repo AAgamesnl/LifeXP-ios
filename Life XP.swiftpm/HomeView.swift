@@ -91,6 +91,13 @@ struct HomeView: View {
                         )
                         .environmentObject(model)
 
+                        EnergyCheckCard(
+                            headline: model.energyCheckIn,
+                            prompts: model.recoveryPrompts,
+                            remaining: model.remainingCount
+                        )
+                        .environmentObject(model)
+
                         LevelCard(
                             level: model.level,
                             progress: model.levelProgress,
@@ -107,6 +114,8 @@ struct HomeView: View {
                             LegendaryQuestCard(pack: pack, item: legendary)
                         }
 
+                        WeeklyBlueprintCard(steps: model.weeklyBlueprint)
+
                         // Suggestion card
                         if let suggestion = model.suggestedItem {
                             NavigationLink(destination: PackDetailView(pack: suggestion.pack)) {
@@ -117,6 +126,10 @@ struct HomeView: View {
 
                         if let dim = model.lowestDimension, !model.focusSuggestions.isEmpty {
                             FocusDimensionCard(dimension: dim, items: model.focusSuggestions)
+                        }
+
+                        if !model.focusPlaylist.isEmpty {
+                            FocusPlaylistCard(items: model.focusPlaylist)
                         }
 
                         // Quick dimension bars
@@ -137,6 +150,10 @@ struct HomeView: View {
 
                         MomentumGrid(rankings: model.dimensionRankings)
                             .environmentObject(model)
+
+                        if !model.boosterPacks.isEmpty {
+                            BoosterCarousel(boosterPacks: model.boosterPacks)
+                        }
 
                         // Quick links
                         VStack(spacing: 12) {
@@ -164,9 +181,9 @@ struct HomeView: View {
                             }
                             .buttonStyle(.plain)
 
-                        if !model.microWins.isEmpty {
-                            MicroWinsCard(items: model.microWins)
-                        }
+                            if !model.microWins.isEmpty {
+                                MicroWinsCard(items: model.microWins)
+                            }
                         }
                     }
                     .padding()
@@ -549,6 +566,240 @@ struct MomentumTile: View {
         .padding()
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+}
+
+struct EnergyCheckCard: View {
+    @EnvironmentObject var model: AppModel
+    let headline: String
+    let prompts: [String]
+    let remaining: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Energy check-in")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.secondary)
+                    Text(headline)
+                        .font(.headline)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 4) {
+                    Label("\(remaining) open quests", systemImage: "list.star")
+                        .font(.caption.weight(.medium))
+                        .foregroundColor(.accentColor)
+                    Text("Kies er 1 en claim snelle XP.")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Snelle resets")
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(.secondary)
+
+                ForEach(prompts.prefix(3), id: \.self) { prompt in
+                    HStack(spacing: 8) {
+                        Image(systemName: "sparkle.magnifyingglass")
+                            .foregroundColor(.accentColor)
+                        Text(prompt)
+                            .font(.subheadline)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+
+            if !model.microWins.isEmpty {
+                Divider()
+                HStack {
+                    Image(systemName: "bolt.fill")
+                        .foregroundColor(.orange)
+                    Text("Micro win klaarstaan: \(model.microWins.first?.title ?? "Pak de kleinste taak")")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+            }
+        }
+        .padding()
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .shadow(radius: 8, y: 3)
+    }
+}
+
+struct WeeklyBlueprintCard: View {
+    let steps: [AppModel.BlueprintStep]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Weekly blueprint")
+                    .font(.headline)
+                Spacer()
+                Text("Tiny rituals")
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Capsule().fill(Color.accentColor.opacity(0.14)))
+            }
+
+            Text("Gebruik deze 3 micro moves om momentum te starten.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(steps) { step in
+                    HStack(spacing: 10) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(Color.accentColor.opacity(0.12))
+                            Image(systemName: step.icon)
+                                .foregroundColor(.accentColor)
+                        }
+                        .frame(width: 44, height: 44)
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(step.title)
+                                .font(.subheadline.weight(.semibold))
+                            Text(step.detail)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .lineLimit(2)
+                        }
+                        Spacer()
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+}
+
+struct FocusPlaylistCard: View {
+    let items: [ChecklistItem]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Focus playlist")
+                    .font(.headline)
+                Spacer()
+                Text("4 quests")
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Capsule().fill(Color.accentColor.opacity(0.14)))
+            }
+
+            Text("Snelle selectie om vandaag doorheen te tikken.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            ForEach(items) { item in
+                HStack(spacing: 10) {
+                    Image(systemName: "play.circle.fill")
+                        .foregroundColor(.accentColor)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(item.title)
+                            .font(.subheadline.weight(.semibold))
+                        if let detail = item.detail {
+                            Text(detail)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .lineLimit(2)
+                        }
+                    }
+                    Spacer()
+                    Text("\(item.xp) XP")
+                        .font(.caption.weight(.medium))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Capsule().fill(Color(.systemGray6)))
+                }
+            }
+        }
+        .padding()
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(radius: 8, y: 3)
+    }
+}
+
+struct BoosterCarousel: View {
+    let boosterPacks: [(pack: CategoryPack, remaining: Int, progress: Double)]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Booster packs")
+                    .font(.headline)
+                Spacer()
+                Text("Sluit een pack af voor dopamine")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(Array(boosterPacks.prefix(4)).indices, id: \.self) { index in
+                        let entry = boosterPacks[index]
+                        let accent = Color(hex: entry.pack.accentColorHex, default: .accentColor)
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Image(systemName: entry.pack.iconSystemName)
+                                    .foregroundColor(accent)
+                                Text(entry.pack.title)
+                                    .font(.subheadline.weight(.semibold))
+                                Spacer()
+                            }
+
+                            HStack {
+                                Text("\(Int(entry.progress * 100))%")
+                                    .font(.caption.weight(.medium))
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Capsule().fill(accent.opacity(0.16)))
+                                    .foregroundColor(accent)
+                                Text("Nog \(entry.remaining) quests")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+
+                            GeometryReader { geo in
+                                ZStack(alignment: .leading) {
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(Color(.systemGray6))
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(accent)
+                                        .frame(width: max(10, geo.size.width * CGFloat(min(1, max(0, entry.progress)))))
+                                }
+                            }
+                            .frame(height: 10)
+                        }
+                        .padding()
+                        .frame(width: 220)
+                        .background(Color(.systemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .shadow(color: Color.black.opacity(0.06), radius: 8, y: 3)
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 

@@ -194,6 +194,16 @@ final class AppModel: ObservableObject {
             .reduce(0) { $0 + $1.xp }
     }
 
+    /// Number of completed quests.
+    var completedCount: Int {
+        completedItemIDs.count
+    }
+
+    /// Remaining quests available in the visible packs.
+    var remainingCount: Int {
+        max(0, allVisibleItems.count - completedCount)
+    }
+
     /// XP for a single dimension, counting only completed items.
     func xp(for dimension: LifeDimension) -> Int {
         allVisibleItems
@@ -352,6 +362,93 @@ final class AppModel: ObservableObject {
         let base = toneMode == .soft ? inspirationsSoft : inspirationsRealTalk
         let index = calendar.component(.weekOfYear, from: Date()) % base.count
         return base[index]
+    }
+
+    /// Light-weight check-in based on the overwhelmed slider.
+    var energyCheckIn: String {
+        switch overwhelmedLevel {
+        case 0...2:
+            return "Je staat in herstelmodus. Kies iets zachts en vier elke micro stap."
+        case 3...4:
+            return "Je kan wat aan. Kies 1 focus-quest en 1 micro win voor momentum."
+        default:
+            return "Je bent in beast mode. Pak een hero quest en bouw aan je streak."
+        }
+    }
+
+    /// Gentle resets the user can do when energy is low.
+    var recoveryPrompts: [String] {
+        [
+            "Doe een 3-minuten reset: ademhaling, water, stretchen.",
+            "Schrijf 5 dingen op die vandaag genoeg zijn. Niet perfect, wel echt.",
+            "Maak een 'done list' van wat al goed ging en claim die dopamine.",
+            "Plan een mini-reward na één task: thee, muziek, een meme kijken.",
+            "Kies de makkelijkste quest die toch vooruitgang boekt." 
+        ]
+    }
+
+    struct BlueprintStep: Identifiable {
+        let id = UUID().uuidString
+        let title: String
+        let detail: String
+        let icon: String
+    }
+
+    /// Weekly blueprint with tiny rituals and focus moves.
+    var weeklyBlueprint: [BlueprintStep] {
+        let dayIndex = calendar.component(.weekday, from: Date())
+        let base: [[BlueprintStep]] = [
+            [
+                BlueprintStep(title: "Plan 1 bold move", detail: "Blokkeer 30 min voor een taak waar toekomst-jij blij van wordt.", icon: "target"),
+                BlueprintStep(title: "Inbox reset", detail: "Snoei notificaties en 5 snelle replies.", icon: "tray.fill"),
+                BlueprintStep(title: "Body check", detail: "10 minuten bewegen of een wandeling met muziek.", icon: "figure.walk")
+            ],
+            [
+                BlueprintStep(title: "Social ping", detail: "Stuur een voice note naar iemand die je energie geeft.", icon: "bubble.left.and.bubble.right.fill"),
+                BlueprintStep(title: "Money micro", detail: "Check 1 rekening of zet 10 euro apart.", icon: "creditcard.fill"),
+                BlueprintStep(title: "Mind care", detail: "Schrijf 3 zinnen over wat je vandaag loslaat.", icon: "brain.head.profile")
+            ],
+            [
+                BlueprintStep(title: "Adventure seed", detail: "Plan een mini-uitstap voor dit weekend.", icon: "safari.fill"),
+                BlueprintStep(title: "Workspace reset", detail: "Ruim 1 hoekje op zodat je weer kan focussen.", icon: "square.grid.2x2.fill"),
+                BlueprintStep(title: "Sleep prep", detail: "Leg je outfit klaar en zet je telefoon op nachtstand.", icon: "moon.zzz.fill")
+            ]
+        ]
+
+        let deck = base[dayIndex % base.count]
+        return deck
+    }
+
+    /// Quick wins tuned to the weakest dimension first.
+    var focusPlaylist: [ChecklistItem] {
+        if let dim = lowestDimension {
+            let targeted = allVisibleItems.filter { item in
+                item.dimensions.contains(dim) && !completedItemIDs.contains(item.id)
+            }
+            if !targeted.isEmpty {
+                return Array(targeted.prefix(4))
+            }
+        }
+
+        let available = allVisibleItems.filter { !completedItemIDs.contains($0.id) }
+        return Array(available.prefix(4))
+    }
+
+    /// Packs sorted by remaining quests to nudge players into closure.
+    var boosterPacks: [(pack: CategoryPack, remaining: Int, progress: Double)] {
+        packs.compactMap { pack in
+            let visible = items(for: pack)
+            guard !visible.isEmpty else { return nil }
+            let done = visible.filter { completedItemIDs.contains($0.id) }.count
+            let remaining = visible.count - done
+            return (pack: pack, remaining: remaining, progress: Double(done) / Double(visible.count))
+        }
+        .sorted { lhs, rhs in
+            if lhs.progress == rhs.progress {
+                return lhs.remaining < rhs.remaining
+            }
+            return lhs.progress > rhs.progress
+        }
     }
 
     /// Weekly spotlight theme that rotates om de gebruiker een hoofdstuk te geven.
