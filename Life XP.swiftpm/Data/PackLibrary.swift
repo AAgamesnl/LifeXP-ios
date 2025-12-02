@@ -970,6 +970,1056 @@ enum PackLibrary {
         ]
     )
 
+    static let studentSurvival = CategoryPack(
+        id: "student_survival",
+        title: "Student Survival",
+        subtitle: "Voor iedereen die probeert niet te verdrinken in lessen, deadlines en rommelige kotkamers.",
+        iconSystemName: "graduationcap.fill",
+        accentColorHex: "#3B82F6",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "student_syllabus_check",
+                title: "Syllabus reality check",
+                detail: "Alle vakken en belangrijke deadlines in één overzicht gezet.",
+                xp: 14,
+                dimensions: [.money, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "student_study_spot",
+                title: "Blokplek gekozen",
+                detail: "Een vaste plek gekozen om te studeren (thuis, bib of koffiebar).",
+                xp: 12,
+                dimensions: [.mind, .adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "student_budget",
+                title: "Kot-budget gemaakt",
+                detail: "Een weekbudget bepaald voor eten, uitgaan en vervoer.",
+                xp: 16,
+                dimensions: [.money, .mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let movingOut = CategoryPack(
+        id: "moving_out_first_place",
+        title: "Moving Out & First Place",
+        subtitle: "Van ‘bij ouders’ naar ‘eigen plek, eigen regels’.",
+        iconSystemName: "house.fill",
+        accentColorHex: "#F59E0B",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "moving_inventory",
+                title: "Basisinventaris gemaakt",
+                detail: "Een lijst van écht noodzakelijke spullen opgesteld.",
+                xp: 14,
+                dimensions: [.money, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "moving_fixed_costs",
+                title: "Vaste kosten berekend",
+                detail: "Huur, energie, internet en verzekeringen in kaart gebracht.",
+                xp: 16,
+                dimensions: [.money, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "moving_housewarming",
+                title: "Mini housewarming",
+                detail: "Een kleine avond met vrienden of familie georganiseerd.",
+                xp: 12,
+                dimensions: [.love, .adventure],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let newCity = CategoryPack(
+        id: "new_city_starter",
+        title: "New City Starter Pack",
+        subtitle: "Je woont in een nieuwe stad en wil je er niet verloren voelen.",
+        iconSystemName: "mappin.and.ellipse",
+        accentColorHex: "#22C55E",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "newcity_mark_spots",
+                title: "3 plekken markeren",
+                detail: "Supermarkt, ontspanningsplek en nood-apotheek gemarkeerd.",
+                xp: 12,
+                dimensions: [.adventure, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "newcity_coffee_base",
+                title: "Koffiebar-found",
+                detail: "Een plek gevonden waar je je alleen comfortabel voelt.",
+                xp: 10,
+                dimensions: [.mind, .love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "newcity_walk",
+                title: "Neighborhood walk",
+                detail: "Bewust zonder Google Maps je wijk verkend.",
+                xp: 14,
+                dimensions: [.adventure, .mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let socialConfidenceBasics = CategoryPack(
+        id: "social_confidence_basics_pack",
+        title: "Social Confidence Basics",
+        subtitle: "Minder awkward in gesprekken zonder jezelf te forceren.",
+        iconSystemName: "person.2.fill",
+        accentColorHex: "#A855F7",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "social_new_person",
+                title: "1 nieuwe persoon aangesproken",
+                detail: "Kleine praat gemaakt in winkel, bar of werk.",
+                xp: 12,
+                dimensions: [.love, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "social_honest_cancel",
+                title: "Eerlijk ‘ik ben moe’ gezegd",
+                detail: "Een afspraak afgezet zonder smoes.",
+                xp: 10,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "social_boundary_check",
+                title: "Grenzen-check",
+                detail: "Drie situaties opgeschreven waarin je eigenlijk ‘nee’ wilde zeggen.",
+                xp: 14,
+                dimensions: [.mind, .love],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let deepFriendships = CategoryPack(
+        id: "deep_friendships",
+        title: "Deep Friendships",
+        subtitle: "Niet 100 oppervlakkige contacten maar 3–5 mensen die echt tellen.",
+        iconSystemName: "person.3.fill",
+        accentColorHex: "#EC4899",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "friendship_top3",
+                title: "Top-3 mensen gekozen",
+                detail: "De mensen gekozen die je meer aandacht wilt geven.",
+                xp: 10,
+                dimensions: [.love, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "friendship_quality_time",
+                title: "Quality time gepland",
+                detail: "Een 1-op-1 moment gepland zonder telefoon.",
+                xp: 12,
+                dimensions: [.love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "friendship_checkin",
+                title: "Eerlijke check-in",
+                detail: "Iemand gevraagd hoe het echt gaat.",
+                xp: 12,
+                dimensions: [.love, .mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let familyBoundaries = CategoryPack(
+        id: "family_boundaries_peace",
+        title: "Family Boundaries & Peace",
+        subtitle: "Voor iedereen met een familie die… ingewikkeld is.",
+        iconSystemName: "shield.lefthalf.fill",
+        accentColorHex: "#0EA5E9",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "family_red_flags",
+                title: "Rode vlaggen benoemd",
+                detail: "Genoteerd wat je triggert bij familie.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "family_soft_boundary",
+                title: "1 zachte grens gezet",
+                detail: "Een klein ‘ik doe dat liever niet’ uitgesproken.",
+                xp: 14,
+                dimensions: [.love, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "family_step_back",
+                title: "Uit contact stappen",
+                detail: "Bewust een ruziegeval niet via WhatsApp laten ontploffen.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let singleEra = CategoryPack(
+        id: "single_era_solo",
+        title: "Single Era – Solo Life",
+        subtitle: "Niet wachten tot je ‘iemand’ hebt; dit is je main character season.",
+        iconSystemName: "person.fill.badge.plus",
+        accentColorHex: "#7C3AED",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "single_solo_date",
+                title: "Solo date gepland",
+                detail: "Cinema, koffie, museum of wandeling alleen ingepland.",
+                xp: 12,
+                dimensions: [.adventure, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "single_vision",
+                title: "Vision zonder partner",
+                detail: "Opgeschreven hoe je leven eruit mag zien als je alleen blijft.",
+                xp: 14,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "single_detox",
+                title: "Social media detox van exen",
+                detail: "Exen en situationships uit je feeds gefilterd.",
+                xp: 10,
+                dimensions: [.mind, .love],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let careerStarter = CategoryPack(
+        id: "career_starter",
+        title: "Career Starter / First Job",
+        subtitle: "Voor je eerste job/stage: minder imposter, meer rust.",
+        iconSystemName: "briefcase.fill",
+        accentColorHex: "#22C55E",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "career_goals_firstyear",
+                title: "Job-doelen uitgeschreven",
+                detail: "Opgeschreven wat je wil leren in je eerste jaar.",
+                xp: 14,
+                dimensions: [.money, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "career_feedback",
+                title: "Feedback gevraagd",
+                detail: "Actief om eerlijke feedback gevraagd.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "career_commute_ritual",
+                title: "Commute-routine",
+                detail: "Standaard muziek, podcast of ritueel voor onderweg bepaald.",
+                xp: 10,
+                dimensions: [.mind, .love],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let careerPivot = CategoryPack(
+        id: "career_pivot",
+        title: "Career Pivot & Doubt",
+        subtitle: "Twijfel aan je job zonder op autopilot te blijven.",
+        iconSystemName: "arrow.triangle.2.circlepath",
+        accentColorHex: "#0EA5E9",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "career_diary",
+                title: "Eerlijk jobdagboek",
+                detail: "Eén week per dag 3 bullets: energiegevers en -zuigers.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "career_alternatives",
+                title: "Alternatieven verkennen",
+                detail: "Drie andere beroepen of sectoren uitgezocht.",
+                xp: 14,
+                dimensions: [.money, .adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "career_informational_chat",
+                title: "1 gesprek met iemand die anders werkt",
+                detail: "Een informele call of koffie geregeld om te leren.",
+                xp: 16,
+                dimensions: [.mind, .love],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let freelanceFoundations = CategoryPack(
+        id: "freelance_foundations",
+        title: "Freelance & Side Hustle Foundations",
+        subtitle: "Voor iedereen die stiekem liever zijn eigen dingen doet.",
+        iconSystemName: "eurosign.circle.fill",
+        accentColorHex: "#22C55E",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "freelance_value_prop",
+                title: "Mini value-prop geschreven",
+                detail: "In één zin: wat bied jij en voor wie?",
+                xp: 14,
+                dimensions: [.money, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "freelance_first_euro",
+                title: "Eerste € verdient",
+                detail: "Ongeacht bedrag minstens één keer betaald werk gedaan.",
+                xp: 16,
+                dimensions: [.money, .adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "freelance_admin_folder",
+                title: "Basis administratie-mapje gemaakt",
+                detail: "Facturen en kosten gestructureerd opgeslagen.",
+                xp: 12,
+                dimensions: [.money, .mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let digitalHygiene = CategoryPack(
+        id: "digital_hygiene",
+        title: "Digital Hygiene & Detox",
+        subtitle: "Minder doomscrolling, minder ruis, meer headspace.",
+        iconSystemName: "iphone.gen3.slash",
+        accentColorHex: "#8B5CF6",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "digital_homescreen",
+                title: "Homescreen clean-up",
+                detail: "Eén pagina met alleen essentials gemaakt.",
+                xp: 10,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "digital_notifications",
+                title: "Notificatie-killer",
+                detail: "Push uit voor minstens drie apps gezet.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "digital_phone_free",
+                title: "Phone-free blok",
+                detail: "Twee uur bewust zonder telefoon gegaan.",
+                xp: 14,
+                dimensions: [.mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let sleepRest = CategoryPack(
+        id: "sleep_rest_foundations",
+        title: "Sleep & Rest Foundations",
+        subtitle: "Geen perfecte 5 AM grind, gewoon minder gesloopt wakker worden.",
+        iconSystemName: "bed.double.fill",
+        accentColorHex: "#0EA4BF",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "sleep_goal",
+                title: "Realistische slaapdoel gekozen",
+                detail: "Aantal uren bepaald dat bij jou past.",
+                xp: 10,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "sleep_wind_down",
+                title: "Wind-down signaal",
+                detail: "Vaste reminder of ritueel 30 minuten voor slapen ingesteld.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "sleep_bed_only",
+                title: "Bed alleen voor slapen",
+                detail: "Een week niet in bed gescrold of gewerkt.",
+                xp: 14,
+                dimensions: [.mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let foodEnergy = CategoryPack(
+        id: "food_energy",
+        title: "Food & Energy",
+        subtitle: "Niet afvallen, maar beter voelen in je lichaam.",
+        iconSystemName: "fork.knife",
+        accentColorHex: "#84CC16",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "food_mindful_meal",
+                title: "1 maaltijd bewust gegeten",
+                detail: "Zonder scherm en echt proeven.",
+                xp: 10,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "food_energy_tracker",
+                title: "Energie-tracker",
+                detail: "Drie dagen bijgehouden welke maaltijden je crash geven.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "food_new_meal",
+                title: "Fun nieuwe maaltijd geprobeerd",
+                detail: "Een nieuw recept of keuken getest.",
+                xp: 12,
+                dimensions: [.adventure, .mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let movementBody = CategoryPack(
+        id: "movement_body_respect",
+        title: "Movement & Body Respect Basics",
+        subtitle: "Bewegen als respect voor je lijf zonder bodyshaming.",
+        iconSystemName: "figure.walk",
+        accentColorHex: "#10B981",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "movement_ten_walk",
+                title: "10-minuten-walk",
+                detail: "Drie dagen na elkaar een 10-minutenwandeling gedaan.",
+                xp: 10,
+                dimensions: [.mind, .adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "movement_daily_stretch",
+                title: "Stretch-moment",
+                detail: "Vijf minuten per dag gestretcht.",
+                xp: 10,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "movement_fun_activity",
+                title: "1 actieve activiteit die niet sporten voelt",
+                detail: "Iets actiefs gedaan dat vooral leuk was (dans, zwemmen, klimmen).",
+                xp: 14,
+                dimensions: [.adventure, .mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let creativityPassion = CategoryPack(
+        id: "creativity_passion_projects",
+        title: "Creativity & Passion Projects",
+        subtitle: "Voor iedereen die ideeën heeft maar nooit eraan begint.",
+        iconSystemName: "paintbrush.pointed.fill",
+        accentColorHex: "#F472B6",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "creativity_idea_dump",
+                title: "Ideeën-dump",
+                detail: "Alles wat je ooit wou maken opgeschreven.",
+                xp: 10,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "creativity_micro_session",
+                title: "1 micro-sessie",
+                detail: "15 minuten aan één project gewerkt.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "creativity_mini_launch",
+                title: "Mini launch",
+                detail: "Iets online gezet, ongeacht perfectie.",
+                xp: 14,
+                dimensions: [.adventure, .mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let selfCompassion = CategoryPack(
+        id: "self_compassion_voice",
+        title: "Self-Compassion & Inner Voice",
+        subtitle: "Minder innerlijke bully, meer inner coach.",
+        iconSystemName: "heart.text.square.fill",
+        accentColorHex: "#F43F5E",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "compassion_rewrite",
+                title: "1 negatieve gedachte herschreven",
+                detail: "Een harde gedachte naar iets milders herschreven.",
+                xp: 10,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "compassion_letter",
+                title: "Brief naar jezelf",
+                detail: "Een brief geschreven zoals aan een goede vriend(in).",
+                xp: 12,
+                dimensions: [.mind, .love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "compassion_win_list",
+                title: "Win-lijstje",
+                detail: "Tien dingen genoteerd die je de laatste jaren goed deed.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let everydayCalm = CategoryPack(
+        id: "everyday_calm",
+        title: "Everyday Calm & Overwhelm",
+        subtitle: "Niet geen stress, maar iets minder ‘alles is te veel’.",
+        iconSystemName: "brain.head.profile",
+        accentColorHex: "#38BDF8",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "calm_radar",
+                title: "Overwhelm radar",
+                detail: "Drie triggers voor stressniveau herkend.",
+                xp: 10,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "calm_reset_ritual",
+                title: "Mini reset-ritueel",
+                detail: "Ademhaling, korte wandeling of muziek gekozen als reset.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "calm_half_todos",
+                title: "To-do’s gehalveerd",
+                detail: "Daglijst gehalveerd naar realistisch niveau.",
+                xp: 14,
+                dimensions: [.mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let lightMinimalism = CategoryPack(
+        id: "light_minimalism",
+        title: "Light Minimalism & De-Clutter",
+        subtitle: "Minder spullen, meer ademruimte.",
+        iconSystemName: "trash.circle.fill",
+        accentColorHex: "#F97316",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "minimalism_drawer",
+                title: "1 lade of plank opgeruimd",
+                detail: "Een volledige lade of plank uitgekuist.",
+                xp: 10,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "minimalism_clothes_give",
+                title: "Kleding-stapel weggeven",
+                detail: "Minstens vijf items weggegeven of gedoneerd.",
+                xp: 12,
+                dimensions: [.mind, .love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "minimalism_digital_trash",
+                title: "Digitale prullenbak",
+                detail: "Downloads en screenshots opgeruimd.",
+                xp: 10,
+                dimensions: [.mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let homeVibes = CategoryPack(
+        id: "home_vibes_nesting",
+        title: "Home Vibes & Nesting",
+        subtitle: "Je plek voelt eindelijk als jij.",
+        iconSystemName: "lamp.table.fill",
+        accentColorHex: "#FDE047",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "home_moodboard",
+                title: "Moodboard gemaakt",
+                detail: "Een album of Pinterestboard gemaakt voor je ruimte.",
+                xp: 10,
+                dimensions: [.mind, .adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "home_corner",
+                title: "1 hoekje afgewerkt",
+                detail: "Een hoekje afgewerkt met iets kleins dat sfeer brengt.",
+                xp: 12,
+                dimensions: [.mind, .love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "home_scent_light",
+                title: "Geur & licht check",
+                detail: "Bewuste keuze gemaakt voor licht of kaarsen.",
+                xp: 10,
+                dimensions: [.mind, .love],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let microAdventures = CategoryPack(
+        id: "micro_adventures",
+        title: "Micro-Adventures & Local Exploration",
+        subtitle: "Main character moments zonder vliegtuig.",
+        iconSystemName: "figure.hiking",
+        accentColorHex: "#0EA5E9",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "micro_new_park",
+                title: "Nieuw park of wandeling geprobeerd",
+                detail: "Een onbekend park of trail bezocht.",
+                xp: 12,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "micro_new_route",
+                title: "Andere route naar werk of school",
+                detail: "Bewust een andere route genomen.",
+                xp: 10,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "micro_free_activity",
+                title: "Low budget activiteit gedaan",
+                detail: "Een gratis of goedkope activiteit in je stad opgezocht en gedaan.",
+                xp: 14,
+                dimensions: [.adventure, .mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let moneyResetLite = CategoryPack(
+        id: "money_reset_lite",
+        title: "Money Reset Lite",
+        subtitle: "Minder chaos zonder finfluencer te worden.",
+        iconSystemName: "eurosign.arrow.circlepath",
+        accentColorHex: "#22C55E",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "money_screenshot",
+                title: "Geld-screenshot",
+                detail: "Banksaldo’s en schulden eerlijk bekeken.",
+                xp: 10,
+                dimensions: [.money, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "money_leaks",
+                title: "Top-3 geldlekkages",
+                detail: "Geldlekken opgeschreven en één aangepakt.",
+                xp: 12,
+                dimensions: [.money],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "money_mini_savings",
+                title: "Mini spaarpotje",
+                detail: "Automatische spaaropdracht ingesteld, al is het €10.",
+                xp: 14,
+                dimensions: [.money, .mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let coupleDates = CategoryPack(
+        id: "couple_dates",
+        title: "Couple Dates & Shared Memories",
+        subtitle: "Van Netflix en telefoon naar echte herinneringen.",
+        iconSystemName: "heart.circle.fill",
+        accentColorHex: "#EF4444",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "couple_budget_date",
+                title: "Low budget date",
+                detail: "Een budgetvriendelijke date bedacht en gedaan.",
+                xp: 12,
+                dimensions: [.love, .adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "couple_phonefree",
+                title: "Telefoonvrije date",
+                detail: "Een avond samen zonder telefoon.",
+                xp: 10,
+                dimensions: [.love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "couple_try_new",
+                title: "Samen iets nieuws geprobeerd",
+                detail: "Een nieuw spel, activiteit of restaurant getest.",
+                xp: 12,
+                dimensions: [.love, .adventure],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let conflictSkills = CategoryPack(
+        id: "conflict_skills_repair",
+        title: "Conflict Skills & Repair",
+        subtitle: "Niet minder ruzie, maar betere ruzie.",
+        iconSystemName: "hands.sparkles.fill",
+        accentColorHex: "#14B8A6",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "conflict_triggers",
+                title: "Triggers van jezelf benoemd",
+                detail: "Opgeschreven wat je raakt in conflicten.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "conflict_debrief",
+                title: "Conflict ge-debriefed",
+                detail: "Na afloop samen ge-debriefd.",
+                xp: 14,
+                dimensions: [.love, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "conflict_sorry2",
+                title: "Sorry 2.0",
+                detail: "Echte sorry uitgesproken met gedrag, gevoel en afspraak.",
+                xp: 14,
+                dimensions: [.love, .mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let boundariesPack = CategoryPack(
+        id: "boundaries_saying_no",
+        title: "Boundaries & Saying No",
+        subtitle: "Voor de people pleasers.",
+        iconSystemName: "hand.raised.fill",
+        accentColorHex: "#A855F7",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "boundaries_no_excuse",
+                title: "1 ‘nee’ gezegd",
+                detail: "Een nee gezegd zonder duizend excuses.",
+                xp: 12,
+                dimensions: [.mind, .love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "boundaries_script",
+                title: "Boundary script geschreven",
+                detail: "Een zin bedacht die je kan gebruiken.",
+                xp: 10,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "boundaries_energy_vamp",
+                title: "Energiezuiger niet toegezegd",
+                detail: "Een moment bewust niet toegezegd.",
+                xp: 12,
+                dimensions: [.mind, .love],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let meaningValues = CategoryPack(
+        id: "meaning_values",
+        title: "Meaning & Values",
+        subtitle: "Als je even niet weet waar je leven heen gaat.",
+        iconSystemName: "sparkle.magnifyingglass",
+        accentColorHex: "#6366F1",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "meaning_top_values",
+                title: "Top-5 waarden gekozen",
+                detail: "Een lijst met je vijf belangrijkste waarden gemaakt.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "meaning_activity",
+                title: "1 activiteit gekozen",
+                detail: "Een activiteit gekozen die twee waarden ondersteunt.",
+                xp: 12,
+                dimensions: [.mind, .adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "meaning_good_year",
+                title: "Hoe ziet een goed jaar eruit?",
+                detail: "Eerlijk opgeschreven hoe een goed jaar eruitziet voor jou.",
+                xp: 14,
+                dimensions: [.mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let weekendUpgrade = CategoryPack(
+        id: "weekend_upgrade",
+        title: "Weekend Upgrade Pack",
+        subtitle: "Elk weekend net 10% beter dan ‘scrollen en eten’.",
+        iconSystemName: "calendar.badge.clock",
+        accentColorHex: "#F97316",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "weekend_memorable",
+                title: "Weekend-activiteit gepland",
+                detail: "Iets ingepland dat je later herinnert.",
+                xp: 12,
+                dimensions: [.adventure, .love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "weekend_life_admin",
+                title: "1 uur life admin",
+                detail: "Een uur geblokt voor mail, papieren en planning.",
+                xp: 10,
+                dimensions: [.mind, .money],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "weekend_rest_block",
+                title: "Bewust rustblok",
+                detail: "Een blok waarin niets moest maar wel gekozen was.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let seasonalReset = CategoryPack(
+        id: "seasonal_reset",
+        title: "Seasonal Reset",
+        subtitle: "Klein seizoensritueel zodat het jaar niet weg-slipt.",
+        iconSystemName: "leaf.fill",
+        accentColorHex: "#22C55E",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "seasonal_checkin",
+                title: "Season check-in",
+                detail: "Genoteerd wat je achterlaat en meeneemt.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "seasonal_closet",
+                title: "Kleding-seizoen wissel",
+                detail: "Kleding gewisseld en weggegeven wat niet meer past.",
+                xp: 12,
+                dimensions: [.mind, .adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "seasonal_goal",
+                title: "1 seizoensdoel gekozen",
+                detail: "Een heel klein doel voor het nieuwe seizoen gekozen.",
+                xp: 14,
+                dimensions: [.mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let healthAdmin = CategoryPack(
+        id: "health_admin",
+        title: "Health Admin & Self Check-ins",
+        subtitle: "Uitgestelde dokters- en tandartsdingen zonder adviezen.",
+        iconSystemName: "cross.case.fill",
+        accentColorHex: "#0EA4BF",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "health_make_appointment",
+                title: "Afspraak effectief gemaakt",
+                detail: "Een tandarts- of huisartsafspraak ingepland.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "health_med_overview",
+                title: "Medicatie-overzicht",
+                detail: "Overzicht gemaakt van medicatie en supplementen (zonder advies).",
+                xp: 10,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "health_questions_list",
+                title: "Vragenlijst voor check-up",
+                detail: "Vragen genoteerd voor je volgende consult.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let workLifeBoundaries = CategoryPack(
+        id: "work_life_boundaries",
+        title: "Work–Life Boundaries",
+        subtitle: "Voor iedereen die ’s avonds nog mails leest.",
+        iconSystemName: "rectangle.portrait.and.arrow.right",
+        accentColorHex: "#60A5FA",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "work_end_ritual",
+                title: "Hard einde werkdag",
+                detail: "Een uur en ritueel gekozen om af te sluiten.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "work_notifications_limit",
+                title: "Werkapps gelimiteerd",
+                detail: "Notificaties buiten werkuren beperkt.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "work_evening_free",
+                title: "Werkvrije avond",
+                detail: "Een avond per week volledig werkvrij gepland.",
+                xp: 14,
+                dimensions: [.love, .mind],
+                isPremium: false
+            )
+        ]
+    )
+
+    static let creatorSocialStarter = CategoryPack(
+        id: "creator_social_starter",
+        title: "Creator & Social Media Starter",
+        subtitle: "Voor wie wil posten of maken maar blokkeert.",
+        iconSystemName: "camera.fill",
+        accentColorHex: "#F472B6",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "creator_reasons",
+                title: "Waarom wil ik creëren?",
+                detail: "Drie redenen opgeschreven waarom je wil maken of posten.",
+                xp: 12,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "creator_first_post",
+                title: "1 imperfecte post",
+                detail: "Een post online gezet zonder perfectionisme.",
+                xp: 14,
+                dimensions: [.adventure, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "creator_content_ritual",
+                title: "Content-ritueel",
+                detail: "Een vast moment per week gekozen om te maken.",
+                xp: 12,
+                dimensions: [.mind, .money],
+                isPremium: false
+            )
+        ]
+    )
+
     static let all: [CategoryPack] = [
         relationshipCore,
         glowUp,
@@ -986,7 +2036,37 @@ enum PackLibrary {
         luxuryCalm,
         megaMomentum,
         healthKit,
-        socialConfidence
+        socialConfidence,
+        studentSurvival,
+        movingOut,
+        newCity,
+        socialConfidenceBasics,
+        deepFriendships,
+        familyBoundaries,
+        singleEra,
+        careerStarter,
+        careerPivot,
+        freelanceFoundations,
+        digitalHygiene,
+        sleepRest,
+        foodEnergy,
+        movementBody,
+        creativityPassion,
+        selfCompassion,
+        everydayCalm,
+        lightMinimalism,
+        homeVibes,
+        microAdventures,
+        moneyResetLite,
+        coupleDates,
+        conflictSkills,
+        boundariesPack,
+        meaningValues,
+        weekendUpgrade,
+        seasonalReset,
+        healthAdmin,
+        workLifeBoundaries,
+        creatorSocialStarter
     ]
 
     /// Items that should be hidden when the user enables safe mode.
