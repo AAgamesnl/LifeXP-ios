@@ -6,16 +6,9 @@ struct HomeView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color(.systemBackground),
-                        Color(.secondarySystemBackground)
-                    ]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-                
+                BrandBackground()
+                    .opacity(0.55)
+
                 ScrollView {
                     let spacing: CGFloat = model.compactHomeLayout ? 16 : 24
                     VStack(spacing: spacing) {
@@ -71,17 +64,14 @@ struct HomeView: View {
                                 
                                 Spacer()
                             }
-                            
+
                             Text(model.coachMessage)
                                 .font(.footnote)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.leading)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .padding()
-                        .background(.ultraThinMaterial)
-                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                        .shadow(radius: 14, y: 6)
+                        .brandCard()
 
                         DailyBriefingCard(
                             affirmation: model.dailyAffirmation,
@@ -309,20 +299,7 @@ struct DailyBriefingCard: View {
                 }
             }
         }
-        .padding()
-        .background(
-            LinearGradient(
-                colors: [Color(.systemBackground).opacity(0.95), Color.accentColor.opacity(0.12)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.accentColor.opacity(0.15), lineWidth: 1)
-        )
-        .shadow(radius: 10, y: 4)
+        .brandCard(cornerRadius: 22)
     }
 }
 
@@ -402,10 +379,7 @@ struct SuggestionCardView: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
-        .padding()
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .shadow(radius: 10, y: 4)
+        .brandCard(cornerRadius: 22)
     }
 }
 
@@ -427,10 +401,10 @@ struct ProgressRing: View {
                 .stroke(
                     AngularGradient(
                         gradient: Gradient(colors: [
-                            Color.blue,
-                            Color.purple,
-                            Color.pink,
-                            Color.blue
+                            BrandTheme.gradientTop,
+                            BrandTheme.gradientMiddle,
+                            BrandTheme.gradientBottom,
+                            BrandTheme.gradientTop
                         ]),
                         center: .center
                     ),
@@ -483,13 +457,13 @@ struct DimensionRow: View {
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(.systemGray5))
-                    
+                        .fill(Color.white.opacity(0.15))
+
                     RoundedRectangle(cornerRadius: 8)
                         .fill(LinearGradient(
                             gradient: Gradient(colors: [
-                                Color.accentColor.opacity(0.9),
-                                Color.accentColor.opacity(0.5)
+                                BrandTheme.accent.opacity(0.95),
+                                BrandTheme.gradientMiddle.opacity(0.7)
                             ]),
                             startPoint: .leading,
                             endPoint: .trailing
@@ -513,10 +487,10 @@ struct QuickActionRow: View {
         HStack(spacing: 12) {
             ZStack {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color.accentColor.opacity(0.12))
+                    .fill(BrandTheme.accent.opacity(0.14))
                 Image(systemName: icon)
                     .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.accentColor)
+                    .foregroundColor(BrandTheme.accent)
             }
             .frame(width: 52, height: 52)
             
@@ -532,9 +506,14 @@ struct QuickActionRow: View {
             Spacer()
         }
         .padding()
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .shadow(radius: 6, y: 3)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .stroke(BrandTheme.accent.opacity(0.12), lineWidth: 1)
+                )
+        )
     }
 }
 

@@ -11,15 +11,8 @@ struct OnboardingView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(.systemBackground),
-                    Color(.secondarySystemBackground)
-                ]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            BrandBackground()
+                .ignoresSafeArea()
             
             VStack {
                 TabView(selection: $step) {
@@ -52,6 +45,7 @@ struct OnboardingView: View {
                 }
                 .padding()
             }
+            .tint(BrandTheme.accent)
         }
     }
     
