@@ -10,7 +10,7 @@ struct JourneysView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 Section(header: Text("Live tracker")) {
                     if let active = activeJourney {

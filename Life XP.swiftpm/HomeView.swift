@@ -4,7 +4,7 @@ struct HomeView: View {
     @EnvironmentObject var model: AppModel
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 BrandBackground()
                     .opacity(0.55)
@@ -387,17 +387,18 @@ struct SuggestionCardView: View {
 
 struct ProgressRing: View {
     let progress: Double
-    
+
     var body: some View {
+        let clamped = max(0, min(progress, 1))
         ZStack {
             Circle()
                 .stroke(
                     Color(.systemGray5),
                     lineWidth: 14
                 )
-            
+
             Circle()
-                .trim(from: 0, to: CGFloat(max(0, min(progress, 1))))
+                .trim(from: 0, to: CGFloat(clamped))
                 .stroke(
                     AngularGradient(
                         gradient: Gradient(colors: [
@@ -414,13 +415,16 @@ struct ProgressRing: View {
                 .animation(.spring(response: 0.8, dampingFraction: 0.8), value: progress)
             
             VStack(spacing: 4) {
-                Text("\(Int(progress * 100))")
+                Text("\(Int(clamped * 100))")
                     .font(.title.bold())
                 Text("%")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Progress")
+        .accessibilityValue("\(Int(clamped * 100))% complete")
     }
 }
 

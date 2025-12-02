@@ -27,8 +27,12 @@ final class AppModel: ObservableObject {
         didSet { persistHideHeavyTopics() }
     }
 
-    @Published var primaryFocus: LifeDimension? = nil
-    @Published var overwhelmedLevel: Int = 3
+    @Published var primaryFocus: LifeDimension? = nil {
+        didSet { persistPrimaryFocus() }
+    }
+    @Published var overwhelmedLevel: Int = 3 {
+        didSet { persistOverwhelmedLevel() }
+    }
 
     // MARK: - Home customization
     @Published var showEnergyCard: Bool {
@@ -76,6 +80,8 @@ final class AppModel: ObservableObject {
         static let homeCompact = "lifeXP.homeCompact"
         static let homeExpanded = "lifeXP.homeExpanded"
         static let journeyStarts = "lifeXP.journeyStarts"
+        static let primaryFocus = "lifeXP.primaryFocus"
+        static let overwhelmLevel = "lifeXP.overwhelmLevel"
     }
 
     // MARK: - Lifecycle
@@ -105,6 +111,14 @@ final class AppModel: ObservableObject {
         self.showQuickActions = userDefaults.object(forKey: Keys.homeQuickActions) as? Bool ?? true
         self.compactHomeLayout = userDefaults.object(forKey: Keys.homeCompact) as? Bool ?? false
         self.expandHomeCardsByDefault = userDefaults.object(forKey: Keys.homeExpanded) as? Bool ?? true
+
+        if let storedFocus = userDefaults.string(forKey: Keys.primaryFocus) {
+            self.primaryFocus = LifeDimension(rawValue: storedFocus)
+        } else {
+            self.primaryFocus = nil
+        }
+
+        self.overwhelmedLevel = userDefaults.object(forKey: Keys.overwhelmLevel) as? Int ?? 3
 
         if let storedStarts = userDefaults.dictionary(forKey: Keys.journeyStarts) as? [String: TimeInterval] {
             var hydrated: [String: Date] = [:]
@@ -150,6 +164,18 @@ final class AppModel: ObservableObject {
     private func persistJourneyStarts() {
         let payload = journeyStartDates.mapValues { $0.timeIntervalSince1970 }
         userDefaults.set(payload, forKey: Keys.journeyStarts)
+    }
+
+    private func persistPrimaryFocus() {
+        if let focus = primaryFocus {
+            userDefaults.set(focus.rawValue, forKey: Keys.primaryFocus)
+        } else {
+            userDefaults.removeObject(forKey: Keys.primaryFocus)
+        }
+    }
+
+    private func persistOverwhelmedLevel() {
+        userDefaults.set(overwhelmedLevel, forKey: Keys.overwhelmLevel)
     }
 
     // MARK: - Data helpers

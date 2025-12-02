@@ -8,12 +8,13 @@ struct OnboardingView: View {
     @State private var overwhelmed: Double = 3
     @State private var selectedTone: ToneMode = .soft
     @State private var step: Int = 0
+    @State private var hasSyncedFromModel = false
     
     var body: some View {
         ZStack {
             BrandBackground()
                 .ignoresSafeArea()
-            
+
             VStack {
                 TabView(selection: $step) {
                     pageWelcome
@@ -46,6 +47,13 @@ struct OnboardingView: View {
                 .padding()
             }
             .tint(BrandTheme.accent)
+            .onAppear {
+                guard !hasSyncedFromModel else { return }
+                selectedFocus = model.primaryFocus
+                overwhelmed = Double(model.overwhelmedLevel)
+                selectedTone = model.toneMode
+                hasSyncedFromModel = true
+            }
         }
     }
     

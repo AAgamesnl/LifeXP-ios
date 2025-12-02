@@ -4,7 +4,7 @@ struct PacksView: View {
     @EnvironmentObject var model: AppModel
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 LazyVStack(spacing: 18) {
                     ForEach(model.packs) { pack in

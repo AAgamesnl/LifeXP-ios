@@ -4,7 +4,7 @@ struct SettingsView: View {
     @EnvironmentObject var model: AppModel
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section(header: Text("Life XP PRO")) {
                     Toggle(isOn: $model.premiumUnlocked) {
