@@ -2020,7 +2020,546 @@ enum PackLibrary {
         ]
     )
 
-    static let all: [CategoryPack] = [
+    static let lifeChecklist = CategoryPack(
+        id: "life_checklist_classic",
+        title: "Life Checklist",
+        subtitle: "Van geboorte tot bucketlist-momenten",
+        iconSystemName: "checkmark.circle.fill",
+        accentColorHex: "#2563EB",
+        isPremium: false,
+        items: [
+            ChecklistItem(
+                id: "life_be_born",
+                title: "👶 Be born",
+                detail: "Welkom op de planeet: je eerste XP is binnen.",
+                xp: 5,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_first_steps",
+                title: "🚶‍♂️ Take first steps",
+                detail: "Die wiebelige meters die de wereld openen.",
+                xp: 6,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_first_words",
+                title: "📣 Say first words",
+                detail: "Je eerste woorden gedeeld met je wereld.",
+                xp: 6,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_learn_read",
+                title: "👨‍🏫 Learn to read",
+                detail: "Boeken en borden ontgrendeld.",
+                xp: 10,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_make_friend",
+                title: "🤗 Make a friend",
+                detail: "Je eerste echte vriend gevonden.",
+                xp: 10,
+                dimensions: [.love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_ride_bike",
+                title: "🚴‍♂️ Learn to ride a bike",
+                detail: "Balans, vrijheid en schrammen behaald.",
+                xp: 12,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_read_book",
+                title: "📗 Read a book",
+                detail: "Een compleet boek uitgelezen uit eigen keuze.",
+                xp: 8,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_learn_swim",
+                title: "🏊‍♂️ Learn to swim",
+                detail: "Je eerste baantjes zonder drijfmiddelen.",
+                xp: 12,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_finish_elementary",
+                title: "🏫 Finish elementary school",
+                detail: "Je basisschooltijd afgerond.",
+                xp: 14,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_play_sport",
+                title: "⚽ Play a sport",
+                detail: "Mee gedaan met een sportteam of -club.",
+                xp: 10,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_fly_plane",
+                title: "🛫 Fly in a plane",
+                detail: "Je eerste keer de lucht in gegaan.",
+                xp: 12,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_ride_boat",
+                title: "🛥️ Ride a boat",
+                detail: "Een tocht op het water gemaakt.",
+                xp: 10,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_train_trip",
+                title: "🚆 Ride in a train",
+                detail: "Met de trein een bestemming bereikt.",
+                xp: 8,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_helicopter",
+                title: "🚁 Ride a helicopter",
+                detail: "Een vlucht met uitzicht vanuit een heli meegemaakt.",
+                xp: 18,
+                dimensions: [.adventure],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_see_ocean",
+                title: "🌊 See the ocean",
+                detail: "Voor het eerst de zee gezien en geroken.",
+                xp: 10,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_see_snow",
+                title: "❄️ See snow",
+                detail: "Sneeuw in het echt meegemaakt.",
+                xp: 10,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_make_snowman",
+                title: "☃️ Make a snowman",
+                detail: "Je eigen sneeuwpop gebouwd.",
+                xp: 10,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_finish_middle",
+                title: "🏫 Finish middle school",
+                detail: "Je middelbare school onderbouw afgerond.",
+                xp: 16,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_concert",
+                title: "🎶 Go to a concert",
+                detail: "Live muziek beleefd met volume en vibes.",
+                xp: 14,
+                dimensions: [.adventure, .love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_camping",
+                title: "🏕️ Go camping",
+                detail: "Een nacht in een tent of onder de sterren geslapen.",
+                xp: 14,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_rollercoaster",
+                title: "🎢 Ride a rollercoaster",
+                detail: "Een achtbaan overleefd en misschien geschreeuwd.",
+                xp: 14,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_play_instrument",
+                title: "🎻 Play an instrument",
+                detail: "Een instrument leren bespelen en laten horen.",
+                xp: 16,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_first_kiss",
+                title: "💋 Get kissed",
+                detail: "Je eerste kus gehad.",
+                xp: 16,
+                dimensions: [.love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_credit_card",
+                title: "💳 Get a credit card",
+                detail: "Je eerste kredietkaart aangevraagd of gekregen.",
+                xp: 16,
+                dimensions: [.money, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_start_driving",
+                title: "🚘 Start driving",
+                detail: "Je eerste kilometers gereden achter het stuur.",
+                xp: 18,
+                dimensions: [.adventure, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_roadtrip",
+                title: "🗺️ Go on a roadtrip",
+                detail: "Een trip gepland en gereden met stops en verhalen.",
+                xp: 18,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_new_country",
+                title: "🗾 Visit another country",
+                detail: "Een grens overgestoken en een nieuw land ontdekt.",
+                xp: 20,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_public_speech",
+                title: "🎤 Give a speech",
+                detail: "Voor publiek gesproken zonder wegrennen.",
+                xp: 18,
+                dimensions: [.mind, .adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_graduate_highschool",
+                title: "🏫 Graduate high school",
+                detail: "Je middelbare school diploma in handen.",
+                xp: 22,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_second_language",
+                title: "🌐 Learn another language",
+                detail: "Een nieuwe taal geleerd en gebruikt in gesprek.",
+                xp: 22,
+                dimensions: [.mind],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_invest_money",
+                title: "💸 Invest some money",
+                detail: "Je eerste geld belegd of geïnvesteerd.",
+                xp: 24,
+                dimensions: [.money, .mind],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_meet_idol",
+                title: "📷 Meet an idol",
+                detail: "Iemand ontmoet die je bewondert.",
+                xp: 18,
+                dimensions: [.love, .adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_big_mistake",
+                title: "😩 Make a terrible mistake",
+                detail: "Een grote fout gemaakt en ervan geleerd.",
+                xp: 16,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_win_trophy",
+                title: "🏆 Win a trophy",
+                detail: "Een prijs of trofee binnengehaald.",
+                xp: 20,
+                dimensions: [.adventure],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_climb_mountain",
+                title: "⛰️ Climb a mountain",
+                detail: "Een top gehaald waar je hart van ging kloppen.",
+                xp: 24,
+                dimensions: [.adventure],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_run_marathon",
+                title: "🎽 Run a marathon",
+                detail: "42 km afgelegd en de finish gehaald.",
+                xp: 28,
+                dimensions: [.adventure, .mind],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_learn_cook",
+                title: "🍳 Learn to cook",
+                detail: "Een maaltijd zelfstandig gekookt die iemand anders lekker vond.",
+                xp: 14,
+                dimensions: [.mind, .love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_explore_cave",
+                title: "🔦 Explore a cave",
+                detail: "Ondergronds avontuur in een grot meegemaakt.",
+                xp: 22,
+                dimensions: [.adventure],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_see_volcano",
+                title: "🌋 See a volcano",
+                detail: "Een vulkaan van dichtbij gezien.",
+                xp: 22,
+                dimensions: [.adventure],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_graduate_college",
+                title: "🎓 Graduate college",
+                detail: "Een hbo/uni diploma behaald.",
+                xp: 26,
+                dimensions: [.mind],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_long_relationship",
+                title: "💕 Have a long relationship",
+                detail: "Minstens 1 jaar een relatie onderhouden.",
+                xp: 24,
+                dimensions: [.love],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_get_dumped",
+                title: "🗑️ Get dumped",
+                detail: "Een break-up doorgemaakt en verwerkt.",
+                xp: 18,
+                dimensions: [.love, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_sign_contract",
+                title: "🖊️ Sign a contract",
+                detail: "Je eerste grote contract getekend.",
+                xp: 20,
+                dimensions: [.money, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_get_job",
+                title: "🏢 Get a job",
+                detail: "Je eerste baan of betaalde gig gestart.",
+                xp: 20,
+                dimensions: [.money, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_get_promoted",
+                title: "☝️ Get promoted",
+                detail: "Een promotie of stap omhoog gekregen.",
+                xp: 22,
+                dimensions: [.money, .mind],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_first_paycheck",
+                title: "💵 Get a paycheck",
+                detail: "Je eerste loon ontvangen en benut.",
+                xp: 18,
+                dimensions: [.money],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_get_fired",
+                title: "🔥 Get fired",
+                detail: "Ontslag meegemaakt en opnieuw gestart.",
+                xp: 18,
+                dimensions: [.mind, .money],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_in_news",
+                title: "📰 Get in the news",
+                detail: "Vernoemd of verschenen in media.",
+                xp: 18,
+                dimensions: [.adventure, .mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_vote",
+                title: "🗳️ Vote in an election",
+                detail: "Gestemd in een lokale of landelijke verkiezing.",
+                xp: 14,
+                dimensions: [.mind],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_switch_careers",
+                title: "🤡 Switch careers",
+                detail: "Van richting veranderd en opnieuw begonnen.",
+                xp: 22,
+                dimensions: [.money, .mind],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_buy_house",
+                title: "🏠 Buy a house",
+                detail: "Een huis gekocht of hypotheek geregeld.",
+                xp: 26,
+                dimensions: [.money, .mind],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_get_engaged",
+                title: "💍 Get engaged",
+                detail: "Verloofd geraakt en het gevierd.",
+                xp: 24,
+                dimensions: [.love],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_get_married",
+                title: "👰 Get married",
+                detail: "Ja gezegd tijdens je huwelijk.",
+                xp: 28,
+                dimensions: [.love],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_have_kid",
+                title: "👶 Have a kid",
+                detail: "Ouder geworden van je eerste kind.",
+                xp: 28,
+                dimensions: [.love],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_teach_walk",
+                title: "🚶‍♂️ Teach your kid to walk",
+                detail: "Samen de eerste stapjes geoefend.",
+                xp: 18,
+                dimensions: [.love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_teach_talk",
+                title: "📣 Teach your kid to talk",
+                detail: "De eerste woordjes van je kind begeleid.",
+                xp: 18,
+                dimensions: [.love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_watch_kid_graduate",
+                title: "🎓 Watch your kid graduate",
+                detail: "Aanwezig geweest bij het diploma van je kind.",
+                xp: 24,
+                dimensions: [.love],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_watch_kid_marry",
+                title: "👰 Watch your kid get married",
+                detail: "Je kind het ja-woord zien geven.",
+                xp: 26,
+                dimensions: [.love],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_grandparent",
+                title: "👴 Become a grandparent",
+                detail: "Kleinkinderen verwelkomd in de familie.",
+                xp: 24,
+                dimensions: [.love],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_retire",
+                title: "🏖️ Retire",
+                detail: "Gestopt met fulltime werk en een nieuw ritme gekozen.",
+                xp: 22,
+                dimensions: [.mind, .money],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_tell_story",
+                title: "📔 Tell your grandkid a story",
+                detail: "Een verhaal gedeeld dat de familie bijblijft.",
+                xp: 18,
+                dimensions: [.love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_solar_eclipse",
+                title: "🌑 See a solar eclipse",
+                detail: "Een zonsverduistering bewust meegemaakt.",
+                xp: 20,
+                dimensions: [.adventure],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_plant_garden",
+                title: "🌷 Plant a garden",
+                detail: "Zelf iets geplant en zien groeien.",
+                xp: 16,
+                dimensions: [.mind, .love],
+                isPremium: false
+            ),
+            ChecklistItem(
+                id: "life_travel_world",
+                title: "🌎 Travel the world",
+                detail: "Meerdere continenten bezocht en verhalen verzameld.",
+                xp: 30,
+                dimensions: [.adventure],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_turn_100",
+                title: "🎂 Turn 100",
+                detail: "Een eeuw leven gevierd.",
+                xp: 40,
+                dimensions: [.mind, .love],
+                isPremium: true
+            ),
+            ChecklistItem(
+                id: "life_complete_checklist",
+                title: "✔️ Complete Life Checklist",
+                detail: "Alle mijlpalen in deze lijst afgevinkt.",
+                xp: 50,
+                dimensions: [.mind, .adventure],
+                isPremium: true
+            )
+        ]
+    )
+
+    private static let basePacks: [CategoryPack] = [
         relationshipCore,
         glowUp,
         breakupHealing,
@@ -2066,8 +2605,11 @@ enum PackLibrary {
         seasonalReset,
         healthAdmin,
         workLifeBoundaries,
-        creatorSocialStarter
+        creatorSocialStarter,
+        lifeChecklist
     ]
+
+    static let all: [CategoryPack] = basePacks
 
     /// Items that should be hidden when the user enables safe mode.
     static let heavyItemIDs: Set<String> = [

@@ -708,7 +708,7 @@ enum JourneyLibrary {
         ]
     )
 
-    static let all: [Journey] = [
+    private static let baseJourneys: [Journey] = [
         breakupGlowUp,
         getTogether,
         softLife,
@@ -752,4 +752,6 @@ enum JourneyLibrary {
         socialMediaSoftDetox,
         mainCharacterKickstart
     ]
+
+    static let all: [Journey] = baseJourneys
 }
