@@ -10,7 +10,7 @@ import AppleProductTypes
 let package = Package(
     name: "Life XP",
     platforms: [
-        .iOS("17.0")
+        .iOS("18.1")
     ],
     products: [
         .iOSApplication(
@@ -18,7 +18,7 @@ let package = Package(
             targets: ["AppModule"],
             bundleIdentifier: "com.ayoub.LifeXP",
             teamIdentifier: "26TUM3453K",
-            displayVersion: "0.5",
+            displayVersion: "0.6.1",
             bundleVersion: "1",
             appIcon: .asset("AppIcon"),
             accentColor: .presetColor(.indigo),
