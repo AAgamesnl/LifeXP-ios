@@ -4,5 +4,5 @@ import Foundation
 enum SampleContent {
     static let packs = PackLibrary.all
     static let heavyItemIDs = PackLibrary.heavyItemIDs
-    static let journeys = JourneyLibrary.all
+    static let arcs = ArcLibrary.all
 }

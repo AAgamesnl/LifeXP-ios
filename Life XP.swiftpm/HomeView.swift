@@ -73,6 +73,20 @@ struct HomeView: View {
                         }
                         .brandCard()
 
+                        if let arcPreview = model.highlightedArc {
+                            let board = model.nextQuestBoard(limit: 2)
+                            let next = board.arc?.id == arcPreview.id ? board.quests : model.nextQuests(in: arcPreview, limit: 2)
+                            NavigationLink(destination: ArcDetailView(arc: arcPreview)) {
+                                CurrentArcCard(
+                                    arc: arcPreview,
+                                    progress: model.arcProgress(arcPreview),
+                                    nextQuests: next,
+                                    isSuggestion: model.activeArc == nil
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+
                         DailyBriefingCard(
                             affirmation: model.dailyAffirmation,
                             ritual: model.ritualOfTheDay,
@@ -160,24 +174,24 @@ struct HomeView: View {
                                         .font(.headline)
                                     Spacer()
                                 }
-                            
-                            NavigationLink(destination: JourneysView()) {
-                                QuickActionRow(
-                                    icon: "map.fill",
-                                    title: "Journeys",
-                                    subtitle: "Maak van je leven een route, niet alleen een lijst."
-                                )
-                            }
-                            .buttonStyle(.plain)
-                            
-                            NavigationLink(destination: ChallengeView()) {
-                                QuickActionRow(
-                                    icon: "flag.checkered",
-                                    title: "Weekend Challenge",
-                                    subtitle: "Laat Life XP een challenge voor je samenstellen."
-                                )
-                            }
-                            .buttonStyle(.plain)
+
+                                NavigationLink(destination: ArcsView()) {
+                                    QuickActionRow(
+                                        icon: "map.fill",
+                                        title: "Arcs hub",
+                                        subtitle: "Zie je huidige arc, suggesties en quest board."
+                                    )
+                                }
+                                .buttonStyle(.plain)
+
+                                NavigationLink(destination: ChallengeView()) {
+                                    QuickActionRow(
+                                        icon: "flag.checkered",
+                                        title: "Weekend Challenge",
+                                        subtitle: "Laat Life XP een challenge voor je samenstellen."
+                                    )
+                                }
+                                .buttonStyle(.plain)
 
                                 if !model.microWins.isEmpty {
                                     MicroWinsCard(items: model.microWins)
@@ -190,6 +204,71 @@ struct HomeView: View {
             }
             .navigationTitle("Home")
         }
+    }
+}
+
+struct CurrentArcCard: View {
+    let arc: Arc
+    let progress: Double
+    let nextQuests: [Quest]
+    let isSuggestion: Bool
+
+    var body: some View {
+        let accent = Color(hex: arc.accentColorHex, default: .accentColor)
+
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Label(isSuggestion ? "Suggested arc" : "Current arc", systemImage: "map.fill")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.secondary)
+                    Text(arc.title)
+                        .font(.headline)
+                    Text(arc.subtitle)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                }
+
+                Spacer()
+
+                Image(systemName: arc.iconSystemName)
+                    .font(.title2.weight(.bold))
+                    .foregroundColor(accent)
+                    .padding(12)
+                    .background(Circle().fill(accent.opacity(0.14)))
+            }
+
+            ProgressView(value: progress) {
+                Text("\(Int(progress * 100))% • \(arc.questCount) quests")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .tint(accent)
+
+            if !nextQuests.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Next up")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.secondary)
+                    ForEach(nextQuests) { quest in
+                        HStack(spacing: 6) {
+                            Image(systemName: quest.kind.systemImage)
+                                .foregroundColor(accent)
+                            Text(quest.title)
+                                .font(.subheadline)
+                            Spacer()
+                            Text("\(quest.xp) XP")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
 

@@ -21,6 +21,15 @@ struct StatsView: View {
                         streak: model.currentStreak
                     )
 
+                    if let arc = model.highlightedArc {
+                        ArcSnapshotCard(
+                            arc: arc,
+                            progress: model.arcProgress(arc),
+                            day: model.arcDay(for: arc),
+                            nextQuests: model.nextQuestBoard(limit: 2).quests
+                        )
+                    }
+
                     // Overall card
                     VStack(spacing: 8) {
                         Text("Overall")
@@ -89,16 +98,16 @@ struct StatsView: View {
 
                     VStack(spacing: 12) {
                         HStack {
-                            Text("Journeys & arcs")
+                            Text("Arcs")
                                 .font(.headline)
                             Spacer()
-                            Text("\(model.completedJourneys.count) completed")
+                            Text("\(model.completedArcs.count) completed")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
 
-                        ForEach(model.journeys) { journey in
-                            JourneyProgressRow(journey: journey)
+                        ForEach(model.arcs) { arc in
+                            ArcProgressRow(arc: arc)
                         }
                     }
                     .padding()
@@ -296,31 +305,38 @@ struct LevelSummaryCard: View {
     }
 }
 
-struct JourneyProgressRow: View {
+struct ArcProgressRow: View {
     @EnvironmentObject var model: AppModel
-    let journey: Journey
+    let arc: Arc
 
     var body: some View {
-        let accent = Color(hex: journey.accentColorHex, default: .accentColor)
-        let progress = model.journeyProgress(journey)
+        let accent = Color(hex: arc.accentColorHex, default: .accentColor)
+        let progress = model.arcProgress(arc)
+        let totalQuests = arc.questCount
+        let completed = arc.chapters.flatMap { $0.quests }.filter { model.isCompleted($0) }.count
 
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Image(systemName: journey.iconSystemName)
+                Image(systemName: arc.iconSystemName)
                     .foregroundColor(accent)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(journey.title)
+                    Text(arc.title)
                         .font(.subheadline.weight(.semibold))
-                    Text(journey.subtitle)
+                    Text(arc.subtitle)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
                 Spacer()
-                Text("\(Int(progress * 100))%")
-                    .font(.caption.weight(.semibold))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Capsule().fill(accent.opacity(0.18)))
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("\(Int(progress * 100))%")
+                        .font(.caption.weight(.semibold))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Capsule().fill(accent.opacity(0.18)))
+                    Text("\(completed)/\(totalQuests) quests")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
             }
 
             GeometryReader { geo in
@@ -368,6 +384,78 @@ struct ProgressSnapshotCard: View {
         .padding()
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+}
+
+struct ArcSnapshotCard: View {
+    let arc: Arc
+    let progress: Double
+    let day: Int?
+    let nextQuests: [Quest]
+
+    var body: some View {
+        let accent = Color(hex: arc.accentColorHex, default: .accentColor)
+
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Arc focus")
+                    .font(.headline)
+                Spacer()
+                if let day = day {
+                    Text("Dag \(day)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            HStack(spacing: 12) {
+                Image(systemName: arc.iconSystemName)
+                    .foregroundColor(accent)
+                    .padding(10)
+                    .background(Circle().fill(accent.opacity(0.12)))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(arc.title)
+                        .font(.subheadline.weight(.semibold))
+                    Text(arc.subtitle)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    ProgressView(value: progress) {
+                        Text("\(Int(progress * 100))% • \(arc.questCount) quests")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                    .tint(accent)
+                }
+            }
+
+            if !nextQuests.isEmpty {
+                Divider()
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Volgende quests")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.secondary)
+                    ForEach(nextQuests) { quest in
+                        HStack(spacing: 8) {
+                            Image(systemName: quest.kind.systemImage)
+                                .foregroundColor(accent)
+                            Text(quest.title)
+                                .font(.subheadline)
+                                .lineLimit(1)
+                            Spacer()
+                            Text("\(quest.xp) XP")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .shadow(radius: 6, y: 3)
     }
 }
 
@@ -443,7 +531,16 @@ struct ShareEntryCard: View {
     @EnvironmentObject var model: AppModel
 
     private var shareText: String {
-        "Ik heb \(Int(model.globalProgress * 100))% van mijn Life XP checklist unlocked en \(model.totalXP) XP verzameld. Pak jouw kaart in de app!"
+        let arcLine: String
+        if let arc = model.highlightedArc {
+            let progress = Int(model.arcProgress(arc) * 100)
+            arcLine = " Arc ‘\(arc.title)’ staat op \(progress)% en levert \(arc.totalXP) XP."
+        } else {
+            arcLine = " Geen arc actief? Kies er een in de app."
+        }
+
+        let streakLine = model.currentStreak > 0 ? " Streak: \(model.currentStreak)d." : ""
+        return "Ik heb \(Int(model.globalProgress * 100))% van mijn Life XP checklist unlocked en \(model.totalXP) XP verzameld." + arcLine + streakLine + " Pak jouw kaart in de app!"
     }
 
     var body: some View {
@@ -529,15 +626,32 @@ struct ShareCardView: View {
                             .foregroundColor(.white.opacity(0.7))
                     }
                     
-                    ProgressRing(progress: model.globalProgress)
-                        .frame(width: 150, height: 150)
-                        .padding(.top, 8)
-                    
-                    Text("\(model.totalXP) XP collected")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundColor(.white.opacity(0.9))
-                    
-                    VStack(spacing: 10) {
+                ProgressRing(progress: model.globalProgress)
+                    .frame(width: 150, height: 150)
+                    .padding(.top, 8)
+
+                Text("\(model.totalXP) XP collected")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(.white.opacity(0.9))
+
+                if model.currentStreak > 0 {
+                    Text("Streak: \(model.currentStreak) days")
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.85))
+                }
+
+                if let arc = model.highlightedArc {
+                    VStack(spacing: 4) {
+                        Text("Arc: \(arc.title) • \(Int(model.arcProgress(arc) * 100))%")
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.8))
+                        Text("\(arc.questCount) quests • \(arc.totalXP) XP")
+                            .font(.caption2)
+                            .foregroundColor(.white.opacity(0.75))
+                    }
+                }
+
+                VStack(spacing: 10) {
                         ForEach(LifeDimension.allCases) { dim in
                             HStack(spacing: 10) {
                                 Image(systemName: dim.systemImage)

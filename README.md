@@ -5,7 +5,7 @@ Life XP is an iOS 17 SwiftUI prototype that treats personal growth like a balanc
 ## Tech stack
 - SwiftUI + Observation/`ObservableObject` for state-driven UI.
 - iOS 17 target with multiplatform (iPhone + iPad) support configured in `Package.swift`.
-- `UserDefaults` persistence for tone, safe-mode, streaks, journey starts, and home layout preferences.
+- `UserDefaults` persistence for tone, safe-mode, streaks, arc starts, and home layout preferences.
 - Sample content generated in-code (no external storage or networking).
 
 ## Repository layout
@@ -13,25 +13,25 @@ Life XP is an iOS 17 SwiftUI prototype that treats personal growth like a balanc
 - `Life XP.swiftpm/MyApp.swift` – entry point; creates `AppModel` and injects it into the SwiftUI hierarchy.
 - `Life XP.swiftpm/AppModel.swift` – single source of truth for data, streak logic, preference persistence, and derived view helpers.
 - `Life XP.swiftpm/Models/` – data structures:
-  - `LifeDimension`, `ChecklistItem`, `CategoryPack`, `Journey`, `Badge`.
+  - `LifeDimension`, `ChecklistItem`, `CategoryPack`, `Arc`/`Chapter`/`Quest`, `Badge`.
 - `Life XP.swiftpm/Data/` – sample data factories:
-  - `PackLibrary` (per-dimension packs), `JourneyLibrary` (prebuilt flows), `SampleContent` (aggregates all static content + heavy-topic IDs).
+  - `PackLibrary` (per-dimension packs), `ArcLibrary` (prebuilt arcs), `SampleContent` (aggregates all static content + heavy-topic IDs).
 - `Life XP.swiftpm/Utils/` – UI helpers and formatting extensions.
 - Feature views (SwiftUI):
   - `ContentView` (tab scaffold + onboarding modal)
   - `OnboardingView` (focus, overwhelm, tone)
   - `HomeView` (life score, streaks, coach messages, quick actions)
-  - `JourneysView` (journey list/detail, weekend challenge, badges)
+- `ArcsView` (arc hub/detail, weekend challenge, badges)
   - `PacksView` (pack list/detail with PRO gating prompts)
   - `StatsAndShareViews` (XP breakdown, badge snippet, share card preview)
   - `SettingsView` (tone mode, safe mode, PRO unlock toggle)
 
 ## Data flow highlights
-- **AppModel** publishes packs, journeys, completion set, tone/safe-mode, streak counters, and home layout flags. Streak updates occur whenever checklist completion toggles. Journey start dates are tracked per-journey ID and persisted as timestamps.
+- **AppModel** publishes packs, arcs, completion set, tone/safe-mode, streak counters, and home layout flags. Streak updates occur whenever checklist or quest completion toggles. Arc start dates are tracked per-arc ID and persisted as timestamps.
 - **Visibility & safe mode:** Heavy topics are filtered out via `SampleContent.heavyItemIDs` when `hideHeavyTopics` is true; helper methods like `items(for:)` and `allVisibleItems` centralize this logic.
-- **Completion & XP:** Completion is stored per `ChecklistItem.id`. XP totals are computed on the fly (see `xpTotal`, `dimensionXP`, `lifeScore` helpers in `AppModel.swift`).
-- **Journeys:** Each `Journey` references checklist IDs; `journeyProgress(journey:)` returns percentage + completed counts and respects safe-mode filtering.
-- **Weekend challenge:** Generated inside `JourneysView` from random visible items split by dimension and duration (seeded by user mood selection).
+- **Completion & XP:** Completion is stored per `id` for both quests and checklist items. XP totals are computed on the fly (see `xpTotal`, `dimensionXP`, `lifeScore` helpers in `AppModel.swift`).
+- **Arcs:** Each `Arc` contains chapters with `Quest` nodes; `arcProgress(arc:)` returns percentage + completed counts.
+- **Weekend challenge:** Generated inside `ArcsView` from random visible items split by dimension and duration (seeded by user mood selection).
 
 ## Running the project
 ### Xcode

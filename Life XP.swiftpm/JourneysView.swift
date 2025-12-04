@@ -1,90 +1,75 @@
 import SwiftUI
 
-struct JourneysView: View {
+struct ArcsView: View {
     @EnvironmentObject var model: AppModel
 
-    private var activeJourney: Journey? {
-        guard let startID = model.journeyStartDates.keys.first,
-              let journey = model.journeys.first(where: { $0.id == startID }) else { return nil }
-        return journey
-    }
+    private var currentArc: Arc? { model.activeArc }
+    private var suggestions: [Arc] { model.suggestedArcs }
+    private var questBoard: (arc: Arc?, quests: [Quest]) { model.nextQuestBoard(limit: 3) }
 
     var body: some View {
         NavigationStack {
-            List {
-                Section(header: Text("Live tracker")) {
-                    if let active = activeJourney {
-                        JourneyLiveTracker(journey: active)
+            ScrollView {
+                VStack(spacing: 16) {
+                    if let arc = currentArc {
+                        ArcHeroCard(arc: arc)
+                            .transition(.scale.combined(with: .opacity))
                     } else {
-                        Text("Start een journey om live progress en de countdown te zien.")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                Section(header: Text("Journeys")) {
-                    ForEach(model.journeys) { journey in
-                        NavigationLink(destination: JourneyDetailView(journey: journey)) {
-                            JourneyCardView(journey: journey)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-
-                Section(header: Text("Tools")) {
-                    NavigationLink(destination: ChallengeView()) {
-                        Label("Weekend Challenge", systemImage: "flag.checkered")
+                        ArcEmptyState(suggestions: suggestions)
                     }
 
-                    NavigationLink(destination: BadgesView()) {
-                        Label("Badges", systemImage: "rosette")
-                    }
+                    SuggestedArcsGrid(suggestions: suggestions)
+
+                    QuestBoardView(arc: questBoard.arc, quests: questBoard.quests)
+
+                    ToolsPanel()
                 }
+                .padding()
             }
-            .listStyle(.insetGrouped)
-            .navigationTitle("Journeys")
+            .navigationTitle("Arcs")
         }
     }
 }
 
-struct JourneyCardView: View {
+// MARK: - Arc hero
+
+struct ArcHeroCard: View {
     @EnvironmentObject var model: AppModel
-    let journey: Journey
+    let arc: Arc
+
+    private var accent: Color { Color(hex: arc.accentColorHex, default: .accentColor) }
 
     var body: some View {
-        let accent = Color(hex: journey.accentColorHex, default: .accentColor)
-        let progress = model.journeyProgress(journey)
-        let done = model.journeyCompletedCount(journey)
-        let total = model.journeyTotalCount(journey)
-        let currentDay = model.journeyDay(for: journey)
+        let progress = model.arcProgress(arc)
+        let next = model.nextQuests(in: arc, limit: 2)
+        let day = model.arcDay(for: arc)
 
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .center, spacing: 12) {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 14) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
                         .fill(accent.opacity(0.16))
-                    Image(systemName: journey.iconSystemName)
-                        .font(.system(size: 24, weight: .semibold))
+                    Image(systemName: arc.iconSystemName)
+                        .font(.system(size: 28, weight: .bold))
                         .foregroundColor(accent)
                 }
-                .frame(width: 56, height: 56)
+                .frame(width: 70, height: 70)
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(journey.title)
-                        .font(.subheadline.weight(.semibold))
-
-                    Text(journey.subtitle)
-                        .font(.caption)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(arc.title)
+                        .font(.title3.bold())
+                    Text(arc.subtitle)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
-                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
 
                     HStack(spacing: 6) {
-                        ForEach(journey.focusDimensions) { dim in
+                        ForEach(arc.focusDimensions) { dim in
                             Label(dim.label, systemImage: dim.systemImage)
-                                .font(.caption2)
+                                .font(.caption2.weight(.semibold))
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(Capsule().fill(accent.opacity(0.12)))
+                                .background(Capsule().fill(accent.opacity(0.14)))
                         }
                     }
                 }
@@ -93,107 +78,350 @@ struct JourneyCardView: View {
             }
 
             ProgressView(value: progress) {
-                Text("\(done)/\(total) steps")
+                Text("\(Int(progress * 100))% • \(arc.chapters.count) chapters")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
             .tint(accent)
 
-            HStack {
-                if let day = currentDay {
-                    Label("Dag \(day) van \(journey.durationDays)", systemImage: "clock.arrow.circlepath")
-                        .font(.caption.weight(.semibold))
-                        .foregroundColor(accent)
-                } else {
-                    Label("Nog niet gestart", systemImage: "play.fill")
-                        .font(.caption.weight(.semibold))
+            if let day = day {
+                Label("Dag \(day) sinds start", systemImage: "clock.arrow.circlepath")
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(accent)
+            }
+
+            if !next.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Volgende quests")
+                        .font(.footnote.weight(.semibold))
                         .foregroundColor(.secondary)
+                    ForEach(next) { quest in
+                        QuestRow(quest: quest, accent: accent)
+                    }
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Chapters")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundColor(.secondary)
+
+                VStack(spacing: 8) {
+                    ForEach(arc.chapters) { chapter in
+                        ChapterProgressRow(
+                            title: chapter.title,
+                            summary: chapter.summary,
+                            progress: model.chapterProgress(chapter),
+                            accent: accent
+                        )
+                    }
+                }
+            }
+
+            HStack(spacing: 10) {
+                NavigationLink(destination: ArcDetailView(arc: arc)) {
+                    Text("Open arc")
+                        .font(.footnote.weight(.bold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(accent.opacity(0.16))
+                        .foregroundColor(accent)
+                        .clipShape(Capsule())
                 }
 
-                Spacer()
-
                 Button {
-                    model.startJourneyIfNeeded(journey)
+                    model.startArcIfNeeded(arc)
                 } label: {
-                    Text(currentDay == nil ? "Start" : "Ga verder")
-                        .font(.caption.weight(.bold))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Capsule().fill(accent.opacity(0.2)))
+                    Text(model.arcStartDates[arc.id] == nil ? "Start" : "Live")
+                        .font(.footnote.weight(.bold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Capsule().fill(accent.opacity(0.1)))
                 }
                 .buttonStyle(.plain)
             }
         }
+        .padding()
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+    }
+}
+
+struct ChapterProgressRow: View {
+    let title: String
+    let summary: String
+    let progress: Double
+    let accent: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                Spacer()
+                Text("\(Int(progress * 100))%")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            Text(summary)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            ProgressView(value: progress)
+                .tint(accent)
+        }
+    }
+}
+
+struct ArcEmptyState: View {
+    @EnvironmentObject var model: AppModel
+    let suggestions: [Arc]
+
+    var body: some View {
+        let accent = Color.accentColor
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Geen arc actief")
+                .font(.headline)
+            Text("Kies een arc die past bij je zwakste dimensie, of start met de suggesties hieronder.")
+                .font(.footnote)
+                .foregroundColor(.secondary)
+            if let first = suggestions.first {
+                Button {
+                    model.startArcIfNeeded(first)
+                } label: {
+                    HStack {
+                        Image(systemName: "play.fill")
+                        Text("Start \(first.title)")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .frame(maxWidth: .infinity)
+                    .background(Capsule().fill(accent.opacity(0.14)))
+                }
+                .buttonStyle(.plain)
+            } else {
+                Text("Geen suggesties gevonden. Voltooi eerst een paar checklist items zodat we kunnen adviseren.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+}
+
+// MARK: - Suggested arcs
+
+struct SuggestedArcsGrid: View {
+    @EnvironmentObject var model: AppModel
+    let suggestions: [Arc]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Suggested arcs")
+                    .font(.headline)
+                Spacer()
+                if let weak = model.lowestDimension {
+                    Text("\(weak.label) boost")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            if suggestions.isEmpty {
+                Text("Geen suggesties beschikbaar. Probeer een paar quests of checklists te doen zodat we patronen zien.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } else {
+                LazyVStack(spacing: 12) {
+                    ForEach(suggestions) { arc in
+                        NavigationLink(destination: ArcDetailView(arc: arc)) {
+                            ArcTile(arc: arc)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct ArcTile: View {
+    @EnvironmentObject var model: AppModel
+    let arc: Arc
+
+    var body: some View {
+        let accent = Color(hex: arc.accentColorHex, default: .accentColor)
+        let progress = model.arcProgress(arc)
+
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(accent.opacity(0.14))
+                Image(systemName: arc.iconSystemName)
+                    .foregroundColor(accent)
+            }
+            .frame(width: 52, height: 52)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(arc.title)
+                    .font(.subheadline.weight(.semibold))
+                Text(arc.subtitle)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+
+                HStack {
+                    ProgressView(value: progress)
+                        .tint(accent)
+                    Text("\(Int(progress * 100))%")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Spacer()
+
+            Button {
+                model.startArcIfNeeded(arc)
+            } label: {
+                Text(model.arcStartDates[arc.id] == nil ? "Start" : "Ga door")
+                    .font(.caption.weight(.bold))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Capsule().fill(accent.opacity(0.16)))
+            }
+            .buttonStyle(.plain)
+        }
         .padding(12)
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+}
+
+// MARK: - Quest board
+
+struct QuestBoardView: View {
+    @EnvironmentObject var model: AppModel
+    let arc: Arc?
+    let quests: [Quest]
+
+    var body: some View {
+        let accent = Color.accentColor
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Quest board")
+                    .font(.headline)
+                Spacer()
+                if let arc = arc {
+                    Text(arc.title)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            if quests.isEmpty {
+                Text("Start een arc of open een chapter om je eerstvolgende quests te zien. We tonen hier automatisch acties uit je huidige arc, of de beste volgende stap uit een suggestie.")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            } else {
+                ForEach(quests) { quest in
+                    QuestRow(quest: quest, accent: accent)
+                }
+            }
+        }
+        .padding()
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
 
-struct JourneyLiveTracker: View {
+struct QuestRow: View {
     @EnvironmentObject var model: AppModel
-    let journey: Journey
+    let quest: Quest
+    let accent: Color
 
     var body: some View {
-        let accent = Color(hex: journey.accentColorHex, default: .accentColor)
+        Button {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                model.toggle(quest)
+            }
+        } label: {
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: model.isCompleted(quest) ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(model.isCompleted(quest) ? accent : Color(.systemGray4))
+                    .font(.system(size: 22, weight: .semibold))
+                    .padding(.top, 2)
 
-        TimelineView(.periodic(from: .now, by: 1)) { context in
-            let day = model.journeyDay(for: journey, date: context.date) ?? 1
-            let remaining = model.journeyDaysRemaining(for: journey, date: context.date) ?? journey.durationDays
-
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Label("Live journey tracker", systemImage: "stopwatch")
-                        .font(.caption.weight(.semibold))
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text("Dag \(day) / \(journey.durationDays)")
-                        .font(.caption.weight(.bold))
-                        .foregroundColor(accent)
-                }
-
-                Text(journey.title)
-                    .font(.headline)
-                Text(journey.subtitle)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
-                ProgressView(value: Double(day), total: Double(max(1, journey.durationDays)))
-                    .tint(accent)
-
-                HStack {
-                    Label("\(max(0, remaining)) dagen te gaan", systemImage: "calendar")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    if let start = model.journeyStartDates[journey.id] {
-                        Text("Gestart: \(start, style: .date)")
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 6) {
+                        Text(quest.title)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundColor(.primary)
+                        Label(quest.kind.label, systemImage: quest.kind.systemImage)
                             .font(.caption2)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 4)
+                            .background(Capsule().fill(accent.opacity(0.14)))
+                            .foregroundColor(accent)
+                    }
+
+                    if let detail = quest.detail {
+                        Text(detail)
+                            .font(.footnote)
                             .foregroundColor(.secondary)
                     }
+
+                    HStack(spacing: 8) {
+                        Text("\(quest.xp) XP")
+                            .font(.caption2)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Capsule().fill(accent.opacity(0.12)))
+                            .foregroundColor(accent)
+
+                        if let minutes = quest.estimatedMinutes {
+                            Label("\(minutes) min", systemImage: "clock")
+                                .font(.caption2)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(Capsule().fill(Color(.systemGray6)))
+                        }
+
+                        ForEach(quest.dimensions) { dim in
+                            Label(dim.label, systemImage: dim.systemImage)
+                                .font(.caption2)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 3)
+                                .background(Capsule().fill(Color(.systemGray6)))
+                        }
+                    }
+
+                    Text(quest.kind.guidance)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
                 }
+
+                Spacer()
             }
-            .padding()
-            .background(
-                LinearGradient(colors: [accent.opacity(0.18), Color(.systemBackground)], startPoint: .topLeading, endPoint: .bottomTrailing)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .contentShape(Rectangle())
         }
     }
 }
 
-struct JourneyDetailView: View {
+// MARK: - Arc detail
+
+struct ArcDetailView: View {
     @EnvironmentObject var model: AppModel
-    let journey: Journey
-    
-    var steps: [ChecklistItem] {
-        journey.stepItemIDs.compactMap { model.item(withID: $0) }
-    }
-    
+    let arc: Arc
+
     var body: some View {
-        let accent = Color(hex: journey.accentColorHex, default: .accentColor)
-        let progress = model.journeyProgress(journey)
-        
+        let accent = Color(hex: arc.accentColorHex, default: .accentColor)
+        let progress = model.arcProgress(arc)
+
         List {
             Section {
                 VStack(alignment: .leading, spacing: 10) {
@@ -201,16 +429,16 @@ struct JourneyDetailView: View {
                         ZStack {
                             RoundedRectangle(cornerRadius: 18, style: .continuous)
                                 .fill(accent.opacity(0.15))
-                            Image(systemName: journey.iconSystemName)
+                            Image(systemName: arc.iconSystemName)
                                 .font(.system(size: 30, weight: .semibold))
                                 .foregroundColor(accent)
                         }
                         .frame(width: 70, height: 70)
-                        
+
                         VStack(alignment: .leading, spacing: 6) {
-                            Text(journey.title)
+                            Text(arc.title)
                                 .font(.title2.bold())
-                            Text(journey.subtitle)
+                            Text(arc.subtitle)
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -218,7 +446,7 @@ struct JourneyDetailView: View {
                             ProgressView(value: progress)
                                 .tint(accent)
 
-                            Text("\(Int(progress * 100))% • \(model.journeyCompletedCount(journey))/\(model.journeyTotalCount(journey)) steps")
+                            Text("\(Int(progress * 100))% voltooid • \(arc.questCount) quests")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -226,9 +454,9 @@ struct JourneyDetailView: View {
 
                     HStack(spacing: 10) {
                         Button {
-                            model.startJourneyIfNeeded(journey)
+                            model.startArcIfNeeded(arc)
                         } label: {
-                            Label(model.journeyStartDates[journey.id] == nil ? "Start journey" : "Ga verder", systemImage: "play.fill")
+                            Label(model.arcStartDates[arc.id] == nil ? "Start arc" : "Ga verder", systemImage: "play.fill")
                                 .font(.footnote.weight(.semibold))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
@@ -236,16 +464,16 @@ struct JourneyDetailView: View {
                         }
                         .buttonStyle(.plain)
 
-                        if let day = model.journeyDay(for: journey) {
-                            Text("Live dag \(day) • \(model.journeyDaysRemaining(for: journey) ?? 0) te gaan")
+                        if let day = model.arcDay(for: arc) {
+                            Text("Live dag \(day)")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                     }
 
-                    if !journey.focusDimensions.isEmpty {
+                    if !arc.focusDimensions.isEmpty {
                         HStack(spacing: 8) {
-                            ForEach(journey.focusDimensions) { dim in
+                            ForEach(arc.focusDimensions) { dim in
                                 HStack(spacing: 4) {
                                     Image(systemName: dim.systemImage)
                                     Text(dim.label)
@@ -262,252 +490,62 @@ struct JourneyDetailView: View {
                 }
                 .padding(.vertical, 4)
             }
-            
-            Section(header: Text("Steps")) {
-                ForEach(steps) { item in
-                    JourneyStepRow(item: item, accent: accent)
+
+            ForEach(arc.chapters) { chapter in
+                Section(header: ChapterHeader(chapter: chapter, accent: accent, progress: model.chapterProgress(chapter))) {
+                    ForEach(chapter.quests) { quest in
+                        QuestRow(quest: quest, accent: accent)
+                    }
                 }
             }
         }
-        .navigationTitle(journey.title)
+        .navigationTitle(arc.title)
         .navigationBarTitleDisplayMode(.inline)
     }
 }
 
-struct JourneyStepRow: View {
-    @EnvironmentObject var model: AppModel
-    let item: ChecklistItem
+struct ChapterHeader: View {
+    let chapter: Chapter
     let accent: Color
-    
-    @State private var showPaywall = false
-    
+    let progress: Double
+
     var body: some View {
-        Button {
-            if item.isPremium && !model.premiumUnlocked {
-                showPaywall = true
-            } else {
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                    model.toggle(item)
-                }
-            }
-        } label: {
-            HStack(alignment: .top, spacing: 10) {
-                Image(systemName: model.isCompleted(item) ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(model.isCompleted(item) ? accent : Color(.systemGray4))
-                    .font(.system(size: 22, weight: .semibold))
-                    .padding(.top, 2)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Text(item.title)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundColor(.primary)
-                            .fixedSize(horizontal: false, vertical: true)
-                        
-                        if item.isPremium {
-                            Text("PRO")
-                                .font(.caption2.bold())
-                                .padding(.horizontal, 5)
-                                .padding(.vertical, 2)
-                                .background(
-                                    Capsule().fill(Color.yellow.opacity(0.16))
-                                )
-                                .overlay(
-                                    Capsule().stroke(Color.yellow.opacity(0.7), lineWidth: 0.8)
-                                )
-                        }
-                    }
-                    
-                    if let detail = item.detail {
-                        Text(detail)
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Text("\(item.xp) XP")
-                        .font(.caption2)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(
-                            Capsule().fill(accent.opacity(0.14))
-                        )
-                        .foregroundColor(accent)
-                }
-                
-                Spacer()
-            }
-            .contentShape(Rectangle())
-        }
-        .alert("Life XP PRO", isPresented: $showPaywall) {
-            Button("Later", role: .cancel) { }
-        } message: {
-            Text("Deze step hoort bij Life XP PRO.\n\nIn de echte app kun je PRO ontgrendelen via een eenmalige in-app aankoop. Voor nu kun je PRO testen via de dev toggle in Settings.")
-        }
-    }
-}
-
-// MARK: - Challenge View
-
-struct ChallengeView: View {
-    @EnvironmentObject var model: AppModel
-    
-    enum Mode: String, CaseIterable, Identifiable {
-        case solo
-        case friends
-        case partner
-        
-        var id: String { rawValue }
-        
-        var label: String {
-            switch self {
-            case .solo: return "Solo"
-            case .friends: return "Friends"
-            case .partner: return "Partner"
-            }
-        }
-        
-        var icon: String {
-            switch self {
-            case .solo: return "person.fill"
-            case .friends: return "person.2.fill"
-            case .partner: return "heart.fill"
-            }
-        }
-    }
-    
-    @State private var mode: Mode = .solo
-    @State private var challengeItems: [ChecklistItem] = []
-    
-    var body: some View {
-        VStack(spacing: 16) {
-            Form {
-                Section(header: Text("Mode")) {
-                    Picker("Mode", selection: $mode) {
-                        ForEach(Mode.allCases) { m in
-                            Label(m.label, systemImage: m.icon)
-                                .tag(m)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                }
-                
-                Section(header: Text("Challenge")) {
-                    if challengeItems.isEmpty {
-                        Text("Tap op \"Generate\" om een challenge samen te stellen.")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                    } else {
-                        ForEach(challengeItems) { item in
-                            HStack(alignment: .top, spacing: 8) {
-                                Image(systemName: "checkmark.circle")
-                                    .foregroundColor(.accentColor)
-                                    .padding(.top, 2)
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(item.title)
-                                        .font(.subheadline.weight(.semibold))
-                                    if let detail = item.detail {
-                                        Text(detail)
-                                            .font(.footnote)
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                                
-                                Spacer()
-                            }
-                        }
-                    }
-                }
-                
-                Section {
-                    Button {
-                        generateChallenge()
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Label("Generate weekend challenge", systemImage: "sparkles")
-                            Spacer()
-                        }
-                    }
-                }
-            }
-        }
-        .navigationTitle("Weekend Challenge")
-        .onAppear {
-            if challengeItems.isEmpty {
-                generateChallenge()
-            }
-        }
-    }
-    
-    private func generateChallenge() {
-        let all = model.allVisibleItems
-        
-        let filtered: [ChecklistItem]
-        switch mode {
-        case .solo:
-            filtered = all.filter { $0.dimensions.contains(.mind) || $0.dimensions.contains(.adventure) }
-        case .friends:
-            filtered = all.filter { $0.dimensions.contains(.adventure) || $0.dimensions.contains(.love) }
-        case .partner:
-            filtered = all.filter { $0.dimensions.contains(.love) }
-        }
-        
-        let base = filtered.isEmpty ? all : filtered
-        var shuffled = Array(base.shuffled().prefix(5))
-        if shuffled.isEmpty {
-            shuffled = all
-        }
-        challengeItems = shuffled
-    }
-}
-
-// MARK: - Badges View
-
-struct BadgesView: View {
-    @EnvironmentObject var model: AppModel
-    
-    var body: some View {
-        List {
-            Section(header: Text("Unlocked badges")) {
-                if model.unlockedBadges.isEmpty {
-                    Text("Nog geen badges… maar dat kan snel veranderen 😉")
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                } else {
-                    ForEach(model.unlockedBadges) { badge in
-                        BadgeRow(badge: badge)
-                    }
-                }
-            }
-        }
-        .navigationTitle("Badges")
-    }
-}
-
-struct BadgeRow: View {
-    let badge: Badge
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(Color.accentColor.opacity(0.15))
-                    .frame(width: 38, height: 38)
-                Image(systemName: badge.iconSystemName)
-                    .foregroundColor(.accentColor)
-            }
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(badge.name)
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(chapter.title)
                     .font(.subheadline.weight(.semibold))
-                Text(badge.description)
+                Spacer()
+                Text("\(Int(progress * 100))%")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            
-            Spacer()
+            Text(chapter.summary)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            ProgressView(value: progress)
+                .tint(accent)
         }
-        .padding(.vertical, 4)
+    }
+}
+
+// MARK: - Tools
+
+struct ToolsPanel: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Tools")
+                .font(.headline)
+
+            NavigationLink(destination: ChallengeView()) {
+                Label("Weekend Challenge", systemImage: "flag.checkered")
+            }
+
+            NavigationLink(destination: BadgesView()) {
+                Label("Badges", systemImage: "rosette")
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
