@@ -34,24 +34,27 @@ struct StatsView: View {
                     }
 
                     // Overall card
-                    VStack(spacing: 8) {
+                    VStack(spacing: 10) {
                         Text("Overall")
                             .font(.headline)
+                            .foregroundColor(BrandTheme.textPrimary)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                        
+
                         HStack(alignment: .center, spacing: 20) {
                             ProgressRing(progress: model.globalProgress)
                                 .frame(width: 120, height: 120)
-                            
+
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("Life Score")
                                     .font(.headline)
+                                    .foregroundColor(BrandTheme.textPrimary)
                                 Text("\(Int(model.globalProgress * 100))% completed")
                                     .font(.title2.bold())
+                                    .foregroundColor(BrandTheme.textPrimary)
                                 Text("\(model.totalXP) XP total")
                                     .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                                
+                                    .foregroundColor(BrandTheme.mutedText)
+
                                 if model.currentStreak > 0 {
                                     HStack {
                                         Image(systemName: "flame.fill")
@@ -60,21 +63,18 @@ struct StatsView: View {
                                     .font(.caption)
                                     .foregroundColor(.orange)
                                 }
-                                
+
                                 if model.bestStreak > 0 {
                                     Text("Best streak: \(model.bestStreak) days")
                                         .font(.caption2)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(BrandTheme.mutedText)
                                 }
                             }
-                            
+
                             Spacer()
                         }
                     }
-                    .padding()
-                    .background(.ultraThinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                    .shadow(radius: 10, y: 5)
+                    .brandCard(cornerRadius: 22)
 
                     InsightsCard(
                         balanceScore: model.dimensionBalanceScore,
@@ -88,6 +88,7 @@ struct StatsView: View {
                         HStack {
                             Text("Dimensions")
                                 .font(.headline)
+                                .foregroundColor(BrandTheme.textPrimary)
                             Spacer()
                         }
 
@@ -96,8 +97,7 @@ struct StatsView: View {
                         }
                     }
                     .padding()
-                    .background(Color(.secondarySystemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .brandCard(cornerRadius: 20)
 
                     VStack(spacing: 12) {
                         HStack {
@@ -167,10 +167,11 @@ struct StatsDimensionCard: View {
                 Image(systemName: dimension.systemImage)
                 Text(dimension.label)
                     .font(.subheadline.weight(.semibold))
+                    .foregroundColor(BrandTheme.textPrimary)
                 Spacer()
                 Text("\(model.xp(for: dimension)) / \(model.maxXP(for: dimension)) XP")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(BrandTheme.mutedText)
             }
             
             GeometryReader { geo in
@@ -193,9 +194,15 @@ struct StatsDimensionCard: View {
             .frame(height: 12)
         }
         .padding(12)
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .shadow(color: Color.black.opacity(0.04), radius: 6, y: 2)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(BrandTheme.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .strokeBorder(BrandTheme.waveDeep.opacity(0.28), lineWidth: 0.8)
+                )
+        )
+        .shadow(color: BrandTheme.waveDeep.opacity(0.22), radius: 10, y: 4)
     }
 }
 
@@ -515,10 +522,14 @@ struct SharePreviewView: View {
                         Spacer()
                         Label("Deel deze kaart", systemImage: "arrow.up.right.square")
                             .font(.callout.bold())
+                            .foregroundColor(BrandTheme.textPrimary)
                         Spacer()
                     }
                     .padding()
-                    .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.white.opacity(0.12)))
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(BrandTheme.accent.opacity(0.14))
+                    )
                 }
             }
             .padding()
@@ -549,7 +560,7 @@ struct ShareEntryCard: View {
             HStack(alignment: .center, spacing: 12) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(BrandTheme.accent.opacity(0.14))
+                        .fill(BrandTheme.accent.opacity(0.18))
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: 22, weight: .semibold))
                         .foregroundColor(BrandTheme.accent)
@@ -570,10 +581,14 @@ struct ShareEntryCard: View {
                     Spacer()
                     Label("Deel nu", systemImage: "arrow.up.right.square")
                         .font(.footnote.bold())
+                        .foregroundColor(BrandTheme.textPrimary)
                     Spacer()
                 }
                 .padding(.vertical, 10)
-                .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(BrandTheme.accent.opacity(0.12)))
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(BrandTheme.accent.opacity(0.18))
+                )
             }
 
             NavigationLink(destination: SharePreviewView()) {
@@ -583,9 +598,7 @@ struct ShareEntryCard: View {
             }
         }
         .padding()
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(radius: 6, y: 3)
+        .brandCard(cornerRadius: 20)
     }
 }
 

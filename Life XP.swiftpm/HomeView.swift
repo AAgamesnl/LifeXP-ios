@@ -5,23 +5,24 @@ struct HomeView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                BrandBackground()
+        ZStack {
+            BrandBackground()
 
-                ScrollView {
-                    let spacing: CGFloat = model.compactHomeLayout ? 16 : 24
-                    VStack(spacing: spacing) {
-                        // Life score + streak
-                        VStack(spacing: 16) {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Life XP")
-                                        .font(.caption)
-                                        .foregroundColor(BrandTheme.mutedText)
+            ScrollView {
+                let spacing: CGFloat = model.compactHomeLayout ? 16 : 24
+                VStack(spacing: spacing) {
+                    // Life score + streak
+                    VStack(spacing: 16) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Life XP")
+                                    .font(.caption)
+                                    .foregroundColor(BrandTheme.mutedText)
 
-                                    Text("Your Life Checklist")
-                                        .font(.title2.weight(.semibold))
-                                }
+                                Text("Your Life Checklist")
+                                    .font(.title2.weight(.semibold))
+                                    .foregroundColor(BrandTheme.textPrimary)
+                            }
                                 
                                 Spacer()
                                 
@@ -44,22 +45,24 @@ struct HomeView: View {
                                 ProgressRing(progress: model.globalProgress)
                                     .frame(width: 110, height: 110)
                                 
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("Life Score")
-                                        .font(.headline)
-                                    Text("\(Int(model.globalProgress * 100))% completed")
-                                        .font(.title2.bold())
-                                    
-                                    Text("\(model.totalXP) XP earned")
-                                        .font(.subheadline)
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Life Score")
+                                    .font(.headline)
+                                    .foregroundColor(BrandTheme.textPrimary)
+                                Text("\(Int(model.globalProgress * 100))% completed")
+                                    .font(.title2.bold())
+                                    .foregroundColor(BrandTheme.textPrimary)
+
+                                Text("\(model.totalXP) XP earned")
+                                    .font(.subheadline)
+                                    .foregroundColor(BrandTheme.mutedText)
+
+                                if model.bestStreak > 0 {
+                                    Text("Best streak: \(model.bestStreak) days")
+                                        .font(.caption)
                                         .foregroundColor(BrandTheme.mutedText)
-                                    
-                                    if model.bestStreak > 0 {
-                                        Text("Best streak: \(model.bestStreak) days")
-                                            .font(.caption)
-                                            .foregroundColor(BrandTheme.mutedText)
-                                    }
                                 }
+                            }
                                 
                                 Spacer()
                             }
@@ -467,7 +470,7 @@ struct ProgressRing: View {
         ZStack {
             Circle()
                 .stroke(
-                    Color(.systemGray5),
+                    BrandTheme.waveDeep.opacity(0.35),
                     lineWidth: 14
                 )
 
@@ -491,9 +494,10 @@ struct ProgressRing: View {
             VStack(spacing: 4) {
                 Text("\(Int(clamped * 100))")
                     .font(.title.bold())
+                    .foregroundColor(BrandTheme.textPrimary)
                 Text("%")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(BrandTheme.mutedText)
             }
         }
         .accessibilityElement(children: .ignore)

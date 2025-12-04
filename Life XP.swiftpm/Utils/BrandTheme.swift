@@ -1,14 +1,16 @@
 import SwiftUI
 
 struct BrandTheme {
-    static let waveSky = Color(hex: "E9F2FF", default: .accentColor)
-    static let waveMist = Color(hex: "EAE6FF", default: .accentColor)
-    static let waveDeep = Color(hex: "C7D8FF", default: .accentColor)
-    static let accent = Color(hex: "5E7BFF", default: .accentColor)
-    static let accentSoft = Color(hex: "6D8CFF", default: .accentColor)
+    static let waveSky = Color(hex: "D8E6FF", default: .accentColor)
+    static let waveMist = Color(hex: "D9D4FF", default: .accentColor)
+    static let waveDeep = Color(hex: "A8BCFF", default: .accentColor)
+    static let canvas = Color(hex: "F3F6FF", default: .systemBackground)
+    static let accent = Color(hex: "2F5BFF", default: .accentColor)
+    static let accentSoft = Color(hex: "4F72FF", default: .accentColor)
     static let accentLine = Color.white
-    static let cardBackground = Color.white
-    static let mutedText = Color(hex: "7A88A6", default: .secondary)
+    static let cardBackground = canvas
+    static let textPrimary = Color(hex: "1F2A44", default: .primary)
+    static let mutedText = Color(hex: "3E4B6A", default: .secondary)
 
     // Legacy names kept for compatibility across views
     static let gradientTop = waveSky
@@ -24,12 +26,19 @@ struct BrandBackground: View {
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
+            .overlay(
+                LinearGradient(
+                    colors: [BrandTheme.canvas.opacity(0.55), Color.white.opacity(0.35)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
             .ignoresSafeArea()
 
             WaveShape(amplitude: 48, waveLength: 280)
                 .fill(
                     LinearGradient(
-                        colors: [BrandTheme.waveDeep.opacity(0.45), BrandTheme.waveMist.opacity(0.55)],
+                        colors: [BrandTheme.waveDeep.opacity(0.6), BrandTheme.waveMist.opacity(0.65)],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
@@ -41,7 +50,7 @@ struct BrandBackground: View {
             WaveShape(amplitude: 60, waveLength: 240)
                 .fill(
                     LinearGradient(
-                        colors: [BrandTheme.waveSky.opacity(0.7), BrandTheme.waveDeep.opacity(0.5)],
+                        colors: [BrandTheme.waveSky.opacity(0.75), BrandTheme.waveDeep.opacity(0.65)],
                         startPoint: .trailing,
                         endPoint: .leading
                     )
@@ -61,10 +70,10 @@ private struct BrandCardModifier: ViewModifier {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(BrandTheme.cardBackground.opacity(0.96))
+                    .fill(BrandTheme.cardBackground)
                     .overlay(
                         LinearGradient(
-                            colors: [BrandTheme.waveMist.opacity(0.35), BrandTheme.waveSky.opacity(0.25)],
+                            colors: [BrandTheme.waveMist.opacity(0.45), BrandTheme.waveSky.opacity(0.35)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -73,9 +82,9 @@ private struct BrandCardModifier: ViewModifier {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(BrandTheme.accent.opacity(0.16), lineWidth: 1)
+                    .strokeBorder(BrandTheme.accent.opacity(0.22), lineWidth: 1)
             )
-            .shadow(color: BrandTheme.waveDeep.opacity(0.22), radius: 16, y: 8)
+            .shadow(color: BrandTheme.waveDeep.opacity(0.26), radius: 16, y: 10)
     }
 }
 
