@@ -1,4 +1,7 @@
 import SwiftUI
+#if os(iOS)
+import UIKit
+#endif
 
 extension Color {
     /// Initializes a `Color` from a hex string like `#FF00AA`.
@@ -20,5 +23,21 @@ extension Color {
         let b = Double(rgb & 0x0000FF) / 255.0
 
         self = Color(red: r, green: g, blue: b)
+    }
+
+    /// Provides a dynamic color that adapts between light and dark appearances.
+    static func dynamic(light: Color, dark: Color) -> Color {
+        #if os(iOS)
+        return Color(UIColor { traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(dark)
+            default:
+                return UIColor(light)
+            }
+        })
+        #else
+        return light
+        #endif
     }
 }

@@ -34,8 +34,17 @@ struct SettingsView: View {
                             Text(tone.label).tag(tone)
                         }
                     }
-                    
+
                     Toggle("Hide heavy topics", isOn: $model.hideHeavyTopics)
+                }
+
+                Section(header: Text("Appearance"), footer: Text("Choose a consistent look or match iOS system settings.")) {
+                    Picker("Theme", selection: $model.appearanceMode) {
+                        ForEach(AppearanceMode.allCases) { mode in
+                            Text(mode.label).tag(mode)
+                        }
+                    }
+                    .pickerStyle(.segmented)
                 }
                 
                 Section(header: Text("Info")) {

@@ -25,6 +25,10 @@ final class AppModel: ObservableObject {
         didSet { persistToneMode() }
     }
 
+    @Published var appearanceMode: AppearanceMode {
+        didSet { persistAppearanceMode() }
+    }
+
     @Published var hideHeavyTopics: Bool {
         didSet { persistHideHeavyTopics() }
     }
@@ -69,9 +73,13 @@ final class AppModel: ObservableObject {
     private let calendar: Calendar
     private let userDefaults: UserDefaults
 
+    /// Preferred color scheme based on the user's explicit appearance selection.
+    var preferredColorScheme: ColorScheme? { appearanceMode.colorScheme }
+
     private enum Keys {
         static let completed = "lifeXP.completedItemIDs"
         static let toneMode = "lifeXP.toneMode"
+        static let appearanceMode = "lifeXP.appearanceMode"
         static let hideHeavy = "lifeXP.hideHeavy"
         static let currentStreak = "lifeXP.currentStreak"
         static let bestStreak = "lifeXP.bestStreak"
@@ -109,6 +117,13 @@ final class AppModel: ObservableObject {
             self.toneMode = storedTone
         } else {
             self.toneMode = .soft
+        }
+
+        if let rawAppearance = userDefaults.string(forKey: Keys.appearanceMode),
+           let storedAppearance = AppearanceMode(rawValue: rawAppearance) {
+            self.appearanceMode = storedAppearance
+        } else {
+            self.appearanceMode = .system
         }
 
         self.hideHeavyTopics = userDefaults.bool(forKey: Keys.hideHeavy)
@@ -149,6 +164,10 @@ final class AppModel: ObservableObject {
 
     private func persistToneMode() {
         userDefaults.set(toneMode.rawValue, forKey: Keys.toneMode)
+    }
+
+    private func persistAppearanceMode() {
+        userDefaults.set(appearanceMode.rawValue, forKey: Keys.appearanceMode)
     }
 
     private func persistHideHeavyTopics() {

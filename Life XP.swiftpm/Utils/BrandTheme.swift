@@ -1,15 +1,42 @@
 import SwiftUI
 
 struct BrandTheme {
-    static let waveSky = Color(hex: "E9F2FF", default: .accentColor)
-    static let waveMist = Color(hex: "EAE6FF", default: .accentColor)
-    static let waveDeep = Color(hex: "C7D8FF", default: .accentColor)
-    static let accent = Color(hex: "5E7BFF", default: .accentColor)
-    static let accentSoft = Color(hex: "6D8CFF", default: .accentColor)
-    static let accentLine = Color.white
-    static let cardBackground = Color.white
-    static let textPrimary = Color(hex: "1E2B4D", default: .primary)
-    static let mutedText = Color(hex: "7A88A6", default: .secondary)
+    static let waveSky = Color.dynamic(
+        light: Color(hex: "E9F2FF", default: .accentColor),
+        dark: Color(hex: "0F1A2F", default: .accentColor)
+    )
+    static let waveMist = Color.dynamic(
+        light: Color(hex: "EAE6FF", default: .accentColor),
+        dark: Color(hex: "182743", default: .accentColor)
+    )
+    static let waveDeep = Color.dynamic(
+        light: Color(hex: "C7D8FF", default: .accentColor),
+        dark: Color(hex: "23385E", default: .accentColor)
+    )
+    static let accent = Color.dynamic(
+        light: Color(hex: "5E7BFF", default: .accentColor),
+        dark: Color(hex: "8DB2FF", default: .accentColor)
+    )
+    static let accentSoft = Color.dynamic(
+        light: Color(hex: "6D8CFF", default: .accentColor),
+        dark: Color(hex: "ABC6FF", default: .accentColor)
+    )
+    static let accentLine = Color.dynamic(
+        light: .white,
+        dark: Color(hex: "E9EEFF", default: .white)
+    )
+    static let cardBackground = Color.dynamic(
+        light: .white,
+        dark: Color(hex: "111A2E", default: .black)
+    )
+    static let textPrimary = Color.dynamic(
+        light: Color(hex: "1E2B4D", default: .primary),
+        dark: Color(hex: "EEF2FF", default: .primary)
+    )
+    static let mutedText = Color.dynamic(
+        light: Color(hex: "7A88A6", default: .secondary),
+        dark: Color(hex: "AAB5D6", default: .secondary)
+    )
 
     // Legacy names kept for compatibility across views
     static let gradientTop = waveSky

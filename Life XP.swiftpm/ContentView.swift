@@ -43,6 +43,7 @@ struct ContentView: View {
             }
         }
         .tint(BrandTheme.accent)
+        .preferredColorScheme(model.preferredColorScheme)
         .onAppear {
             if !hasCompletedOnboarding {
                 showOnboarding = true
