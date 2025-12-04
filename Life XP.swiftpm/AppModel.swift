@@ -12,7 +12,9 @@ struct SpotlightTheme {
 final class AppModel: ObservableObject {
     // MARK: - Published data
     @Published var packs: [CategoryPack]
-    let journeys: [Journey]
+    let arcs: [Arc]
+    private let arcByID: [String: Arc]
+    private let arcByQuestID: [String: Arc]
     @Published private(set) var completedItemIDs: Set<String>
 
     // MARK: - Premium (placeholder for future IAP)
@@ -60,8 +62,8 @@ final class AppModel: ObservableObject {
     @Published private(set) var bestStreak: Int
     private var lastActiveDay: Date?
 
-    // MARK: - Journeys
-    @Published private(set) var journeyStartDates: [String: Date]
+    // MARK: - Arcs
+    @Published private(set) var arcStartDates: [String: Date]
 
     // MARK: - Environment
     private let calendar: Calendar
@@ -79,7 +81,7 @@ final class AppModel: ObservableObject {
         static let homeQuickActions = "lifeXP.homeQuickActions"
         static let homeCompact = "lifeXP.homeCompact"
         static let homeExpanded = "lifeXP.homeExpanded"
-        static let journeyStarts = "lifeXP.journeyStarts"
+        static let arcStarts = "lifeXP.arcStarts"
         static let primaryFocus = "lifeXP.primaryFocus"
         static let overwhelmLevel = "lifeXP.overwhelmLevel"
     }
@@ -91,7 +93,15 @@ final class AppModel: ObservableObject {
         self.userDefaults = userDefaults
 
         self.packs = SampleContent.packs
-        self.journeys = SampleContent.journeys
+        self.arcs = SampleContent.arcs
+        self.arcByID = Dictionary(uniqueKeysWithValues: arcs.map { ($0.id, $0) })
+        var questMap: [String: Arc] = [:]
+        for arc in arcs {
+            for quest in arc.chapters.flatMap({ $0.quests }) {
+                questMap[quest.id] = arc
+            }
+        }
+        self.arcByQuestID = questMap
         self.completedItemIDs = Set(userDefaults.stringArray(forKey: Keys.completed) ?? [])
 
         if let rawTone = userDefaults.string(forKey: Keys.toneMode),
@@ -120,14 +130,14 @@ final class AppModel: ObservableObject {
 
         self.overwhelmedLevel = userDefaults.object(forKey: Keys.overwhelmLevel) as? Int ?? 3
 
-        if let storedStarts = userDefaults.dictionary(forKey: Keys.journeyStarts) as? [String: TimeInterval] {
+        if let storedStarts = userDefaults.dictionary(forKey: Keys.arcStarts) as? [String: TimeInterval] {
             var hydrated: [String: Date] = [:]
             for (key, timestamp) in storedStarts {
                 hydrated[key] = Date(timeIntervalSince1970: timestamp)
             }
-            self.journeyStartDates = hydrated
+            self.arcStartDates = hydrated
         } else {
-            self.journeyStartDates = [:]
+            self.arcStartDates = [:]
         }
     }
 
@@ -161,9 +171,9 @@ final class AppModel: ObservableObject {
         userDefaults.set(expandHomeCardsByDefault, forKey: Keys.homeExpanded)
     }
 
-    private func persistJourneyStarts() {
-        let payload = journeyStartDates.mapValues { $0.timeIntervalSince1970 }
-        userDefaults.set(payload, forKey: Keys.journeyStarts)
+    private func persistArcStarts() {
+        let payload = arcStartDates.mapValues { $0.timeIntervalSince1970 }
+        userDefaults.set(payload, forKey: Keys.arcStarts)
     }
 
     private func persistPrimaryFocus() {
@@ -212,11 +222,23 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// Flattened quests across all arcs.
+    var allQuests: [Quest] {
+        arcs.flatMap { arc in
+            arc.chapters.flatMap { $0.quests }
+        }
+    }
+
     // MARK: - Completion & XP
 
     /// Whether a given checklist item has been completed.
     func isCompleted(_ item: ChecklistItem) -> Bool {
         completedItemIDs.contains(item.id)
+    }
+
+    /// Whether a quest has been completed.
+    func isCompleted(_ quest: Quest) -> Bool {
+        completedItemIDs.contains(quest.id)
     }
 
     /// Toggles completion and updates streaks + persistence.
@@ -228,6 +250,22 @@ final class AppModel: ObservableObject {
         } else {
             completedItemIDs.insert(item.id)
             registerActivityToday()
+        }
+        persistCompleted()
+    }
+
+    /// Toggle a quest completion.
+    func toggle(_ quest: Quest) {
+        let wasCompleted = isCompleted(quest)
+
+        if wasCompleted {
+            completedItemIDs.remove(quest.id)
+        } else {
+            completedItemIDs.insert(quest.id)
+            registerActivityToday()
+            if let arc = arcByQuestID[quest.id] {
+                startArcIfNeeded(arc)
+            }
         }
         persistCompleted()
     }
@@ -266,98 +304,232 @@ final class AppModel: ObservableObject {
 
     /// Overall completion across all visible items (0...1).
     var globalProgress: Double {
-        let items = allVisibleItems
-        guard !items.isEmpty else { return 0 }
-        let done = items.filter { completedItemIDs.contains($0.id) }.count
-        return Double(done) / Double(items.count)
+        let items = allVisibleItems.count + allQuests.count
+        guard items > 0 else { return 0 }
+        let done = completedCount
+        return Double(done) / Double(items)
     }
 
     /// Total XP accumulated across all dimensions.
     var totalXP: Int {
-        allVisibleItems
+        xpSources
             .filter { completedItemIDs.contains($0.id) }
             .reduce(0) { $0 + $1.xp }
     }
 
     /// Number of completed quests.
     var completedCount: Int {
-        completedItemIDs.count
+        let knownIDs = Set(allVisibleItems.map { $0.id } + allQuests.map { $0.id })
+        return completedItemIDs.intersection(knownIDs).count
     }
 
-    // MARK: - Journey pacing
-
-    func startJourneyIfNeeded(_ journey: Journey, date: Date = Date()) {
-        guard journeyStartDates[journey.id] == nil else { return }
-        journeyStartDates[journey.id] = date
-        persistJourneyStarts()
-    }
-
-    func resetJourneyStart(_ journey: Journey) {
-        journeyStartDates.removeValue(forKey: journey.id)
-        persistJourneyStarts()
-    }
-
-    func journeyDay(for journey: Journey, date: Date = Date()) -> Int? {
-        guard let start = journeyStartDates[journey.id] else { return nil }
-        let startDay = calendar.startOfDay(for: start)
-        let current = calendar.startOfDay(for: date)
-        let diff = calendar.dateComponents([.day], from: startDay, to: current).day ?? 0
-        return max(1, diff + 1)
-    }
-
-    func journeyDaysRemaining(for journey: Journey, date: Date = Date()) -> Int? {
-        guard let day = journeyDay(for: journey, date: date) else { return nil }
-        return max(0, journey.durationDays - day)
+    /// Number of fully finished chapters.
+    var completedChaptersCount: Int {
+        arcs.flatMap { $0.chapters }.filter { chapterProgress($0) >= 1 }.count
     }
 
     /// Remaining quests available in the visible packs.
     var remainingCount: Int {
-        max(0, allVisibleItems.count - completedCount)
+        let total = allVisibleItems.count + allQuests.count
+        return max(0, total - completedCount)
     }
 
     /// XP for a single dimension, counting only completed items.
     func xp(for dimension: LifeDimension) -> Int {
-        allVisibleItems
+        xpSources
             .filter { completedItemIDs.contains($0.id) && $0.dimensions.contains(dimension) }
             .reduce(0) { $0 + $1.xp }
     }
 
     /// Maximum attainable XP for a dimension with the currently visible items.
     func maxXP(for dimension: LifeDimension) -> Int {
-        allVisibleItems
+        xpSources
             .filter { $0.dimensions.contains(dimension) }
             .reduce(0) { $0 + $1.xp }
     }
 
-    // MARK: - Journeys
+    // MARK: - Arcs
 
-    /// Journey completion percentage (0...1).
-    func journeyProgress(_ journey: Journey) -> Double {
-        let steps = journey.stepItemIDs.compactMap { item(withID: $0) }
-        guard !steps.isEmpty else { return 0 }
-        let done = steps.filter { completedItemIDs.contains($0.id) }.count
-        return Double(done) / Double(steps.count)
+    /// Arc completion percentage (0...1).
+    func arcProgress(_ arc: Arc) -> Double {
+        let quests = arc.chapters.flatMap { $0.quests }
+        guard !quests.isEmpty else { return 0 }
+        let done = quests.filter { completedItemIDs.contains($0.id) }.count
+        return Double(done) / Double(quests.count)
     }
 
-    /// Number of completed steps in a journey.
-    func journeyCompletedCount(_ journey: Journey) -> Int {
-        journey.stepItemIDs
-            .compactMap { item(withID: $0) }
+    func chapterProgress(_ chapter: Chapter) -> Double {
+        guard !chapter.quests.isEmpty else { return 0 }
+        let done = chapter.quests.filter { completedItemIDs.contains($0.id) }.count
+        return Double(done) / Double(chapter.quests.count)
+    }
+
+    func remainingXP(for arc: Arc) -> Int {
+        let earned = earnedXP(for: arc)
+        return max(0, arc.totalXP - earned)
+    }
+
+    func earnedXP(for arc: Arc) -> Int {
+        arc.chapters
+            .flatMap { $0.quests }
             .filter { completedItemIDs.contains($0.id) }
-            .count
+            .reduce(0) { $0 + $1.xp }
     }
 
-    /// Total steps available in a journey after applying safe mode.
-    func journeyTotalCount(_ journey: Journey) -> Int {
-        journey.stepItemIDs.compactMap { item(withID: $0) }.count
+    func arc(for quest: Quest) -> Arc? {
+        arcByQuestID[quest.id]
     }
 
-    /// Journeys fully completed (all steps done).
-    var completedJourneys: [Journey] {
-        journeys.filter { journeyProgress($0) >= 1 }
+    func arc(withID id: String) -> Arc? {
+        arcByID[id]
+    }
+
+    var completedArcs: [Arc] {
+        arcs.filter { arcProgress($0) >= 1 }
+    }
+
+    func startArcIfNeeded(_ arc: Arc, date: Date = Date()) {
+        guard arcStartDates[arc.id] == nil else { return }
+        arcStartDates[arc.id] = date
+        persistArcStarts()
+    }
+
+    func resetArcStart(_ arc: Arc) {
+        arcStartDates.removeValue(forKey: arc.id)
+        persistArcStarts()
+    }
+
+    func arcDay(for arc: Arc, date: Date = Date()) -> Int? {
+        guard let start = arcStartDates[arc.id] else { return nil }
+        let startDay = calendar.startOfDay(for: start)
+        let current = calendar.startOfDay(for: date)
+        let diff = calendar.dateComponents([.day], from: startDay, to: current).day ?? 0
+        return max(1, diff + 1)
+    }
+
+    var activeArc: Arc? {
+        let sorted = arcStartDates.sorted(by: { $0.value > $1.value })
+        for entry in sorted {
+            if let arc = arcByID[entry.key], arcProgress(arc) < 1 {
+                return arc
+            }
+        }
+        return sorted.compactMap { arcByID[$0.key] }.first
+    }
+
+    func nextQuests(in arc: Arc, limit: Int = 3) -> [Quest] {
+        var prioritized: [Quest] = []
+        let weak = lowestDimension
+
+        for chapter in arc.chapters {
+            let open = chapter.quests.filter { !isCompleted($0) }
+            let sorted = open.sorted { lhs, rhs in
+                if let weak = weak {
+                    let lhsMatch = lhs.dimensions.contains(weak)
+                    let rhsMatch = rhs.dimensions.contains(weak)
+                    if lhsMatch != rhsMatch { return lhsMatch }
+                }
+
+                if lhs.kind.priority != rhs.kind.priority {
+                    return lhs.kind.priority < rhs.kind.priority
+                }
+
+                if lhs.xp != rhs.xp {
+                    return lhs.xp > rhs.xp
+                }
+
+                return (lhs.estimatedMinutes ?? 30) < (rhs.estimatedMinutes ?? 30)
+            }
+            prioritized.append(contentsOf: sorted)
+
+            if prioritized.count >= limit { break }
+        }
+
+        if prioritized.count < limit {
+            let remaining = arc.chapters
+                .flatMap { $0.quests }
+                .filter { !isCompleted($0) && !prioritized.contains($0) }
+                .sorted { lhs, rhs in
+                    if lhs.kind.priority != rhs.kind.priority {
+                        return lhs.kind.priority < rhs.kind.priority
+                    }
+                    return lhs.xp > rhs.xp
+                }
+            prioritized.append(contentsOf: remaining)
+        }
+
+        return Array(prioritized.prefix(limit))
+    }
+
+    /// Arcs we propose the player starts next, prioritizing weak dimensions and unfinished arcs.
+    var suggestedArcs: [Arc] {
+        let incomplete = arcs.filter { arcProgress($0) < 1 }
+        guard !incomplete.isEmpty else { return [] }
+
+        let unstarted = incomplete.filter { arcStartDates[$0.id] == nil }
+        let candidates = (unstarted.isEmpty ? incomplete : unstarted)
+            .filter { $0.id != activeArc?.id }
+
+        let weak = lowestDimension
+        let prioritized = candidates.sorted { lhs, rhs in
+            if let weak = weak {
+                let lhsMatch = lhs.focusDimensions.contains(weak)
+                let rhsMatch = rhs.focusDimensions.contains(weak)
+                if lhsMatch != rhsMatch { return lhsMatch }
+            }
+
+            if arcStartDates[lhs.id] != nil && arcStartDates[rhs.id] == nil {
+                return false
+            }
+
+            if arcStartDates[lhs.id] == nil && arcStartDates[rhs.id] != nil {
+                return true
+            }
+
+            let lhsRemaining = remainingXP(for: lhs)
+            let rhsRemaining = remainingXP(for: rhs)
+            if lhsRemaining != rhsRemaining { return lhsRemaining > rhsRemaining }
+            return lhs.title < rhs.title
+        }
+
+        return Array(prioritized.prefix(4))
+    }
+
+    /// Combines the active arc with fallback suggestions to surface the most actionable quest board.
+    func nextQuestBoard(limit: Int = 3) -> (arc: Arc?, quests: [Quest]) {
+        if let arc = activeArc {
+            let quests = nextQuests(in: arc, limit: limit)
+            if !quests.isEmpty { return (arc, quests) }
+        }
+
+        if let arc = suggestedArcs.first {
+            return (arc, nextQuests(in: arc, limit: limit))
+        }
+
+        return (nil, [])
+    }
+
+    /// Handy entry for surfacing on Home, Stats, and the share card.
+    var highlightedArc: Arc? {
+        activeArc ?? suggestedArcs.first
+    }
+
+    var arcProgressHeadline: String {
+        guard let arc = highlightedArc else { return "Nog geen arc gekozen." }
+        let progress = Int(arcProgress(arc) * 100)
+        if let day = arcDay(for: arc) {
+            return "\(arc.title): dag \(day), \(progress)% compleet"
+        }
+        return "\(arc.title): \(progress)% compleet"
     }
 
     // MARK: - Suggestions & coaching
+
+    private var xpSources: [(id: String, xp: Int, dimensions: [LifeDimension])] {
+        let items = allVisibleItems.map { ($0.id, $0.xp, $0.dimensions) }
+        let quests = allQuests.map { ($0.id, $0.xp, $0.dimensions) }
+        return items + quests
+    }
 
     /// Random incomplete item suggestion that respects premium access.
     var suggestedItem: (pack: CategoryPack, item: ChecklistItem)? {
@@ -642,7 +814,7 @@ final class AppModel: ObservableObject {
             (totalXP < 1000, "Legend status komt dichterbij: nog \(1000 - totalXP) XP."),
             (xp(for: .adventure) < 120 && maxXP(for: .adventure) > 0, "Focus adventure voor badge ‘Explorer’."),
             (xp(for: .mind) < 150 && maxXP(for: .mind) > 0, "Mind-work badge ‘Inner Work’ staat klaar als je nog \(150 - xp(for: .mind)) XP pakt."),
-            (completedJourneys.isEmpty, "Speel een journey uit om badge ‘Story Arc’ te claimen."),
+            (completedArcs.isEmpty, "Speel een arc uit om badge ‘Story Arc’ te claimen."),
             (currentStreak < 7, "\(max(0, 7 - currentStreak)) dagen tot je ‘Consistency Era’ badge terugziet."),
             (bestStreak < 21, "Ga voor 21 dagen streak om ‘Unstoppable’ te claimen."),
         ]
@@ -755,21 +927,30 @@ final class AppModel: ObservableObject {
             ))
         }
 
-        if completedJourneys.count >= 1 {
+        if completedArcs.count >= 1 {
             result.append(Badge(
                 id: "badge_story_arc",
                 name: "Story Arc",
-                description: "Je hebt minstens één journey volledig uitgespeeld.",
+                description: "Je hebt minstens één arc volledig uitgespeeld.",
                 iconSystemName: "book.circle.fill"
             ))
         }
 
-        if completedJourneys.count >= 3 {
+        if completedArcs.count >= 3 {
             result.append(Badge(
                 id: "badge_arc_collector",
                 name: "Arc Collector",
-                description: "Drie journeys gecompleteerd: je leeft in seizoenen.",
+                description: "Drie arcs gecompleteerd: je leeft in seizoenen.",
                 iconSystemName: "rectangle.stack.fill"
+            ))
+        }
+
+        if completedChaptersCount >= 3 {
+            result.append(Badge(
+                id: "badge_chapter_closer",
+                name: "Chapter Closer",
+                description: "Je hebt 3+ chapters afgerond. Jij sluit lusjes.",
+                iconSystemName: "book.closed.fill"
             ))
         }
 

@@ -17,10 +17,10 @@ struct ContentView: View {
                         Label("Home", systemImage: "sparkles")
                     }
 
-                JourneysView()
+                ArcsView()
                     .environmentObject(model)
                     .tabItem {
-                        Label("Journeys", systemImage: "map.fill")
+                        Label("Arcs", systemImage: "map.fill")
                     }
 
                 PacksView()
