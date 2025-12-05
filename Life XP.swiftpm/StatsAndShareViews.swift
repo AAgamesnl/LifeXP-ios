@@ -2,11 +2,14 @@ import SwiftUI
 
 struct StatsView: View {
     @EnvironmentObject var model: AppModel
-    
+
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
+            ZStack {
+                BrandBackground()
+
+                ScrollView {
+                    VStack(spacing: 24) {
                     LevelSummaryCard(
                         level: model.level,
                         progress: model.levelProgress,
@@ -137,10 +140,11 @@ struct StatsView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                         .shadow(radius: 6, y: 3)
                     }
-                    
-                    ShareEntryCard()
+
+                        ShareEntryCard()
+                    }
+                    .padding()
                 }
-                .padding()
             }
             .navigationTitle("Stats")
         }
@@ -264,10 +268,7 @@ struct InsightsCard: View {
                 }
             }
         }
-        .padding()
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(radius: 6, y: 3)
+        .brandCard(cornerRadius: 20)
     }
 }
 
@@ -494,19 +495,19 @@ struct SharePreviewView: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.9).ignoresSafeArea()
-            
+            BrandBackground()
+
             VStack(spacing: 20) {
                 Text("Screenshot deze kaart en deel ’m in je story ✨")
                     .font(.footnote)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(BrandTheme.mutedText)
 
                 ShareCardView()
                     .frame(maxWidth: 360)
 
                 Text("Tip: zet je camera op full-screen, maak een screenshot en tag je app-naam.")
                     .font(.caption2)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(BrandTheme.mutedText)
                     .multilineTextAlignment(.center)
 
                 ShareLink(item: "Mijn Life XP progress: \(Int(model.globalProgress * 100))% compleet!") {
@@ -548,10 +549,10 @@ struct ShareEntryCard: View {
             HStack(alignment: .center, spacing: 12) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(Color.blue.opacity(0.15))
+                        .fill(BrandTheme.accent.opacity(0.14))
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(.blue)
+                        .foregroundColor(BrandTheme.accent)
                 }
                 .frame(width: 54, height: 54)
 
@@ -572,7 +573,7 @@ struct ShareEntryCard: View {
                     Spacer()
                 }
                 .padding(.vertical, 10)
-                .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.blue.opacity(0.12)))
+                .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(BrandTheme.accent.opacity(0.12)))
             }
 
             NavigationLink(destination: SharePreviewView()) {
@@ -590,107 +591,127 @@ struct ShareEntryCard: View {
 
 struct ShareCardView: View {
     @EnvironmentObject var model: AppModel
-    
+
     private func ratio(for dimension: LifeDimension) -> Double {
         let maxXP = model.maxXP(for: dimension)
         guard maxXP > 0 else { return 0 }
         return Double(model.xp(for: dimension)) / Double(maxXP)
     }
-    
+
     var body: some View {
         GeometryReader { geo in
-            let _ = geo.size
             ZStack {
                 LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color.purple,
-                        Color.black,
-                        Color.blue
-                    ]),
+                    colors: [BrandTheme.waveSky, BrandTheme.waveMist, BrandTheme.waveDeep],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
                 .ignoresSafeArea()
-                
+
+                Circle()
+                    .fill(BrandTheme.accent.opacity(0.2))
+                    .blur(radius: 80)
+                    .scaleEffect(1.4)
+                    .offset(x: -100, y: -160)
+
+                Circle()
+                    .fill(BrandTheme.accentSoft.opacity(0.18))
+                    .blur(radius: 80)
+                    .scaleEffect(1.3)
+                    .offset(x: 120, y: 180)
+
                 RoundedRectangle(cornerRadius: 32, style: .continuous)
-                    .strokeBorder(Color.white.opacity(0.25), lineWidth: 1)
+                    .strokeBorder(BrandTheme.accent.opacity(0.18), lineWidth: 1)
                     .padding(10)
-                
-                VStack(spacing: 24) {
-                    VStack(spacing: 4) {
+
+                VStack(spacing: 18) {
+                    VStack(spacing: 6) {
+                        ZStack {
+                            Circle()
+                                .fill(BrandTheme.accent.opacity(0.22))
+                                .frame(width: 86, height: 86)
+                            Circle()
+                                .fill(BrandTheme.accent)
+                                .frame(width: 64, height: 64)
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 26, weight: .heavy))
+                                .foregroundColor(.white)
+                        }
+
                         Text("My Life Checklist")
                             .font(.headline)
-                            .foregroundColor(.white)
-                        Text("How ‘completed’ is your life?")
+                            .foregroundColor(BrandTheme.accent)
+                        Text("Soft waves, steady wins")
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(BrandTheme.mutedText)
                     }
-                    
-                ProgressRing(progress: model.globalProgress)
-                    .frame(width: 150, height: 150)
-                    .padding(.top, 8)
 
-                Text("\(model.totalXP) XP collected")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundColor(.white.opacity(0.9))
+                    ProgressRing(progress: model.globalProgress)
+                        .frame(width: 150, height: 150)
+                        .padding(.top, 4)
 
-                if model.currentStreak > 0 {
-                    Text("Streak: \(model.currentStreak) days")
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.85))
-                }
+                    Text("\(model.totalXP) XP collected")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundColor(BrandTheme.accent)
 
-                if let arc = model.highlightedArc {
-                    VStack(spacing: 4) {
-                        Text("Arc: \(arc.title) • \(Int(model.arcProgress(arc) * 100))%")
-                            .font(.caption)
-                            .foregroundColor(.white.opacity(0.8))
-                        Text("\(arc.questCount) quests • \(arc.totalXP) XP")
-                            .font(.caption2)
-                            .foregroundColor(.white.opacity(0.75))
+                    if model.currentStreak > 0 {
+                        Text("Streak: \(model.currentStreak) days")
+                            .font(.caption.weight(.semibold))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Capsule().fill(BrandTheme.accent.opacity(0.12)))
+                            .foregroundColor(BrandTheme.accent)
                     }
-                }
 
-                VStack(spacing: 10) {
+                    if let arc = model.highlightedArc {
+                        VStack(spacing: 4) {
+                            Text("Arc: \(arc.title) • \(Int(model.arcProgress(arc) * 100))%")
+                                .font(.caption)
+                                .foregroundColor(BrandTheme.mutedText)
+                            Text("\(arc.questCount) quests • \(arc.totalXP) XP")
+                                .font(.caption2)
+                                .foregroundColor(BrandTheme.mutedText)
+                        }
+                    }
+
+                    VStack(spacing: 12) {
                         ForEach(LifeDimension.allCases) { dim in
                             HStack(spacing: 10) {
                                 Image(systemName: dim.systemImage)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(BrandTheme.accent)
                                 Text(dim.label)
                                     .font(.footnote.weight(.medium))
-                                    .foregroundColor(.white)
-                                
+                                    .foregroundColor(.primary)
+
                                 GeometryReader { geo in
                                     ZStack(alignment: .leading) {
                                         Capsule()
-                                            .fill(Color.white.opacity(0.15))
+                                            .fill(BrandTheme.waveDeep.opacity(0.35))
                                         Capsule()
-                                            .fill(Color.white)
+                                            .fill(BrandTheme.accent)
                                             .frame(width: max(8, geo.size.width * CGFloat(min(1, max(0, ratio(for: dim))))))
                                     }
                                 }
                                 .frame(height: 8)
-                                
+
                                 Text("\(model.xp(for: dim))")
                                     .font(.caption2)
-                                    .foregroundColor(.white.opacity(0.8))
+                                    .foregroundColor(BrandTheme.mutedText)
                             }
                         }
                     }
                     .padding(.horizontal, 16)
-                    
-                    Spacer()
-                    
+
                     VStack(spacing: 4) {
-                        Text("Check jouw life progress")
+                        Text("Soft steps, bold wins")
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.85))
-                        
-                        Text("Search in the App Store: Life XP")
+                            .foregroundColor(BrandTheme.mutedText)
+
+                        Text("Search: Life XP")
                             .font(.caption2.weight(.semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(BrandTheme.accent)
                     }
-                    .padding(.bottom, 16)
+                    .padding(.bottom, 8)
                 }
                 .padding(.horizontal, 22)
                 .padding(.vertical, 24)

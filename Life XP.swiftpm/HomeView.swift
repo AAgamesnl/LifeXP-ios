@@ -7,7 +7,6 @@ struct HomeView: View {
         NavigationStack {
             ZStack {
                 BrandBackground()
-                    .opacity(0.55)
 
                 ScrollView {
                     let spacing: CGFloat = model.compactHomeLayout ? 16 : 24
@@ -18,8 +17,8 @@ struct HomeView: View {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Life XP")
                                         .font(.caption)
-                                        .foregroundColor(.secondary)
-                                    
+                                        .foregroundColor(BrandTheme.mutedText)
+
                                     Text("Your Life Checklist")
                                         .font(.title2.weight(.semibold))
                                 }
@@ -35,9 +34,9 @@ struct HomeView: View {
                                     .padding(.horizontal, 10)
                                     .padding(.vertical, 6)
                                     .background(
-                                        Capsule().fill(Color.orange.opacity(0.12))
+                                        Capsule().fill(BrandTheme.accent.opacity(0.12))
                                     )
-                                    .foregroundColor(.orange)
+                                    .foregroundColor(BrandTheme.accent)
                                 }
                             }
                             
@@ -53,12 +52,12 @@ struct HomeView: View {
                                     
                                     Text("\(model.totalXP) XP earned")
                                         .font(.subheadline)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(BrandTheme.mutedText)
                                     
                                     if model.bestStreak > 0 {
                                         Text("Best streak: \(model.bestStreak) days")
                                             .font(.caption)
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(BrandTheme.mutedText)
                                     }
                                 }
                                 
@@ -148,14 +147,12 @@ struct HomeView: View {
                                     .font(.headline)
                                 Spacer()
                             }
-                            
+
                             ForEach(LifeDimension.allCases) { dim in
                                 DimensionRow(dimension: dim)
                             }
                         }
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .brandCard(cornerRadius: 20)
 
                         if model.showMomentumGrid {
                             MomentumGrid(rankings: model.dimensionRankings)
@@ -221,12 +218,12 @@ struct CurrentArcCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Label(isSuggestion ? "Suggested arc" : "Current arc", systemImage: "map.fill")
                         .font(.caption.weight(.semibold))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(BrandTheme.mutedText)
                     Text(arc.title)
                         .font(.headline)
                     Text(arc.subtitle)
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(BrandTheme.mutedText)
                         .lineLimit(2)
                 }
 
@@ -242,7 +239,7 @@ struct CurrentArcCard: View {
             ProgressView(value: progress) {
                 Text("\(Int(progress * 100))% • \(arc.questCount) quests")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(BrandTheme.mutedText)
             }
             .tint(accent)
 
@@ -250,7 +247,7 @@ struct CurrentArcCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Next up")
                         .font(.caption.weight(.semibold))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(BrandTheme.mutedText)
                     ForEach(nextQuests) { quest in
                         HStack(spacing: 6) {
                             Image(systemName: quest.kind.systemImage)
@@ -260,15 +257,13 @@ struct CurrentArcCard: View {
                             Spacer()
                             Text("\(quest.xp) XP")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(BrandTheme.mutedText)
                         }
                     }
                 }
             }
         }
-        .padding()
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .brandCard(cornerRadius: 22)
     }
 }
 
@@ -481,10 +476,10 @@ struct ProgressRing: View {
                 .stroke(
                     AngularGradient(
                         gradient: Gradient(colors: [
-                            BrandTheme.gradientTop,
-                            BrandTheme.gradientMiddle,
-                            BrandTheme.gradientBottom,
-                            BrandTheme.gradientTop
+                            BrandTheme.accent,
+                            BrandTheme.accentSoft,
+                            BrandTheme.waveDeep,
+                            BrandTheme.accent
                         ]),
                         center: .center
                     ),
@@ -540,13 +535,13 @@ struct DimensionRow: View {
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.white.opacity(0.15))
+                        .fill(BrandTheme.waveDeep.opacity(0.28))
 
                     RoundedRectangle(cornerRadius: 8)
                         .fill(LinearGradient(
                             gradient: Gradient(colors: [
-                                BrandTheme.accent.opacity(0.95),
-                                BrandTheme.gradientMiddle.opacity(0.7)
+                                BrandTheme.accent,
+                                BrandTheme.accentSoft.opacity(0.75)
                             ]),
                             startPoint: .leading,
                             endPoint: .trailing
