@@ -2,10 +2,13 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var model: AppModel
-    
+
     var body: some View {
         NavigationStack {
-            Form {
+            ZStack {
+                BrandBackground()
+
+                Form {
                 Section(header: Text("Life XP PRO")) {
                     Toggle(isOn: $model.premiumUnlocked) {
                         VStack(alignment: .leading, spacing: 4) {
@@ -51,6 +54,8 @@ struct SettingsView: View {
                             .multilineTextAlignment(.trailing)
                     }
                 }
+                }
+                .scrollContentBackground(.hidden)
             }
             .navigationTitle("Settings")
         }
