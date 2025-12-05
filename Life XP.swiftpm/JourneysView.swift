@@ -9,8 +9,11 @@ struct ArcsView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 16) {
+            ZStack {
+                BrandBackground()
+
+                ScrollView {
+                    VStack(spacing: 16) {
                     if let arc = currentArc {
                         ArcHeroCard(arc: arc)
                             .transition(.scale.combined(with: .opacity))
@@ -23,8 +26,9 @@ struct ArcsView: View {
                     QuestBoardView(arc: questBoard.arc, quests: questBoard.quests)
 
                     ToolsPanel()
+                    }
+                    .padding()
                 }
-                .padding()
             }
             .navigationTitle("Arcs")
         }
@@ -60,7 +64,7 @@ struct ArcHeroCard: View {
                         .font(.title3.bold())
                     Text(arc.subtitle)
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(BrandTheme.mutedText)
                         .fixedSize(horizontal: false, vertical: true)
 
                     HStack(spacing: 6) {
@@ -70,6 +74,7 @@ struct ArcHeroCard: View {
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
                                 .background(Capsule().fill(accent.opacity(0.14)))
+                                .foregroundColor(BrandTheme.mutedText)
                         }
                     }
                 }
@@ -80,31 +85,31 @@ struct ArcHeroCard: View {
             ProgressView(value: progress) {
                 Text("\(Int(progress * 100))% • \(arc.chapters.count) chapters")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(BrandTheme.mutedText)
             }
             .tint(accent)
 
             if let day = day {
                 Label("Dag \(day) sinds start", systemImage: "clock.arrow.circlepath")
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(accent)
+                    .foregroundColor(BrandTheme.accent)
             }
 
             if !next.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Volgende quests")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundColor(.secondary)
-                    ForEach(next) { quest in
-                        QuestRow(quest: quest, accent: accent)
-                    }
+                Text("Volgende quests")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundColor(BrandTheme.mutedText)
+                ForEach(next) { quest in
+                    QuestRow(quest: quest, accent: accent)
+                }
                 }
             }
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("Chapters")
                     .font(.footnote.weight(.semibold))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(BrandTheme.mutedText)
 
                 VStack(spacing: 8) {
                     ForEach(arc.chapters) { chapter in
@@ -141,9 +146,7 @@ struct ArcHeroCard: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding()
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .brandCard(cornerRadius: 22)
     }
 }
 
