@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var model = AppModel()
-    
+
     @AppStorage("lifeXP.hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     @State private var showOnboarding: Bool = false
 
@@ -61,6 +61,6 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
-            .preferredColorScheme(.dark)
+            .preferredColorScheme(.light)
     }
 }
