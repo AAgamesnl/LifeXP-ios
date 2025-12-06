@@ -22,10 +22,10 @@ struct HomeView: View {
                                     Text("Your Life Checklist")
                                         .font(.title2.weight(.semibold))
                                 }
-                                
+
                                 Spacer()
-                                
-                                if model.currentStreak > 0 {
+
+                                if model.showStreaks && model.currentStreak > 0 {
                                     HStack(spacing: 6) {
                                         Image(systemName: "flame.fill")
                                         Text("\(model.currentStreak)-day streak")
@@ -75,8 +75,8 @@ struct HomeView: View {
                         }
                         .brandCard()
 
-                        if let arcPreview = model.highlightedArc {
-                            let board = model.nextQuestBoard(limit: 2)
+                        if let arcPreview = model.highlightedArc, model.showHeroCards {
+                            let board = model.nextQuestBoard(limit: model.questBoardLimit)
                             let next = board.arc?.id == arcPreview.id ? board.quests : model.nextQuests(in: arcPreview, limit: 2)
                             NavigationLink(destination: ArcDetailView(arc: arcPreview)) {
                                 CurrentArcCard(
@@ -87,6 +87,8 @@ struct HomeView: View {
                                 )
                             }
                             .buttonStyle(.plain)
+                        } else if let arcPreview = model.highlightedArc {
+                            CompactArcSummary(arc: arcPreview, progress: model.arcProgress(arcPreview), nextQuests: model.nextQuests(in: arcPreview, limit: 1))
                         }
 
                         DailyBriefingCard(
@@ -94,7 +96,7 @@ struct HomeView: View {
                             ritual: model.ritualOfTheDay,
                             focusHeadline: model.focusHeadline,
                             nextUnlock: model.nextUnlockMessage,
-                            streak: model.currentStreak,
+                            streak: model.showStreaks ? model.currentStreak : 0,
                             defaultExpanded: model.expandHomeCardsByDefault
                         )
                         .environmentObject(model)
@@ -121,7 +123,7 @@ struct HomeView: View {
                             SeasonalSpotlightCard(theme: spotlight.theme, items: spotlight.items)
                         }
 
-                        if let legendary = model.legendaryQuest, let pack = model.pack(for: legendary.id) {
+                        if model.settings.showProTeasers, let legendary = model.legendaryQuest, let pack = model.pack(for: legendary.id) {
                             LegendaryQuestCard(pack: pack, item: legendary)
                         }
 
@@ -270,6 +272,44 @@ struct CurrentArcCard: View {
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Arc: \(arc.title)")
         .accessibilityHint(isSuggestion ? "Suggested arc with \(Int(progress * 100)) percent complete" : "Current arc with \(Int(progress * 100)) percent complete")
+    }
+}
+
+struct CompactArcSummary: View {
+    let arc: Arc
+    let progress: Double
+    let nextQuests: [Quest]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Label("Arc", systemImage: "map")
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text("\(Int(progress * 100))%")
+                    .font(.caption2.weight(.bold))
+            }
+
+            Text(arc.title)
+                .font(.subheadline.weight(.semibold))
+            Text(arc.subtitle)
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            if !nextQuests.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Volgende quest")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.secondary)
+                    Text(nextQuests.first?.title ?? "")
+                        .font(.caption)
+                }
+            }
+        }
+        .padding()
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 

@@ -21,7 +21,7 @@ struct StatsView: View {
                         completed: model.completedCount,
                         remaining: model.remainingCount,
                         balanceScore: model.dimensionBalanceScore,
-                        streak: model.currentStreak
+                        streak: model.showStreaks ? model.currentStreak : 0
                     )
 
                     if let arc = model.highlightedArc {
@@ -29,7 +29,7 @@ struct StatsView: View {
                             arc: arc,
                             progress: model.arcProgress(arc),
                             day: model.arcDay(for: arc),
-                            nextQuests: model.nextQuestBoard(limit: 2).quests
+                            nextQuests: model.nextQuestBoard(limit: model.questBoardLimit).quests
                         )
                     }
 
@@ -52,7 +52,7 @@ struct StatsView: View {
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                                 
-                                if model.currentStreak > 0 {
+                                if model.showStreaks && model.currentStreak > 0 {
                                     HStack {
                                         Image(systemName: "flame.fill")
                                         Text("Current streak: \(model.currentStreak) days")
@@ -60,8 +60,8 @@ struct StatsView: View {
                                     .font(.caption)
                                     .foregroundColor(.orange)
                                 }
-                                
-                                if model.bestStreak > 0 {
+
+                                if model.showStreaks && model.bestStreak > 0 {
                                     Text("Best streak: \(model.bestStreak) days")
                                         .font(.caption2)
                                         .foregroundColor(.secondary)
@@ -112,7 +112,7 @@ struct StatsView: View {
                                 .foregroundColor(.secondary)
                         }
 
-                        ForEach(model.arcs) { arc in
+                        ForEach(model.visibleArcs) { arc in
                             ArcProgressRow(arc: arc)
                         }
                     }
@@ -536,14 +536,14 @@ struct ShareEntryCard: View {
 
     private var shareText: String {
         let arcLine: String
-        if let arc = model.highlightedArc {
+        if model.showArcProgressOnShare, let arc = model.highlightedArc {
             let progress = Int(model.arcProgress(arc) * 100)
             arcLine = " Arc ‘\(arc.title)’ staat op \(progress)% en levert \(arc.totalXP) XP."
         } else {
-            arcLine = " Geen arc actief? Kies er een in de app."
+            arcLine = ""
         }
 
-        let streakLine = model.currentStreak > 0 ? " Streak: \(model.currentStreak)d." : ""
+        let streakLine = (model.showStreaks && model.currentStreak > 0) ? " Streak: \(model.currentStreak)d." : ""
         return "Ik heb \(Int(model.globalProgress * 100))% van mijn Life XP checklist unlocked en \(model.totalXP) XP verzameld." + arcLine + streakLine + " Pak jouw kaart in de app!"
     }
 
@@ -657,7 +657,7 @@ struct ShareCardView: View {
                         .font(.subheadline.weight(.medium))
                         .foregroundColor(BrandTheme.accent)
 
-                    if model.currentStreak > 0 {
+                    if model.showStreaks && model.currentStreak > 0 {
                         Text("Streak: \(model.currentStreak) days")
                             .font(.caption.weight(.semibold))
                             .padding(.horizontal, 12)
@@ -666,7 +666,7 @@ struct ShareCardView: View {
                             .foregroundColor(BrandTheme.accent)
                     }
 
-                    if let arc = model.highlightedArc {
+                    if model.showArcProgressOnShare, let arc = model.highlightedArc {
                         VStack(spacing: 4) {
                             Text("Arc: \(arc.title) • \(Int(model.arcProgress(arc) * 100))%")
                                 .font(.caption)

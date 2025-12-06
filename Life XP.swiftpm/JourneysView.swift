@@ -5,7 +5,7 @@ struct ArcsView: View {
 
     private var currentArc: Arc? { model.activeArc }
     private var suggestions: [Arc] { model.suggestedArcs }
-    private var questBoard: (arc: Arc?, quests: [Quest]) { model.nextQuestBoard(limit: 3) }
+    private var questBoard: (arc: Arc?, quests: [Quest]) { model.nextQuestBoard(limit: model.questBoardLimit) }
 
     var body: some View {
         NavigationStack {
@@ -124,6 +124,13 @@ struct ArcHeroCard: View {
             }
 
             HStack(spacing: 10) {
+                let canStart = model.remainingArcSlots > 0 || model.arcStartDates[arc.id] != nil
+                if model.arcStartDates[arc.id] == nil && model.remainingArcSlots == 0 {
+                    Label("Max \(model.settings.maxConcurrentArcs) arcs actief", systemImage: "exclamationmark.triangle")
+                        .font(.caption2)
+                        .foregroundColor(.orange)
+                }
+
                 NavigationLink(destination: ArcDetailView(arc: arc)) {
                     Text("Open arc")
                         .font(.footnote.weight(.bold))
@@ -144,6 +151,7 @@ struct ArcHeroCard: View {
                         .background(Capsule().fill(accent.opacity(0.1)))
                 }
                 .buttonStyle(.plain)
+                .disabled(!canStart)
             }
         }
         .brandCard(cornerRadius: 22)
@@ -205,6 +213,7 @@ struct ArcEmptyState: View {
                     .background(Capsule().fill(accent.opacity(0.14)))
                 }
                 .buttonStyle(.plain)
+                .disabled(model.remainingArcSlots == 0)
             } else {
                 Text("Geen suggesties gevonden. Voltooi eerst een paar checklist items zodat we kunnen adviseren.")
                     .font(.caption)

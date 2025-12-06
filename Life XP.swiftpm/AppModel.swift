@@ -8,6 +8,72 @@ struct SpotlightTheme {
     let focus: LifeDimension
 }
 
+enum NudgeIntensity: String, Codable, CaseIterable, Identifiable {
+    case gentle, standard, assertive
+
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .gentle: return "Zacht"
+        case .standard: return "Standaard"
+        case .assertive: return "Vurig"
+        }
+    }
+
+    var questBonus: Int {
+        switch self {
+        case .gentle: return 0
+        case .standard: return 1
+        case .assertive: return 2
+        }
+    }
+}
+
+enum QuestBoardDensity: String, Codable, CaseIterable, Identifiable {
+    case lean, balanced, packed
+
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .lean: return "Compact"
+        case .balanced: return "Normaal"
+        case .packed: return "Veel opties"
+        }
+    }
+
+    var questCount: Int {
+        switch self {
+        case .lean: return 2
+        case .balanced: return 3
+        case .packed: return 5
+        }
+    }
+}
+
+struct UserSettings: Codable {
+    var toneMode: ToneMode
+    var appearanceMode: AppearanceMode
+    var safeMode: Bool
+    var dailyNudgeIntensity: NudgeIntensity
+    var maxConcurrentArcs: Int
+    var questBoardDensity: QuestBoardDensity
+    var showHeartRepairContent: Bool
+    var enabledDimensions: Set<LifeDimension>
+    var showProTeasers: Bool
+
+    var showEnergyCard: Bool
+    var showMomentumGrid: Bool
+    var showQuickActions: Bool
+    var compactHomeLayout: Bool
+    var expandHomeCardsByDefault: Bool
+    var showHeroCards: Bool
+    var showStreaks: Bool
+    var showArcProgressOnShare: Bool
+
+    var primaryFocus: LifeDimension?
+    var overwhelmedLevel: Int
+}
+
 /// Central source of truth for Life XP state, progress, and preferences.
 final class AppModel: ObservableObject {
     // MARK: - Published data
@@ -21,44 +87,73 @@ final class AppModel: ObservableObject {
     @Published var premiumUnlocked: Bool = false
 
     // MARK: - Preferences
-    @Published var toneMode: ToneMode {
+    @Published var settings: UserSettings {
         didSet { persistState() }
     }
 
-    @Published var appearanceMode: AppearanceMode {
-        didSet { persistState() }
+    var toneMode: ToneMode {
+        get { settings.toneMode }
+        set { settings.toneMode = newValue }
     }
 
-    @Published var hideHeavyTopics: Bool {
-        didSet { persistState() }
+    var appearanceMode: AppearanceMode {
+        get { settings.appearanceMode }
+        set { settings.appearanceMode = newValue }
     }
 
-    @Published var primaryFocus: LifeDimension? = nil {
-        didSet { persistState() }
-    }
-    @Published var overwhelmedLevel: Int = 3 {
-        didSet { persistState() }
+    var hideHeavyTopics: Bool {
+        get { settings.safeMode }
+        set { settings.safeMode = newValue }
     }
 
-    // MARK: - Home customization
-    @Published var showEnergyCard: Bool {
-        didSet { persistState() }
+    var primaryFocus: LifeDimension? {
+        get { settings.primaryFocus }
+        set { settings.primaryFocus = newValue }
     }
 
-    @Published var showMomentumGrid: Bool {
-        didSet { persistState() }
+    var overwhelmedLevel: Int {
+        get { settings.overwhelmedLevel }
+        set { settings.overwhelmedLevel = newValue }
     }
 
-    @Published var showQuickActions: Bool {
-        didSet { persistState() }
+    var showEnergyCard: Bool {
+        get { settings.showEnergyCard }
+        set { settings.showEnergyCard = newValue }
     }
 
-    @Published var compactHomeLayout: Bool {
-        didSet { persistState() }
+    var showMomentumGrid: Bool {
+        get { settings.showMomentumGrid }
+        set { settings.showMomentumGrid = newValue }
     }
 
-    @Published var expandHomeCardsByDefault: Bool {
-        didSet { persistState() }
+    var showQuickActions: Bool {
+        get { settings.showQuickActions }
+        set { settings.showQuickActions = newValue }
+    }
+
+    var compactHomeLayout: Bool {
+        get { settings.compactHomeLayout }
+        set { settings.compactHomeLayout = newValue }
+    }
+
+    var expandHomeCardsByDefault: Bool {
+        get { settings.expandHomeCardsByDefault }
+        set { settings.expandHomeCardsByDefault = newValue }
+    }
+
+    var showHeroCards: Bool {
+        get { settings.showHeroCards }
+        set { settings.showHeroCards = newValue }
+    }
+
+    var showStreaks: Bool {
+        get { settings.showStreaks }
+        set { settings.showStreaks = newValue }
+    }
+
+    var showArcProgressOnShare: Bool {
+        get { settings.showArcProgressOnShare }
+        set { settings.showArcProgressOnShare = newValue }
     }
 
     // MARK: - Streaks
@@ -74,7 +169,7 @@ final class AppModel: ObservableObject {
     private let persistence: PersistenceManaging
 
     /// Preferred color scheme based on the user's explicit appearance selection.
-    var preferredColorScheme: ColorScheme? { appearanceMode.colorScheme }
+    var preferredColorScheme: ColorScheme? { settings.appearanceMode.colorScheme }
 
     // MARK: - Lifecycle
     init(calendar: Calendar = .current, persistence: PersistenceManaging = PersistenceManager()) {
@@ -96,21 +191,11 @@ final class AppModel: ObservableObject {
         let sanitized = AppModel.sanitized(snapshot: snapshot, arcs: arcs, packs: packs)
 
         self.completedItemIDs = sanitized.progress.completedItemIDs
-        self.toneMode = sanitized.preferences.toneMode
-        self.appearanceMode = sanitized.preferences.appearanceMode
-        self.hideHeavyTopics = sanitized.preferences.hideHeavyTopics
-        self.primaryFocus = sanitized.preferences.primaryFocus
-        self.overwhelmedLevel = sanitized.preferences.overwhelmedLevel
+        self.settings = sanitized.settings
 
         self.currentStreak = sanitized.progress.currentStreak
         self.bestStreak = sanitized.progress.bestStreak
         self.lastActiveDay = sanitized.progress.lastActiveDay
-
-        self.showEnergyCard = sanitized.home.showEnergyCard
-        self.showMomentumGrid = sanitized.home.showMomentumGrid
-        self.showQuickActions = sanitized.home.showQuickActions
-        self.compactHomeLayout = sanitized.home.compactHomeLayout
-        self.expandHomeCardsByDefault = sanitized.home.expandHomeCardsByDefault
 
         self.arcStartDates = sanitized.progress.arcStartDates
     }
@@ -132,20 +217,7 @@ final class AppModel: ObservableObject {
                 lastActiveDay: lastActiveDay,
                 arcStartDates: arcStartDates
             ),
-            preferences: PreferencesState(
-                toneMode: toneMode,
-                appearanceMode: appearanceMode,
-                hideHeavyTopics: hideHeavyTopics,
-                primaryFocus: primaryFocus,
-                overwhelmedLevel: overwhelmedLevel
-            ),
-            home: HomePreferences(
-                showEnergyCard: showEnergyCard,
-                showMomentumGrid: showMomentumGrid,
-                showQuickActions: showQuickActions,
-                compactHomeLayout: compactHomeLayout,
-                expandHomeCardsByDefault: expandHomeCardsByDefault
-            )
+            settings: settings
         )
     }
 
@@ -162,19 +234,45 @@ final class AppModel: ObservableObject {
 
         snapshot.progress.currentStreak = max(0, snapshot.progress.currentStreak)
         snapshot.progress.bestStreak = max(snapshot.progress.currentStreak, snapshot.progress.bestStreak)
-        snapshot.preferences.overwhelmedLevel = max(1, snapshot.preferences.overwhelmedLevel)
+        snapshot.settings.maxConcurrentArcs = min(3, max(1, snapshot.settings.maxConcurrentArcs))
+        snapshot.settings.overwhelmedLevel = max(1, snapshot.settings.overwhelmedLevel)
+        if snapshot.settings.enabledDimensions.isEmpty {
+            snapshot.settings.enabledDimensions = Set(LifeDimension.allCases)
+        }
 
         return snapshot
     }
 
     // MARK: - Data helpers
 
+    private var allowedDimensions: Set<LifeDimension> {
+        settings.enabledDimensions.isEmpty ? Set(LifeDimension.allCases) : settings.enabledDimensions
+    }
+
+    private func respectsDimensions(_ dimensions: [LifeDimension]) -> Bool {
+        dimensions.isEmpty || dimensions.contains { allowedDimensions.contains($0) }
+    }
+
+    private func isArcVisible(_ arc: Arc) -> Bool {
+        if arcStartDates[arc.id] != nil { return true }
+        if !settings.showHeartRepairContent && arc.id == SampleContent.heartRepairArcID {
+            return false
+        }
+        return respectsDimensions(arc.focusDimensions)
+    }
+
+    var visibleArcs: [Arc] {
+        arcs.filter { isArcVisible($0) }
+    }
+
     /// Visible items for a given pack, respecting the safe mode toggle.
     func items(for pack: CategoryPack) -> [ChecklistItem] {
+        var filtered = pack.items
         if hideHeavyTopics {
-            return pack.items.filter { !SampleContent.heavyItemIDs.contains($0.id) }
+            filtered = filtered.filter { !SampleContent.heavyItemIDs.contains($0.id) }
         }
-        return pack.items
+        filtered = filtered.filter { respectsDimensions($0.dimensions) }
+        return filtered
     }
 
     /// Flattened list of items across all packs with safe mode applied.
@@ -189,6 +287,7 @@ final class AppModel: ObservableObject {
             if hideHeavyTopics && SampleContent.heavyItemIDs.contains(id) {
                 return nil
             }
+            if !respectsDimensions(match.dimensions) { return nil }
             return match
         }
         return nil
@@ -203,8 +302,8 @@ final class AppModel: ObservableObject {
 
     /// Flattened quests across all arcs.
     var allQuests: [Quest] {
-        arcs.flatMap { arc in
-            arc.chapters.flatMap { $0.quests }
+        visibleArcs.flatMap { arc in
+            arc.chapters.flatMap { $0.quests.filter { respectsDimensions($0.dimensions) } }
         }
     }
 
@@ -251,11 +350,38 @@ final class AppModel: ObservableObject {
 
     /// Resets all progress-related data while keeping personalization intact.
     func resetProgress() {
+        resetAllProgress()
+    }
+
+    func resetAllProgress() {
         completedItemIDs.removeAll()
         currentStreak = 0
         bestStreak = 0
         lastActiveDay = nil
         arcStartDates.removeAll()
+        persistState()
+    }
+
+    func resetArcProgress() {
+        let arcQuestIDs = Set(arcs.flatMap { $0.chapters.flatMap { $0.quests.map { $0.id } } })
+        completedItemIDs.subtract(arcQuestIDs)
+        arcStartDates.removeAll()
+        persistState()
+    }
+
+    func resetStreaksOnly() {
+        currentStreak = 0
+        bestStreak = 0
+        lastActiveDay = nil
+        persistState()
+    }
+
+    func resetStatsOnly() {
+        // Remove progress-based stats but leave arc start dates intact.
+        completedItemIDs.removeAll()
+        currentStreak = 0
+        bestStreak = 0
+        lastActiveDay = nil
         persistState()
     }
 
@@ -314,7 +440,7 @@ final class AppModel: ObservableObject {
 
     /// Number of fully finished chapters.
     var completedChaptersCount: Int {
-        arcs.flatMap { $0.chapters }.filter { chapterProgress($0) >= 1 }.count
+        visibleArcs.flatMap { $0.chapters }.filter { chapterProgress($0) >= 1 }.count
     }
 
     /// Remaining quests available in the visible packs.
@@ -338,6 +464,14 @@ final class AppModel: ObservableObject {
     }
 
     // MARK: - Arcs
+
+    var activeArcCount: Int {
+        arcStartDates.keys.compactMap { arcByID[$0] }.filter { arcProgress($0) < 1 }.count
+    }
+
+    var remainingArcSlots: Int {
+        max(0, settings.maxConcurrentArcs - activeArcCount)
+    }
 
     /// Arc completion percentage (0...1).
     func arcProgress(_ arc: Arc) -> Double {
@@ -374,11 +508,12 @@ final class AppModel: ObservableObject {
     }
 
     var completedArcs: [Arc] {
-        arcs.filter { arcProgress($0) >= 1 }
+        arcs.filter { arcProgress($0) >= 1 && isArcVisible($0) }
     }
 
     func startArcIfNeeded(_ arc: Arc, date: Date = Date()) {
         guard arcStartDates[arc.id] == nil else { return }
+        guard remainingArcSlots > 0 else { return }
         arcStartDates[arc.id] = date
         persistState()
     }
@@ -451,9 +586,13 @@ final class AppModel: ObservableObject {
         return Array(prioritized.prefix(limit))
     }
 
+    var questBoardLimit: Int {
+        max(1, settings.questBoardDensity.questCount + settings.dailyNudgeIntensity.questBonus)
+    }
+
     /// Arcs we propose the player starts next, prioritizing weak dimensions and unfinished arcs.
     var suggestedArcs: [Arc] {
-        let incomplete = arcs.filter { arcProgress($0) < 1 }
+        let incomplete = visibleArcs.filter { arcProgress($0) < 1 }
         guard !incomplete.isEmpty else { return [] }
 
         let unstarted = incomplete.filter { arcStartDates[$0.id] == nil }
@@ -486,14 +625,15 @@ final class AppModel: ObservableObject {
     }
 
     /// Combines the active arc with fallback suggestions to surface the most actionable quest board.
-    func nextQuestBoard(limit: Int = 3) -> (arc: Arc?, quests: [Quest]) {
+    func nextQuestBoard(limit: Int? = nil) -> (arc: Arc?, quests: [Quest]) {
+        let finalLimit = limit ?? questBoardLimit
         if let arc = activeArc {
-            let quests = nextQuests(in: arc, limit: limit)
+            let quests = nextQuests(in: arc, limit: finalLimit)
             if !quests.isEmpty { return (arc, quests) }
         }
 
         if let arc = suggestedArcs.first {
-            return (arc, nextQuests(in: arc, limit: limit))
+            return (arc, nextQuests(in: arc, limit: finalLimit))
         }
 
         return (nil, [])

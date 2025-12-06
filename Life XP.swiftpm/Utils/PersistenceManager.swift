@@ -5,8 +5,7 @@ struct PersistenceSnapshot: Codable {
     /// Versioned payload so we can migrate in the future when models change.
     var version: Int
     var progress: ProgressState
-    var preferences: PreferencesState
-    var home: HomePreferences
+    var settings: UserSettings
 }
 
 /// Progress-related state such as completions and streaks.
@@ -18,24 +17,6 @@ struct ProgressState: Codable {
     var arcStartDates: [String: Date]
 }
 
-/// User settings and mood toggles.
-struct PreferencesState: Codable {
-    var toneMode: ToneMode
-    var appearanceMode: AppearanceMode
-    var hideHeavyTopics: Bool
-    var primaryFocus: LifeDimension?
-    var overwhelmedLevel: Int
-}
-
-/// Home screen customization toggles.
-struct HomePreferences: Codable {
-    var showEnergyCard: Bool
-    var showMomentumGrid: Bool
-    var showQuickActions: Bool
-    var compactHomeLayout: Bool
-    var expandHomeCardsByDefault: Bool
-}
-
 /// Simple interface to allow dependency injection and testing.
 protocol PersistenceManaging {
     func loadSnapshot() -> PersistenceSnapshot
@@ -45,7 +26,7 @@ protocol PersistenceManaging {
 
 /// Centralized persistence service that hides storage keys and encoding details.
 final class PersistenceManager: PersistenceManaging {
-    static let currentVersion = 1
+    static let currentVersion = 2
 
     private enum Storage {
         static let snapshot = "lifeXP.persistence.snapshot"
@@ -79,13 +60,42 @@ final class PersistenceManager: PersistenceManaging {
 
     func loadSnapshot() -> PersistenceSnapshot {
         if let data = defaults.data(forKey: Storage.snapshot) {
-            do {
-                let decoded = try decoder.decode(PersistenceSnapshot.self, from: data)
+            if let decoded = try? decoder.decode(PersistenceSnapshot.self, from: data) {
                 return migrate(decoded)
-            } catch {
-                // Corrupt payloads should not crash the app; wipe and fall back to defaults.
-                defaults.removeObject(forKey: Storage.snapshot)
             }
+
+            if let legacy = try? decoder.decode(LegacySnapshotV1.self, from: data) {
+                let migrated = PersistenceSnapshot(
+                    version: Self.currentVersion,
+                    progress: legacy.progress,
+                    settings: UserSettings(
+                        toneMode: legacy.preferences.toneMode,
+                        appearanceMode: legacy.preferences.appearanceMode,
+                        safeMode: legacy.preferences.hideHeavyTopics,
+                        dailyNudgeIntensity: .standard,
+                        maxConcurrentArcs: 2,
+                        questBoardDensity: .balanced,
+                        showHeartRepairContent: true,
+                        enabledDimensions: Set(LifeDimension.allCases),
+                        showProTeasers: true,
+                        showEnergyCard: legacy.home.showEnergyCard,
+                        showMomentumGrid: legacy.home.showMomentumGrid,
+                        showQuickActions: legacy.home.showQuickActions,
+                        compactHomeLayout: legacy.home.compactHomeLayout,
+                        expandHomeCardsByDefault: legacy.home.expandHomeCardsByDefault,
+                        showHeroCards: true,
+                        showStreaks: true,
+                        showArcProgressOnShare: true,
+                        primaryFocus: legacy.preferences.primaryFocus,
+                        overwhelmedLevel: legacy.preferences.overwhelmedLevel
+                    )
+                )
+                saveSnapshot(migrated)
+                return migrated
+            }
+
+            // Corrupt payloads should not crash the app; wipe and fall back to defaults.
+            defaults.removeObject(forKey: Storage.snapshot)
         }
 
         if let legacy = loadLegacySnapshot() {
@@ -112,6 +122,9 @@ final class PersistenceManager: PersistenceManaging {
         if snapshot.version != Self.currentVersion {
             snapshot.version = Self.currentVersion
         }
+
+        snapshot.settings.maxConcurrentArcs = min(3, max(1, snapshot.settings.maxConcurrentArcs))
+        snapshot.settings.enabledDimensions = snapshot.settings.enabledDimensions.isEmpty ? Set(LifeDimension.allCases) : snapshot.settings.enabledDimensions
         return snapshot
     }
 
@@ -179,8 +192,27 @@ final class PersistenceManager: PersistenceManaging {
         return PersistenceSnapshot(
             version: Self.currentVersion,
             progress: progress,
-            preferences: preferences,
-            home: home
+            settings: UserSettings(
+                toneMode: preferences.toneMode,
+                appearanceMode: preferences.appearanceMode,
+                safeMode: preferences.hideHeavyTopics,
+                dailyNudgeIntensity: .standard,
+                maxConcurrentArcs: 2,
+                questBoardDensity: .balanced,
+                showHeartRepairContent: true,
+                enabledDimensions: Set(LifeDimension.allCases),
+                showProTeasers: true,
+                showEnergyCard: home.showEnergyCard,
+                showMomentumGrid: home.showMomentumGrid,
+                showQuickActions: home.showQuickActions,
+                compactHomeLayout: home.compactHomeLayout,
+                expandHomeCardsByDefault: home.expandHomeCardsByDefault,
+                showHeroCards: true,
+                showStreaks: true,
+                showArcProgressOnShare: true,
+                primaryFocus: preferences.primaryFocus,
+                overwhelmedLevel: preferences.overwhelmedLevel
+            )
         )
     }
 
@@ -194,20 +226,52 @@ final class PersistenceManager: PersistenceManaging {
                 lastActiveDay: nil,
                 arcStartDates: [:]
             ),
-            preferences: PreferencesState(
+            settings: UserSettings(
                 toneMode: .soft,
                 appearanceMode: .system,
-                hideHeavyTopics: false,
-                primaryFocus: nil,
-                overwhelmedLevel: 3
-            ),
-            home: HomePreferences(
+                safeMode: false,
+                dailyNudgeIntensity: .standard,
+                maxConcurrentArcs: 2,
+                questBoardDensity: .balanced,
+                showHeartRepairContent: true,
+                enabledDimensions: Set(LifeDimension.allCases),
+                showProTeasers: true,
                 showEnergyCard: true,
                 showMomentumGrid: true,
                 showQuickActions: true,
                 compactHomeLayout: false,
-                expandHomeCardsByDefault: true
+                expandHomeCardsByDefault: true,
+                showHeroCards: true,
+                showStreaks: true,
+                showArcProgressOnShare: true,
+                primaryFocus: nil,
+                overwhelmedLevel: 3
             )
         )
     }
+}
+
+// MARK: - Legacy support
+
+private struct PreferencesState: Codable {
+    var toneMode: ToneMode
+    var appearanceMode: AppearanceMode
+    var hideHeavyTopics: Bool
+    var primaryFocus: LifeDimension?
+    var overwhelmedLevel: Int
+}
+
+private struct HomePreferences: Codable {
+    var showEnergyCard: Bool
+    var showMomentumGrid: Bool
+    var showQuickActions: Bool
+    var compactHomeLayout: Bool
+    var expandHomeCardsByDefault: Bool
+}
+
+private struct LegacySnapshotV1: Codable {
+    var version: Int
+    var progress: ProgressState
+    var preferences: PreferencesState
+    var home: HomePreferences
 }
