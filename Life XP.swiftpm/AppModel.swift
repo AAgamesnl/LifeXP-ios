@@ -656,11 +656,15 @@ final class AppModel: ObservableObject {
         arcs.filter { arcProgress($0) >= 1 && isArcVisible($0) }
     }
 
-    func startArcIfNeeded(_ arc: Arc, date: Date = Date()) {
-        guard arcStartDates[arc.id] == nil else { return }
-        guard remainingArcSlots > 0 else { return }
+    @discardableResult
+    func startArcIfNeeded(_ arc: Arc, date: Date = Date()) -> Bool {
+        if arcStartDates[arc.id] != nil {
+            return true
+        }
+        guard remainingArcSlots > 0 else { return false }
         arcStartDates[arc.id] = date
         persistState()
+        return true
     }
 
     func resetArcStart(_ arc: Arc) {
@@ -685,6 +689,22 @@ final class AppModel: ObservableObject {
             }
         }
         return sorted.compactMap { arcByID[$0.key] }.first
+    }
+
+    var activeArcs: [Arc] {
+        arcStartDates
+            .filter { arcID, _ in
+                if let arc = arcByID[arcID] {
+                    return arcProgress(arc) < 1
+                }
+                return false
+            }
+            .sorted(by: { $0.value > $1.value })
+            .compactMap { arcByID[$0.key] }
+    }
+
+    func canStartArc(_ arc: Arc) -> Bool {
+        remainingArcSlots > 0 || arcStartDates[arc.id] != nil
     }
 
     func nextQuests(in arc: Arc, limit: Int = 3) -> [Quest] {

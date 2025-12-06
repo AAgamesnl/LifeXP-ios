@@ -3,10 +3,31 @@ import SwiftUI
 struct ArcsView: View {
     @EnvironmentObject var model: AppModel
     @State private var showHero = false
+    @State private var pendingArcToStart: Arc?
+    @State private var showArcLimitDialog = false
 
     private var currentArc: Arc? { model.activeArc }
+    private var activeArcs: [Arc] { model.activeArcs }
     private var suggestions: [Arc] { model.suggestedArcs }
     private var questBoard: (arc: Arc?, quests: [Quest]) { model.nextQuestBoard(limit: model.questBoardLimit) }
+
+    private func attemptStartArc(_ arc: Arc) {
+        let wasActive = model.arcStartDates[arc.id] != nil
+        if model.startArcIfNeeded(arc), !wasActive {
+            HapticsEngine.lightImpact()
+        } else if !wasActive && model.remainingArcSlots == 0 {
+            pendingArcToStart = arc
+            showArcLimitDialog = true
+        }
+    }
+
+    private func swapArc(_ arcToStop: Arc, with arcToStart: Arc) {
+        model.resetArcStart(arcToStop)
+        if model.startArcIfNeeded(arcToStart) {
+            HapticsEngine.lightImpact()
+        }
+        pendingArcToStart = nil
+    }
 
     var body: some View {
         NavigationStack {
@@ -16,15 +37,23 @@ struct ArcsView: View {
                 ScrollView {
                     VStack(spacing: 16) {
                         if let arc = currentArc {
-                            ArcHeroCard(arc: arc)
+                            ArcHeroCard(
+                                arc: arc,
+                                startAction: attemptStartArc,
+                                stopAction: { model.resetArcStart($0) }
+                            )
                                 .opacity(showHero ? 1 : 0)
                                 .scaleEffect(showHero ? 1 : 0.96)
                                 .animation(.easeOut(duration: 0.55), value: showHero)
                         } else {
-                            ArcEmptyState(suggestions: suggestions)
+                            ArcEmptyState(suggestions: suggestions, startAction: attemptStartArc)
                         }
 
-                        SuggestedArcsGrid(suggestions: suggestions)
+                        if !activeArcs.isEmpty {
+                            ActiveArcsSection(arcs: activeArcs, startAction: attemptStartArc)
+                        }
+
+                        SuggestedArcsGrid(suggestions: suggestions, startAction: attemptStartArc)
 
                         QuestBoardView(arc: questBoard.arc, quests: questBoard.quests)
 
@@ -39,6 +68,26 @@ struct ArcsView: View {
                     showHero = true
                 }
             }
+            .confirmationDialog(
+                "Kies een arc om te pauzeren",
+                isPresented: $showArcLimitDialog,
+                presenting: pendingArcToStart
+            ) { pending in
+                Button("Annuleer", role: .cancel) { pendingArcToStart = nil }
+                ForEach(activeArcs) { active in
+                    Button(role: .destructive) {
+                        swapArc(active, with: pending)
+                    } label: {
+                        Text("Stop \(active.title) en start \(pending.title)")
+                    }
+                }
+            } message: { pending in
+                if model.settings.maxConcurrentArcs > 1 {
+                    Text("Je hebt al \(model.settings.maxConcurrentArcs) arcs live. Kies welke je stopt om \(pending.title) te starten.")
+                } else {
+                    Text("Je hebt al een arc live. Kies welke je stopt om \(pending.title) te starten.")
+                }
+            }
         }
     }
 }
@@ -48,6 +97,8 @@ struct ArcsView: View {
 struct ArcHeroCard: View {
     @EnvironmentObject var model: AppModel
     let arc: Arc
+    var startAction: ((Arc) -> Void)?
+    var stopAction: ((Arc) -> Void)?
 
     private var accent: Color { Color(hex: arc.accentColorHex, default: .accentColor) }
 
@@ -55,6 +106,7 @@ struct ArcHeroCard: View {
         let progress = model.arcProgress(arc)
         let next = model.nextQuests(in: arc, limit: 2)
         let day = model.arcDay(for: arc)
+        let isActive = model.arcStartDates[arc.id] != nil && progress < 1
         VStack(alignment: .leading, spacing: DesignSystem.spacing.lg) {
             HStack(alignment: .top, spacing: DesignSystem.spacing.lg) {
                 ZStack {
@@ -75,6 +127,16 @@ struct ArcHeroCard: View {
                         .font(.subheadline)
                         .foregroundColor(BrandTheme.mutedText)
                         .fixedSize(horizontal: false, vertical: true)
+
+                    if isActive, let day = day {
+                        Label("Live dag \(day)", systemImage: "dot.radiowaves.left.and.right")
+                            .font(.caption.weight(.semibold))
+                            .padding(.horizontal, DesignSystem.spacing.sm)
+                            .padding(.vertical, 6)
+                            .background(Capsule().fill(accent.opacity(0.14)))
+                            .foregroundColor(accent)
+                            .accessibilityLabel("Live dag \(day)")
+                    }
 
                     FlexibleLabelRow(items: arc.focusDimensions.map { ($0.label, $0.systemImage) }, accent: accent.opacity(0.14))
                 }
@@ -134,7 +196,7 @@ struct ArcHeroCard: View {
             }
 
             HStack(spacing: DesignSystem.spacing.md) {
-                let canStart = model.remainingArcSlots > 0 || model.arcStartDates[arc.id] != nil
+                let canStart = model.canStartArc(arc)
                 if model.arcStartDates[arc.id] == nil && model.remainingArcSlots == 0 {
                     Label("Max \(model.settings.maxConcurrentArcs) arcs actief", systemImage: "exclamationmark.triangle")
                         .font(.caption2)
@@ -154,18 +216,40 @@ struct ArcHeroCard: View {
                 .accessibilityLabel("Open arc \(arc.title)")
 
                 Button {
-                    model.startArcIfNeeded(arc)
+                    if let startAction {
+                        startAction(arc)
+                    } else {
+                        _ = model.startArcIfNeeded(arc)
+                    }
                 } label: {
-                    Text(model.arcStartDates[arc.id] == nil ? "Start" : "Live")
+                    Text(isActive ? "Live" : "Start")
                         .font(.footnote.weight(.bold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
                         .background(Capsule().fill(accent.opacity(0.1)))
                 }
                 .buttonStyle(.plain)
-                .disabled(!canStart)
-                .accessibilityLabel(model.arcStartDates[arc.id] == nil ? "Start arc" : "Ga verder in arc")
-                .accessibilityHint(canStart ? "Start of hervat arc" : "Maximum actieve arcs bereikt")
+                .disabled(!canStart && !isActive)
+                .accessibilityLabel(isActive ? "Ga verder in arc" : "Start arc")
+                .accessibilityHint(canStart || isActive ? "Start of hervat arc" : "Maximum actieve arcs bereikt")
+
+                if model.arcStartDates[arc.id] != nil || progress >= 1 {
+                    Button {
+                        if let stopAction {
+                            stopAction(arc)
+                        } else {
+                            model.resetArcStart(arc)
+                        }
+                    } label: {
+                        Text(progress >= 1 ? "Markeer als afgerond" : "Stop deze arc")
+                            .font(.footnote.weight(.bold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Capsule().stroke(accent.opacity(0.4)))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(progress >= 1 ? "Markeer arc als afgerond" : "Stop arc")
+                }
             }
         }
         .brandCard(cornerRadius: DesignSystem.radius.lg)
@@ -207,6 +291,7 @@ struct ChapterProgressRow: View {
 struct ArcEmptyState: View {
     @EnvironmentObject var model: AppModel
     let suggestions: [Arc]
+    var startAction: ((Arc) -> Void)?
 
     var body: some View {
         let accent = Color.accentColor
@@ -218,7 +303,11 @@ struct ArcEmptyState: View {
                 .foregroundColor(.secondary)
             if let first = suggestions.first {
                 Button {
-                    model.startArcIfNeeded(first)
+                    if let startAction {
+                        startAction(first)
+                    } else {
+                        _ = model.startArcIfNeeded(first)
+                    }
                 } label: {
                     HStack {
                         Image(systemName: "play.fill")
@@ -245,11 +334,46 @@ struct ArcEmptyState: View {
     }
 }
 
+struct ActiveArcsSection: View {
+    let arcs: [Arc]
+    var startAction: ((Arc) -> Void)?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+            HStack {
+                Text("Actieve arcs")
+                    .font(.headline)
+                Spacer()
+                Text("Live")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            if arcs.isEmpty {
+                Text("Start een arc om live voortgang te zien.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } else {
+                VStack(spacing: DesignSystem.spacing.sm) {
+                    ForEach(arcs) { arc in
+                        NavigationLink(destination: ArcDetailView(arc: arc)) {
+                            ArcTile(arc: arc, startAction: startAction)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+        .brandCard()
+    }
+}
+
 // MARK: - Suggested arcs
 
 struct SuggestedArcsGrid: View {
     @EnvironmentObject var model: AppModel
     let suggestions: [Arc]
+    var startAction: ((Arc) -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -272,7 +396,7 @@ struct SuggestedArcsGrid: View {
                 LazyVStack(spacing: 12) {
                     ForEach(suggestions) { arc in
                         NavigationLink(destination: ArcDetailView(arc: arc)) {
-                            ArcTile(arc: arc)
+                            ArcTile(arc: arc, startAction: startAction)
                         }
                         .buttonStyle(.plain)
                     }
@@ -285,10 +409,13 @@ struct SuggestedArcsGrid: View {
 struct ArcTile: View {
     @EnvironmentObject var model: AppModel
     let arc: Arc
+    var startAction: ((Arc) -> Void)?
 
     var body: some View {
         let accent = Color(hex: arc.accentColorHex, default: .accentColor)
         let progress = model.arcProgress(arc)
+        let isActive = model.arcStartDates[arc.id] != nil && progress < 1
+        let day = model.arcDay(for: arc)
 
         HStack(spacing: 12) {
             ZStack {
@@ -307,6 +434,15 @@ struct ArcTile: View {
                     .foregroundColor(.secondary)
                     .lineLimit(2)
 
+                if isActive, let day = day {
+                    Label("Live dag \(day)", systemImage: "dot.radiowaves.left.and.right")
+                        .font(.caption2.weight(.semibold))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Capsule().fill(accent.opacity(0.14)))
+                        .foregroundColor(accent)
+                }
+
                 HStack {
                     ProgressView(value: progress)
                         .tint(accent)
@@ -319,9 +455,13 @@ struct ArcTile: View {
             Spacer()
 
             Button {
-                model.startArcIfNeeded(arc)
+                if let startAction {
+                    startAction(arc)
+                } else {
+                    _ = model.startArcIfNeeded(arc)
+                }
             } label: {
-                Text(model.arcStartDates[arc.id] == nil ? "Start" : "Ga door")
+                Text(isActive ? "Live" : "Start")
                     .font(.caption.weight(.bold))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
@@ -471,10 +611,31 @@ struct QuestRow: View {
 struct ArcDetailView: View {
     @EnvironmentObject var model: AppModel
     let arc: Arc
+    @State private var pendingArcToStart: Arc?
+    @State private var showArcLimitDialog = false
 
     var body: some View {
         let accent = Color(hex: arc.accentColorHex, default: .accentColor)
         let progress = model.arcProgress(arc)
+        let isActive = model.arcStartDates[arc.id] != nil && progress < 1
+
+        func attemptStartArc() {
+            let wasActive = model.arcStartDates[arc.id] != nil
+            if model.startArcIfNeeded(arc), !wasActive {
+                HapticsEngine.lightImpact()
+            } else if !wasActive && model.remainingArcSlots == 0 {
+                pendingArcToStart = arc
+                showArcLimitDialog = true
+            }
+        }
+
+        func swapArc(_ active: Arc) {
+            model.resetArcStart(active)
+            if model.startArcIfNeeded(arc) {
+                HapticsEngine.lightImpact()
+            }
+            pendingArcToStart = nil
+        }
 
         List {
             Section {
@@ -528,9 +689,9 @@ struct ArcDetailView: View {
 
                     HStack(spacing: DesignSystem.spacing.md) {
                         Button {
-                            model.startArcIfNeeded(arc)
+                            attemptStartArc()
                         } label: {
-                            Label(model.arcStartDates[arc.id] == nil ? "Start arc" : "Ga verder", systemImage: "play.fill")
+                            Label(isActive ? "Live" : "Start arc", systemImage: "play.fill")
                                 .font(.footnote.weight(.semibold))
                                 .padding(.horizontal, DesignSystem.spacing.md)
                                 .padding(.vertical, DesignSystem.spacing.sm)
@@ -545,6 +706,20 @@ struct ArcDetailView: View {
                                 .foregroundColor(.secondary)
                                 .accessibilityLabel("Live dag \(day)")
                         }
+                    }
+
+                    if model.arcStartDates[arc.id] != nil || progress >= 1 {
+                        Button(role: progress >= 1 ? .none : .destructive) {
+                            model.resetArcStart(arc)
+                        } label: {
+                            Label(progress >= 1 ? "Markeer als afgerond" : "Stop deze arc", systemImage: "stop.circle")
+                                .font(.footnote.weight(.semibold))
+                                .padding(.horizontal, DesignSystem.spacing.md)
+                                .padding(.vertical, DesignSystem.spacing.sm)
+                                .frame(maxWidth: .infinity)
+                                .background(Capsule().stroke(accent.opacity(0.4)))
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
                 .brandCard(cornerRadius: DesignSystem.radius.lg)
@@ -565,6 +740,22 @@ struct ArcDetailView: View {
         }
         .navigationTitle(arc.title)
         .navigationBarTitleDisplayMode(.inline)
+        .confirmationDialog(
+            "Max actieve arcs bereikt",
+            isPresented: $showArcLimitDialog,
+            presenting: pendingArcToStart
+        ) { _ in
+            Button("Annuleer", role: .cancel) { pendingArcToStart = nil }
+            ForEach(model.activeArcs) { active in
+                Button(role: .destructive) {
+                    swapArc(active)
+                } label: {
+                    Text("Stop \(active.title) en start \(arc.title)")
+                }
+            }
+        } message: { _ in
+            Text("Je zit aan je limiet van \(model.settings.maxConcurrentArcs) actieve arcs. Kies welke je pauzeert.")
+        }
     }
 }
 
