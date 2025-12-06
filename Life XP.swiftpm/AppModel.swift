@@ -238,14 +238,19 @@ final class AppModel: ObservableObject {
         snapshot.progress.completedItemIDs = snapshot.progress.completedItemIDs.intersection(knownIDs)
 
         let knownArcIDs = Set(arcs.map { $0.id })
-        snapshot.progress.arcStartDates = snapshot.progress.arcStartDates.filter { knownArcIDs.contains($0.key) }
+        snapshot.progress.arcStartDates = snapshot.progress.arcStartDates.filter {
+            knownArcIDs.contains($0.key) && $0.value.timeIntervalSince1970.isFinite
+        }
 
         snapshot.progress.currentStreak = max(0, snapshot.progress.currentStreak)
         snapshot.progress.bestStreak = max(snapshot.progress.currentStreak, snapshot.progress.bestStreak)
         snapshot.settings.maxConcurrentArcs = min(3, max(1, snapshot.settings.maxConcurrentArcs))
-        snapshot.settings.overwhelmedLevel = max(1, snapshot.settings.overwhelmedLevel)
+        snapshot.settings.overwhelmedLevel = max(0, snapshot.settings.overwhelmedLevel)
+
+        let validDimensions = Set(LifeDimension.allCases)
+        snapshot.settings.enabledDimensions = snapshot.settings.enabledDimensions.intersection(validDimensions)
         if snapshot.settings.enabledDimensions.isEmpty {
-            snapshot.settings.enabledDimensions = Set(LifeDimension.allCases)
+            snapshot.settings.enabledDimensions = validDimensions
         }
 
         return snapshot
@@ -451,7 +456,14 @@ final class AppModel: ObservableObject {
         let visibleItems = items(for: pack)
         guard !visibleItems.isEmpty else { return 0 }
         let done = visibleItems.filter { completedItemIDs.contains($0.id) }.count
-        return Double(done) / Double(visibleItems.count)
+        return normalizedProgress(done: done, total: visibleItems.count)
+    }
+
+    private func normalizedProgress(done: Int, total: Int) -> Double {
+        guard total > 0 else { return 0 }
+        let ratio = Double(done) / Double(total)
+        guard ratio.isFinite else { return 0 }
+        return min(max(ratio, 0), 1)
     }
 
     /// Overall completion across all visible items (0...1).
@@ -459,7 +471,7 @@ final class AppModel: ObservableObject {
         let items = allVisibleItems.count + allQuests.count
         guard items > 0 else { return 0 }
         let done = completedCount
-        return Double(done) / Double(items)
+        return normalizedProgress(done: done, total: items)
     }
 
     /// Total XP accumulated across all dimensions.
@@ -515,13 +527,13 @@ final class AppModel: ObservableObject {
         let quests = arc.chapters.flatMap { $0.quests }
         guard !quests.isEmpty else { return 0 }
         let done = quests.filter { completedItemIDs.contains($0.id) }.count
-        return Double(done) / Double(quests.count)
+        return normalizedProgress(done: done, total: quests.count)
     }
 
     func chapterProgress(_ chapter: Chapter) -> Double {
         guard !chapter.quests.isEmpty else { return 0 }
         let done = chapter.quests.filter { completedItemIDs.contains($0.id) }.count
-        return Double(done) / Double(chapter.quests.count)
+        return normalizedProgress(done: done, total: chapter.quests.count)
     }
 
     func remainingXP(for arc: Arc) -> Int {
@@ -580,6 +592,9 @@ final class AppModel: ObservableObject {
     }
 
     func nextQuests(in arc: Arc, limit: Int = 3) -> [Quest] {
+        let finalLimit = max(0, limit)
+        guard finalLimit > 0 else { return [] }
+
         var prioritized: [Quest] = []
         let weak = lowestDimension
 
@@ -604,10 +619,10 @@ final class AppModel: ObservableObject {
             }
             prioritized.append(contentsOf: sorted)
 
-            if prioritized.count >= limit { break }
+            if prioritized.count >= finalLimit { break }
         }
 
-        if prioritized.count < limit {
+        if prioritized.count < finalLimit {
             let remaining = arc.chapters
                 .flatMap { $0.quests }
                 .filter { !isCompleted($0) && !prioritized.contains($0) }
@@ -620,7 +635,7 @@ final class AppModel: ObservableObject {
             prioritized.append(contentsOf: remaining)
         }
 
-        return Array(prioritized.prefix(limit))
+        return Array(prioritized.prefix(finalLimit))
     }
 
     var questBoardLimit: Int {
@@ -664,6 +679,7 @@ final class AppModel: ObservableObject {
     /// Combines the active arc with fallback suggestions to surface the most actionable quest board.
     func nextQuestBoard(limit: Int? = nil) -> (arc: Arc?, quests: [Quest]) {
         let finalLimit = limit ?? questBoardLimit
+        guard finalLimit > 0 else { return (nil, []) }
         if let arc = activeArc {
             let quests = nextQuests(in: arc, limit: finalLimit)
             if !quests.isEmpty { return (arc, quests) }

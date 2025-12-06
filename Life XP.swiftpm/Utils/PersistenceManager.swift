@@ -61,7 +61,7 @@ final class PersistenceManager: PersistenceManaging {
     func loadSnapshot() -> PersistenceSnapshot {
         if let data = defaults.data(forKey: Storage.snapshot) {
             if let decoded = try? decoder.decode(PersistenceSnapshot.self, from: data) {
-                return migrate(decoded)
+                return sanitized(migrate(decoded))
             }
 
             if let legacy = try? decoder.decode(LegacySnapshotV1.self, from: data) {
@@ -90,8 +90,9 @@ final class PersistenceManager: PersistenceManaging {
                         overwhelmedLevel: legacy.preferences.overwhelmedLevel
                     )
                 )
-                saveSnapshot(migrated)
-                return migrated
+                let safe = sanitized(migrated)
+                saveSnapshot(safe)
+                return safe
             }
 
             // Corrupt payloads should not crash the app; wipe and fall back to defaults.
@@ -99,15 +100,17 @@ final class PersistenceManager: PersistenceManaging {
         }
 
         if let legacy = loadLegacySnapshot() {
-            saveSnapshot(legacy)
-            return legacy
+            let safeLegacy = sanitized(legacy)
+            saveSnapshot(safeLegacy)
+            return safeLegacy
         }
 
-        return PersistenceManager.defaultSnapshot()
+        return sanitized(PersistenceManager.defaultSnapshot())
     }
 
     func saveSnapshot(_ snapshot: PersistenceSnapshot) {
-        guard let data = try? encoder.encode(snapshot) else { return }
+        let safeSnapshot = sanitized(snapshot)
+        guard let data = try? encoder.encode(safeSnapshot) else { return }
         defaults.set(data, forKey: Storage.snapshot)
     }
 
@@ -125,6 +128,25 @@ final class PersistenceManager: PersistenceManaging {
 
         snapshot.settings.maxConcurrentArcs = min(3, max(1, snapshot.settings.maxConcurrentArcs))
         snapshot.settings.enabledDimensions = snapshot.settings.enabledDimensions.isEmpty ? Set(LifeDimension.allCases) : snapshot.settings.enabledDimensions
+        return snapshot
+    }
+
+    private func sanitized(_ snapshot: PersistenceSnapshot) -> PersistenceSnapshot {
+        var snapshot = snapshot
+
+        snapshot.progress.currentStreak = max(0, snapshot.progress.currentStreak)
+        snapshot.progress.bestStreak = max(snapshot.progress.currentStreak, snapshot.progress.bestStreak)
+        snapshot.progress.arcStartDates = snapshot.progress.arcStartDates.filter { $0.value.timeIntervalSince1970.isFinite }
+
+        snapshot.settings.maxConcurrentArcs = min(3, max(1, snapshot.settings.maxConcurrentArcs))
+        snapshot.settings.overwhelmedLevel = max(0, snapshot.settings.overwhelmedLevel)
+
+        let validDimensions = Set(LifeDimension.allCases)
+        snapshot.settings.enabledDimensions = snapshot.settings.enabledDimensions.intersection(validDimensions)
+        if snapshot.settings.enabledDimensions.isEmpty {
+            snapshot.settings.enabledDimensions = validDimensions
+        }
+
         return snapshot
     }
 
