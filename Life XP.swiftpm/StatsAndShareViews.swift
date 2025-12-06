@@ -283,7 +283,6 @@ struct LevelSummaryCard: View {
     let xpToNext: Int
     let nextUnlock: String
 
-    @State private var previousLevel: Int = 1
     @State private var animateBurst = false
     @State private var animatePulse = false
 
@@ -329,9 +328,8 @@ struct LevelSummaryCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .shadow(radius: 8, y: 4)
         .overlay(confettiOverlay)
-        .onAppear { previousLevel = level }
-        .onChange(of: level) { newValue in
-            guard newValue > previousLevel else { previousLevel = newValue; return }
+        .onChange(of: level, initial: false) { oldValue, newValue in
+            guard newValue > oldValue else { return }
 
             withAnimation(.spring(response: 0.6, dampingFraction: 0.65)) {
                 animatePulse = true
@@ -349,8 +347,6 @@ struct LevelSummaryCard: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                 animateBurst = false
             }
-
-            previousLevel = newValue
         }
     }
 

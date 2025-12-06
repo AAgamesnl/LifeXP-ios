@@ -1,4 +1,3 @@
-import SwiftUI
 import Foundation
 
 /// Core life dimensions used throughout the app.

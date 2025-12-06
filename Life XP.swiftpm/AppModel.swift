@@ -141,6 +141,7 @@ struct UserSettings: Codable {
 }
 
 /// Central source of truth for Life XP state, progress, and preferences.
+@MainActor
 final class AppModel: ObservableObject {
     // MARK: - Published data
     @Published var packs: [CategoryPack]
