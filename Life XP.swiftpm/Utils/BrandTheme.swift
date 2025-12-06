@@ -1,5 +1,46 @@
 import SwiftUI
 
+struct DesignSystem {
+    struct Spacing {
+        let xs: CGFloat = 4
+        let sm: CGFloat = 8
+        let md: CGFloat = 12
+        let lg: CGFloat = 16
+        let xl: CGFloat = 20
+        let xxl: CGFloat = 24
+    }
+
+    struct Radii {
+        let sm: CGFloat = 12
+        let md: CGFloat = 16
+        let lg: CGFloat = 22
+        let xl: CGFloat = 28
+    }
+
+    struct Shadows {
+        let soft = Shadow(color: Color.black.opacity(0.12), radius: 16, x: 0, y: 8)
+        let lifted = Shadow(color: Color.black.opacity(0.18), radius: 22, x: 0, y: 12)
+    }
+
+    struct TextStyles {
+        let heroTitle = Font.system(.title2, design: .rounded).weight(.bold)
+        let sectionTitle = Font.system(.headline, design: .rounded).weight(.semibold)
+        let captionEmphasis = Font.caption.weight(.semibold)
+    }
+
+    struct Shadow {
+        let color: Color
+        let radius: CGFloat
+        let x: CGFloat
+        let y: CGFloat
+    }
+
+    static let spacing = Spacing()
+    static let radius = Radii()
+    static let shadow = Shadows()
+    static let text = TextStyles()
+}
+
 struct BrandTheme {
     static let waveSky = Color.dynamic(
         light: Color(hex: "E9F2FF", default: .accentColor),
@@ -82,11 +123,11 @@ struct BrandBackground: View {
 }
 
 private struct BrandCardModifier: ViewModifier {
-    var cornerRadius: CGFloat = 24
+    var cornerRadius: CGFloat = DesignSystem.radius.lg
 
     func body(content: Content) -> some View {
         content
-            .padding()
+            .padding(DesignSystem.spacing.lg)
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .fill(BrandTheme.cardBackground.opacity(0.96))
@@ -103,7 +144,7 @@ private struct BrandCardModifier: ViewModifier {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .strokeBorder(BrandTheme.accent.opacity(0.16), lineWidth: 1)
             )
-            .shadow(color: BrandTheme.waveDeep.opacity(0.22), radius: 16, y: 8)
+            .shadow(color: BrandTheme.waveDeep.opacity(0.22), radius: DesignSystem.shadow.soft.radius, y: DesignSystem.shadow.soft.y)
     }
 }
 
@@ -132,7 +173,11 @@ private struct WaveShape: Shape {
 }
 
 extension View {
-    func brandCard(cornerRadius: CGFloat = 24) -> some View {
+    func brandCard(cornerRadius: CGFloat = DesignSystem.radius.lg) -> some View {
         modifier(BrandCardModifier(cornerRadius: cornerRadius))
+    }
+
+    func brandShadow(_ shadow: DesignSystem.Shadow = DesignSystem.shadow.soft) -> some View {
+        self.shadow(color: shadow.color, radius: shadow.radius, x: shadow.x, y: shadow.y)
     }
 }

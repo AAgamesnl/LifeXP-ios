@@ -335,6 +335,13 @@ final class AppModel: ObservableObject {
     /// Toggle a quest completion.
     func toggle(_ quest: Quest) {
         let wasCompleted = isCompleted(quest)
+        let unlockedBadgesBefore = unlockedBadges.count
+        let arc = arcByQuestID[quest.id]
+        let chapter = arc?.chapters.first { chapter in
+            chapter.quests.contains(where: { $0.id == quest.id })
+        }
+        let arcProgressBefore = arc.map { arcProgress($0) } ?? 0
+        let chapterProgressBefore = chapter.map { chapterProgress($0) } ?? 0
 
         if wasCompleted {
             completedItemIDs.remove(quest.id)
@@ -344,8 +351,30 @@ final class AppModel: ObservableObject {
             if let arc = arcByQuestID[quest.id] {
                 startArcIfNeeded(arc)
             }
+            HapticsEngine.lightImpact()
         }
         persistState()
+
+        guard !wasCompleted else { return }
+
+        if let arc = arc {
+            let arcProgressAfter = arcProgress(arc)
+            if arcProgressAfter >= 1 && arcProgressBefore < 1 {
+                HapticsEngine.success()
+            }
+        }
+
+        if let chapter = chapter {
+            let chapterProgressAfter = chapterProgress(chapter)
+            if chapterProgressAfter >= 1 && chapterProgressBefore < 1 {
+                HapticsEngine.softCelebrate()
+            }
+        }
+
+        let unlockedAfter = unlockedBadges.count
+        if unlockedAfter > unlockedBadgesBefore {
+            HapticsEngine.success()
+        }
     }
 
     /// Resets all progress-related data while keeping personalization intact.

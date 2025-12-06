@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var model: AppModel
+    @State private var showHeroCard = false
     
     var body: some View {
         NavigationStack {
@@ -9,18 +10,18 @@ struct HomeView: View {
                 BrandBackground()
 
                 ScrollView {
-                    let spacing: CGFloat = model.compactHomeLayout ? 16 : 24
+                    let spacing: CGFloat = model.compactHomeLayout ? DesignSystem.spacing.xl : DesignSystem.spacing.xxl
                     VStack(spacing: spacing) {
                         // Life score + streak
-                        VStack(spacing: 16) {
+                        VStack(spacing: DesignSystem.spacing.lg) {
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Life XP")
-                                        .font(.caption)
+                                        .font(DesignSystem.text.captionEmphasis)
                                         .foregroundColor(BrandTheme.mutedText)
 
                                     Text("Your Life Checklist")
-                                        .font(.title2.weight(.semibold))
+                                        .font(DesignSystem.text.heroTitle)
                                 }
 
                                 Spacer()
@@ -87,6 +88,9 @@ struct HomeView: View {
                                 )
                             }
                             .buttonStyle(.plain)
+                            .opacity(showHeroCard ? 1 : 0)
+                            .scaleEffect(showHeroCard ? 1 : 0.98)
+                            .animation(.easeOut(duration: 0.6).delay(0.05), value: showHeroCard)
                         } else if let arcPreview = model.highlightedArc {
                             CompactArcSummary(arc: arcPreview, progress: model.arcProgress(arcPreview), nextQuests: model.nextQuests(in: arcPreview, limit: 1))
                         }
@@ -205,6 +209,11 @@ struct HomeView: View {
                 }
             }
             .navigationTitle("Home")
+            .onAppear {
+                withAnimation(.easeOut(duration: 0.6)) {
+                    showHeroCard = true
+                }
+            }
         }
     }
 }
@@ -247,6 +256,7 @@ struct CurrentArcCard: View {
                     .foregroundColor(BrandTheme.mutedText)
             }
             .tint(accent)
+            .animation(.easeInOut(duration: 0.6), value: progress)
 
             if !nextQuests.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
@@ -593,6 +603,7 @@ struct DimensionRow: View {
                             endPoint: .trailing
                         ))
                         .frame(width: max(8, geo.size.width * CGFloat(min(1, max(0, ratio)))))
+                        .animation(.easeInOut(duration: 0.6), value: ratio)
                 }
             }
             .frame(height: 10)
