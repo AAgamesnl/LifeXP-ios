@@ -340,7 +340,9 @@ final class AppModel: ObservableObject {
 
         snapshot.progress.currentStreak = max(0, snapshot.progress.currentStreak)
         snapshot.progress.bestStreak = max(snapshot.progress.currentStreak, snapshot.progress.bestStreak)
-        snapshot.settings.maxConcurrentArcs = min(3, max(1, snapshot.settings.maxConcurrentArcs))
+        snapshot.settings.safeMode = false
+        snapshot.settings.showHeartRepairContent = true
+        snapshot.settings.maxConcurrentArcs = 2
         snapshot.settings.overwhelmedLevel = max(0, snapshot.settings.overwhelmedLevel)
 
         let validDimensions = Set(LifeDimension.allCases)
@@ -431,6 +433,7 @@ final class AppModel: ObservableObject {
     /// Toggles completion and updates streaks + persistence.
     func toggle(_ item: ChecklistItem) {
         let wasCompleted = isCompleted(item)
+        let levelBefore = level
 
         if wasCompleted {
             completedItemIDs.remove(item.id)
@@ -438,12 +441,18 @@ final class AppModel: ObservableObject {
             completedItemIDs.insert(item.id)
             registerActivityToday()
         }
+        let levelAfter = level
         persistState()
+
+        if !wasCompleted && levelAfter > levelBefore {
+            HapticsEngine.softCelebrate()
+        }
     }
 
     /// Toggle a quest completion.
     func toggle(_ quest: Quest) {
         let wasCompleted = isCompleted(quest)
+        let levelBefore = level
         let unlockedBadgesBefore = unlockedBadges.count
         let arc = arcByQuestID[quest.id]
         let chapter = arc?.chapters.first { chapter in
@@ -462,9 +471,14 @@ final class AppModel: ObservableObject {
             }
             HapticsEngine.lightImpact()
         }
+        let levelAfter = level
         persistState()
 
         guard !wasCompleted else { return }
+
+        if levelAfter > levelBefore {
+            HapticsEngine.softCelebrate()
+        }
 
         if let arc = arc {
             let arcProgressAfter = arcProgress(arc)

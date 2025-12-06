@@ -2030,7 +2030,7 @@ enum PackLibrary {
         items: [
             ChecklistItem(
                 id: "life_be_born",
-                title: "👶 Be born",
+                title: "Geboren worden",
                 detail: "Welkom op de planeet: je eerste XP is binnen.",
                 xp: 5,
                 dimensions: [.mind],
@@ -2038,7 +2038,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_first_steps",
-                title: "🚶‍♂️ Take first steps",
+                title: "Eerste stapjes",
                 detail: "Die wiebelige meters die de wereld openen.",
                 xp: 6,
                 dimensions: [.adventure],
@@ -2046,7 +2046,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_first_words",
-                title: "📣 Say first words",
+                title: "Eerste woorden",
                 detail: "Je eerste woorden gedeeld met je wereld.",
                 xp: 6,
                 dimensions: [.mind],
@@ -2054,7 +2054,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_learn_read",
-                title: "👨‍🏫 Learn to read",
+                title: "Leren lezen",
                 detail: "Boeken en borden ontgrendeld.",
                 xp: 10,
                 dimensions: [.mind],
@@ -2062,7 +2062,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_make_friend",
-                title: "🤗 Make a friend",
+                title: "Eerste vriend gemaakt",
                 detail: "Je eerste echte vriend gevonden.",
                 xp: 10,
                 dimensions: [.love],
@@ -2070,7 +2070,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_ride_bike",
-                title: "🚴‍♂️ Learn to ride a bike",
+                title: "Leren fietsen",
                 detail: "Balans, vrijheid en schrammen behaald.",
                 xp: 12,
                 dimensions: [.adventure],
@@ -2078,7 +2078,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_read_book",
-                title: "📗 Read a book",
+                title: "Eerste boek uitgelezen",
                 detail: "Een compleet boek uitgelezen uit eigen keuze.",
                 xp: 8,
                 dimensions: [.mind],
@@ -2086,7 +2086,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_learn_swim",
-                title: "🏊‍♂️ Learn to swim",
+                title: "Leren zwemmen",
                 detail: "Je eerste baantjes zonder drijfmiddelen.",
                 xp: 12,
                 dimensions: [.adventure],
@@ -2094,7 +2094,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_finish_elementary",
-                title: "🏫 Finish elementary school",
+                title: "Basisschool afgerond",
                 detail: "Je basisschooltijd afgerond.",
                 xp: 14,
                 dimensions: [.mind],
@@ -2102,7 +2102,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_play_sport",
-                title: "⚽ Play a sport",
+                title: "Teamsport gespeeld",
                 detail: "Mee gedaan met een sportteam of -club.",
                 xp: 10,
                 dimensions: [.adventure],
@@ -2110,7 +2110,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_fly_plane",
-                title: "🛫 Fly in a plane",
+                title: "Voor het eerst gevlogen",
                 detail: "Je eerste keer de lucht in gegaan.",
                 xp: 12,
                 dimensions: [.adventure],
@@ -2118,7 +2118,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_ride_boat",
-                title: "🛥️ Ride a boat",
+                title: "Boottocht gemaakt",
                 detail: "Een tocht op het water gemaakt.",
                 xp: 10,
                 dimensions: [.adventure],
@@ -2126,7 +2126,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_train_trip",
-                title: "🚆 Ride in a train",
+                title: "Treinreis gemaakt",
                 detail: "Met de trein een bestemming bereikt.",
                 xp: 8,
                 dimensions: [.adventure],
@@ -2134,7 +2134,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_helicopter",
-                title: "🚁 Ride a helicopter",
+                title: "Helikoptervlucht meegemaakt",
                 detail: "Een vlucht met uitzicht vanuit een heli meegemaakt.",
                 xp: 18,
                 dimensions: [.adventure],
@@ -2142,7 +2142,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_see_ocean",
-                title: "🌊 See the ocean",
+                title: "De oceaan gezien",
                 detail: "Voor het eerst de zee gezien en geroken.",
                 xp: 10,
                 dimensions: [.adventure],
@@ -2150,7 +2150,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_see_snow",
-                title: "❄️ See snow",
+                title: "Sneeuw beleefd",
                 detail: "Sneeuw in het echt meegemaakt.",
                 xp: 10,
                 dimensions: [.adventure],
@@ -2158,7 +2158,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_make_snowman",
-                title: "☃️ Make a snowman",
+                title: "Sneeuwpop gebouwd",
                 detail: "Je eigen sneeuwpop gebouwd.",
                 xp: 10,
                 dimensions: [.adventure],
@@ -2166,7 +2166,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_finish_middle",
-                title: "🏫 Finish middle school",
+                title: "Middelbare onderbouw afgerond",
                 detail: "Je middelbare school onderbouw afgerond.",
                 xp: 16,
                 dimensions: [.mind],
@@ -2174,7 +2174,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_concert",
-                title: "🎶 Go to a concert",
+                title: "Naar een concert geweest",
                 detail: "Live muziek beleefd met volume en vibes.",
                 xp: 14,
                 dimensions: [.adventure, .love],
@@ -2182,7 +2182,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_camping",
-                title: "🏕️ Go camping",
+                title: "Nachtje kamperen",
                 detail: "Een nacht in een tent of onder de sterren geslapen.",
                 xp: 14,
                 dimensions: [.adventure],
@@ -2190,7 +2190,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_rollercoaster",
-                title: "🎢 Ride a rollercoaster",
+                title: "Achtbaan gereden",
                 detail: "Een achtbaan overleefd en misschien geschreeuwd.",
                 xp: 14,
                 dimensions: [.adventure],
@@ -2198,7 +2198,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_play_instrument",
-                title: "🎻 Play an instrument",
+                title: "Instrument leren bespelen",
                 detail: "Een instrument leren bespelen en laten horen.",
                 xp: 16,
                 dimensions: [.mind],
@@ -2206,7 +2206,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_first_kiss",
-                title: "💋 Get kissed",
+                title: "Eerste kus gehad",
                 detail: "Je eerste kus gehad.",
                 xp: 16,
                 dimensions: [.love],
@@ -2214,7 +2214,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_credit_card",
-                title: "💳 Get a credit card",
+                title: "Eerste creditcard geregeld",
                 detail: "Je eerste kredietkaart aangevraagd of gekregen.",
                 xp: 16,
                 dimensions: [.money, .mind],
@@ -2222,7 +2222,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_start_driving",
-                title: "🚘 Start driving",
+                title: "Begonnen met autorijden",
                 detail: "Je eerste kilometers gereden achter het stuur.",
                 xp: 18,
                 dimensions: [.adventure, .mind],
@@ -2230,7 +2230,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_roadtrip",
-                title: "🗺️ Go on a roadtrip",
+                title: "Roadtrip gereden",
                 detail: "Een trip gepland en gereden met stops en verhalen.",
                 xp: 18,
                 dimensions: [.adventure],
@@ -2238,7 +2238,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_new_country",
-                title: "🗾 Visit another country",
+                title: "Nieuw land bezocht",
                 detail: "Een grens overgestoken en een nieuw land ontdekt.",
                 xp: 20,
                 dimensions: [.adventure],
@@ -2246,7 +2246,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_public_speech",
-                title: "🎤 Give a speech",
+                title: "Speech gegeven voor publiek",
                 detail: "Voor publiek gesproken zonder wegrennen.",
                 xp: 18,
                 dimensions: [.mind, .adventure],
@@ -2254,7 +2254,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_graduate_highschool",
-                title: "🏫 Graduate high school",
+                title: "Middelbareschooldiploma gehaald",
                 detail: "Je middelbare school diploma in handen.",
                 xp: 22,
                 dimensions: [.mind],
@@ -2262,7 +2262,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_second_language",
-                title: "🌐 Learn another language",
+                title: "Tweede taal geleerd",
                 detail: "Een nieuwe taal geleerd en gebruikt in gesprek.",
                 xp: 22,
                 dimensions: [.mind],
@@ -2270,7 +2270,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_invest_money",
-                title: "💸 Invest some money",
+                title: "Eerste investering gedaan",
                 detail: "Je eerste geld belegd of geïnvesteerd.",
                 xp: 24,
                 dimensions: [.money, .mind],
@@ -2278,7 +2278,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_meet_idol",
-                title: "📷 Meet an idol",
+                title: "Idool ontmoet",
                 detail: "Iemand ontmoet die je bewondert.",
                 xp: 18,
                 dimensions: [.love, .adventure],
@@ -2286,7 +2286,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_big_mistake",
-                title: "😩 Make a terrible mistake",
+                title: "Grote fout gemaakt en geleerd",
                 detail: "Een grote fout gemaakt en ervan geleerd.",
                 xp: 16,
                 dimensions: [.mind],
@@ -2294,7 +2294,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_win_trophy",
-                title: "🏆 Win a trophy",
+                title: "Prijs of trofee gewonnen",
                 detail: "Een prijs of trofee binnengehaald.",
                 xp: 20,
                 dimensions: [.adventure],
@@ -2302,7 +2302,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_climb_mountain",
-                title: "⛰️ Climb a mountain",
+                title: "Bergtop bereikt",
                 detail: "Een top gehaald waar je hart van ging kloppen.",
                 xp: 24,
                 dimensions: [.adventure],
@@ -2310,7 +2310,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_run_marathon",
-                title: "🎽 Run a marathon",
+                title: "Marathon uitgelopen",
                 detail: "42 km afgelegd en de finish gehaald.",
                 xp: 28,
                 dimensions: [.adventure, .mind],
@@ -2318,7 +2318,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_learn_cook",
-                title: "🍳 Learn to cook",
+                title: "Zelf leren koken",
                 detail: "Een maaltijd zelfstandig gekookt die iemand anders lekker vond.",
                 xp: 14,
                 dimensions: [.mind, .love],
@@ -2326,7 +2326,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_explore_cave",
-                title: "🔦 Explore a cave",
+                title: "Grot ontdekt",
                 detail: "Ondergronds avontuur in een grot meegemaakt.",
                 xp: 22,
                 dimensions: [.adventure],
@@ -2334,7 +2334,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_see_volcano",
-                title: "🌋 See a volcano",
+                title: "Vulkaan van dichtbij gezien",
                 detail: "Een vulkaan van dichtbij gezien.",
                 xp: 22,
                 dimensions: [.adventure],
@@ -2342,7 +2342,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_graduate_college",
-                title: "🎓 Graduate college",
+                title: "Hbo/uni diploma gehaald",
                 detail: "Een hbo/uni diploma behaald.",
                 xp: 26,
                 dimensions: [.mind],
@@ -2350,7 +2350,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_long_relationship",
-                title: "💕 Have a long relationship",
+                title: "Relatie langer dan een jaar",
                 detail: "Minstens 1 jaar een relatie onderhouden.",
                 xp: 24,
                 dimensions: [.love],
@@ -2358,7 +2358,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_get_dumped",
-                title: "🗑️ Get dumped",
+                title: "Een break-up doorleefd",
                 detail: "Een break-up doorgemaakt en verwerkt.",
                 xp: 18,
                 dimensions: [.love, .mind],
@@ -2366,7 +2366,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_sign_contract",
-                title: "🖊️ Sign a contract",
+                title: "Eerste grote contract getekend",
                 detail: "Je eerste grote contract getekend.",
                 xp: 20,
                 dimensions: [.money, .mind],
@@ -2374,7 +2374,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_get_job",
-                title: "🏢 Get a job",
+                title: "Eerste baan gestart",
                 detail: "Je eerste baan of betaalde gig gestart.",
                 xp: 20,
                 dimensions: [.money, .mind],
@@ -2382,7 +2382,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_get_promoted",
-                title: "☝️ Get promoted",
+                title: "Promotie gekregen",
                 detail: "Een promotie of stap omhoog gekregen.",
                 xp: 22,
                 dimensions: [.money, .mind],
@@ -2390,7 +2390,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_first_paycheck",
-                title: "💵 Get a paycheck",
+                title: "Eerste salaris ontvangen",
                 detail: "Je eerste loon ontvangen en benut.",
                 xp: 18,
                 dimensions: [.money],
@@ -2398,7 +2398,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_get_fired",
-                title: "🔥 Get fired",
+                title: "Ontslag meegemaakt",
                 detail: "Ontslag meegemaakt en opnieuw gestart.",
                 xp: 18,
                 dimensions: [.mind, .money],
@@ -2406,7 +2406,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_in_news",
-                title: "📰 Get in the news",
+                title: "In het nieuws verschenen",
                 detail: "Vernoemd of verschenen in media.",
                 xp: 18,
                 dimensions: [.adventure, .mind],
@@ -2414,7 +2414,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_vote",
-                title: "🗳️ Vote in an election",
+                title: "Gestemd bij verkiezing",
                 detail: "Gestemd in een lokale of landelijke verkiezing.",
                 xp: 14,
                 dimensions: [.mind],
@@ -2422,7 +2422,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_switch_careers",
-                title: "🤡 Switch careers",
+                title: "Carrière geswitcht",
                 detail: "Van richting veranderd en opnieuw begonnen.",
                 xp: 22,
                 dimensions: [.money, .mind],
@@ -2430,7 +2430,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_buy_house",
-                title: "🏠 Buy a house",
+                title: "Eigen huis gekocht",
                 detail: "Een huis gekocht of hypotheek geregeld.",
                 xp: 26,
                 dimensions: [.money, .mind],
@@ -2438,7 +2438,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_get_engaged",
-                title: "💍 Get engaged",
+                title: "Verloofd geraakt",
                 detail: "Verloofd geraakt en het gevierd.",
                 xp: 24,
                 dimensions: [.love],
@@ -2446,7 +2446,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_get_married",
-                title: "👰 Get married",
+                title: "Getrouwd",
                 detail: "Ja gezegd tijdens je huwelijk.",
                 xp: 28,
                 dimensions: [.love],
@@ -2454,7 +2454,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_have_kid",
-                title: "👶 Have a kid",
+                title: "Eerste kind gekregen",
                 detail: "Ouder geworden van je eerste kind.",
                 xp: 28,
                 dimensions: [.love],
@@ -2462,7 +2462,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_teach_walk",
-                title: "🚶‍♂️ Teach your kid to walk",
+                title: "Je kind leren lopen",
                 detail: "Samen de eerste stapjes geoefend.",
                 xp: 18,
                 dimensions: [.love],
@@ -2470,7 +2470,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_teach_talk",
-                title: "📣 Teach your kid to talk",
+                title: "Je kind leren praten",
                 detail: "De eerste woordjes van je kind begeleid.",
                 xp: 18,
                 dimensions: [.love],
@@ -2478,7 +2478,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_watch_kid_graduate",
-                title: "🎓 Watch your kid graduate",
+                title: "Diploma-uitreiking van je kind",
                 detail: "Aanwezig geweest bij het diploma van je kind.",
                 xp: 24,
                 dimensions: [.love],
@@ -2486,7 +2486,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_watch_kid_marry",
-                title: "👰 Watch your kid get married",
+                title: "Huwelijk van je kind meegemaakt",
                 detail: "Je kind het ja-woord zien geven.",
                 xp: 26,
                 dimensions: [.love],
@@ -2494,7 +2494,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_grandparent",
-                title: "👴 Become a grandparent",
+                title: "Grootouder geworden",
                 detail: "Kleinkinderen verwelkomd in de familie.",
                 xp: 24,
                 dimensions: [.love],
@@ -2502,7 +2502,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_retire",
-                title: "🏖️ Retire",
+                title: "Met pensioen gegaan",
                 detail: "Gestopt met fulltime werk en een nieuw ritme gekozen.",
                 xp: 22,
                 dimensions: [.mind, .money],
@@ -2510,7 +2510,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_tell_story",
-                title: "📔 Tell your grandkid a story",
+                title: "Familieverhaal doorverteld",
                 detail: "Een verhaal gedeeld dat de familie bijblijft.",
                 xp: 18,
                 dimensions: [.love],
@@ -2518,7 +2518,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_solar_eclipse",
-                title: "🌑 See a solar eclipse",
+                title: "Zonsverduistering gezien",
                 detail: "Een zonsverduistering bewust meegemaakt.",
                 xp: 20,
                 dimensions: [.adventure],
@@ -2526,7 +2526,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_plant_garden",
-                title: "🌷 Plant a garden",
+                title: "Eigen tuin aangelegd",
                 detail: "Zelf iets geplant en zien groeien.",
                 xp: 16,
                 dimensions: [.mind, .love],
@@ -2534,7 +2534,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_travel_world",
-                title: "🌎 Travel the world",
+                title: "Wereld rondgereisd",
                 detail: "Meerdere continenten bezocht en verhalen verzameld.",
                 xp: 30,
                 dimensions: [.adventure],
@@ -2542,7 +2542,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_turn_100",
-                title: "🎂 Turn 100",
+                title: "100ste verjaardag gevierd",
                 detail: "Een eeuw leven gevierd.",
                 xp: 40,
                 dimensions: [.mind, .love],
@@ -2550,7 +2550,7 @@ enum PackLibrary {
             ),
             ChecklistItem(
                 id: "life_complete_checklist",
-                title: "✔️ Complete Life Checklist",
+                title: "Life Checklist voltooid",
                 detail: "Alle mijlpalen in deze lijst afgevinkt.",
                 xp: 50,
                 dimensions: [.mind, .adventure],

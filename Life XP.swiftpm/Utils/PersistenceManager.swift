@@ -126,7 +126,9 @@ final class PersistenceManager: PersistenceManaging {
             snapshot.version = Self.currentVersion
         }
 
-        snapshot.settings.maxConcurrentArcs = min(3, max(1, snapshot.settings.maxConcurrentArcs))
+        snapshot.settings.safeMode = false
+        snapshot.settings.showHeartRepairContent = true
+        snapshot.settings.maxConcurrentArcs = 2
         snapshot.settings.enabledDimensions = snapshot.settings.enabledDimensions.isEmpty ? Set(LifeDimension.allCases) : snapshot.settings.enabledDimensions
         return snapshot
     }
@@ -138,7 +140,9 @@ final class PersistenceManager: PersistenceManaging {
         snapshot.progress.bestStreak = max(snapshot.progress.currentStreak, snapshot.progress.bestStreak)
         snapshot.progress.arcStartDates = snapshot.progress.arcStartDates.filter { $0.value.timeIntervalSince1970.isFinite }
 
-        snapshot.settings.maxConcurrentArcs = min(3, max(1, snapshot.settings.maxConcurrentArcs))
+        snapshot.settings.safeMode = false
+        snapshot.settings.showHeartRepairContent = true
+        snapshot.settings.maxConcurrentArcs = 2
         snapshot.settings.overwhelmedLevel = max(0, snapshot.settings.overwhelmedLevel)
 
         let validDimensions = Set(LifeDimension.allCases)

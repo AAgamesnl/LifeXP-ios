@@ -1,4 +1,6 @@
 import SwiftUI
+import UIKit
+import UniformTypeIdentifiers
 
 struct StatsView: View {
     @EnvironmentObject var model: AppModel
@@ -281,21 +283,41 @@ struct LevelSummaryCard: View {
     let xpToNext: Int
     let nextUnlock: String
 
+    @State private var previousLevel: Int = 1
+    @State private var animateBurst = false
+    @State private var animatePulse = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .center) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Level \(level)")
-                        .font(.title3.bold())
-                    Text("Nog \(xpToNext) XP tot level \(level + 1)")
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Level")
                         .font(.caption)
                         .foregroundColor(.secondary)
+                    HStack(alignment: .firstTextBaseline, spacing: 12) {
+                        Text("\(level)")
+                            .font(.system(size: 64, weight: .black, design: .rounded))
+                            .foregroundColor(.primary)
+                            .shadow(color: Color.black.opacity(0.08), radius: 6, y: 4)
+                            .scaleEffect(animatePulse ? 1.08 : 1)
+                            .animation(.spring(response: 0.6, dampingFraction: 0.7), value: animatePulse)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("\(Int(progress * 100))%")
+                                .font(.caption2.weight(.semibold))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Capsule().fill(Color.accentColor.opacity(0.14)))
+                            Text("Nog \(xpToNext) XP tot level \(level + 1)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
                 }
 
                 Spacer()
 
                 ProgressRing(progress: progress)
-                    .frame(width: 90, height: 90)
+                    .frame(width: 96, height: 96)
             }
 
             Text(nextUnlock)
@@ -306,6 +328,48 @@ struct LevelSummaryCard: View {
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .shadow(radius: 8, y: 4)
+        .overlay(confettiOverlay)
+        .onAppear { previousLevel = level }
+        .onChange(of: level) { newValue in
+            guard newValue > previousLevel else { previousLevel = newValue; return }
+
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.65)) {
+                animatePulse = true
+            }
+            withAnimation(.easeOut(duration: 1)) {
+                animateBurst = true
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                    animatePulse = false
+                }
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                animateBurst = false
+            }
+
+            previousLevel = newValue
+        }
+    }
+
+    private var confettiOverlay: some View {
+        ZStack {
+            ForEach(0..<12, id: \.self) { index in
+                let angle = Double(index) / 12 * Double.pi * 2
+                Circle()
+                    .fill(Color.accentColor.opacity(0.6))
+                    .frame(width: 8, height: 8)
+                    .offset(
+                        x: CGFloat(cos(angle)) * (animateBurst ? 64 : 8),
+                        y: CGFloat(sin(angle)) * (animateBurst ? 64 : 8)
+                    )
+                    .opacity(animateBurst ? 0 : 1)
+                    .scaleEffect(animateBurst ? 1 : 0.4)
+                    .animation(.easeOut(duration: 0.9).delay(Double(index) * 0.01), value: animateBurst)
+            }
+        }
     }
 }
 
@@ -493,59 +557,99 @@ private struct SnapshotTile: View {
 
 // MARK: - Share Views
 
+struct ShareCardImage: Transferable {
+    let image: UIImage
+
+    var preview: Image { Image(uiImage: image) }
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .png) { image.pngData() ?? Data() }
+    }
+}
+
 struct SharePreviewView: View {
     @EnvironmentObject var model: AppModel
+    @State private var shareCard: ShareCardImage?
+    @State private var isRendering = false
 
     var body: some View {
         ZStack {
             BrandBackground()
 
-            VStack(spacing: 20) {
-                Text("Screenshot deze kaart en deel ’m in je story ✨")
-                    .font(.footnote)
-                    .foregroundColor(BrandTheme.mutedText)
-
+            VStack(spacing: 16) {
                 ShareCardView()
                     .frame(maxWidth: 360)
 
-                Text("Tip: zet je camera op full-screen, maak een screenshot en tag je app-naam.")
-                    .font(.caption2)
-                    .foregroundColor(BrandTheme.mutedText)
-                    .multilineTextAlignment(.center)
-
-                ShareLink(item: "Mijn Life XP progress: \(Int(model.globalProgress * 100))% compleet!") {
-                    HStack {
-                        Spacer()
-                        Label("Deel deze kaart", systemImage: "arrow.up.right.square")
-                            .font(.callout.bold())
-                        Spacer()
+                if let card = shareCard {
+                    ShareLink(item: card, preview: SharePreview("Life XP-kaart", image: card.preview)) {
+                        shareButtonLabel(title: "Deel deze kaart")
                     }
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.white.opacity(0.12)))
+                    .accessibilityLabel("Deel een afbeelding van je kaart")
+                } else {
+                    Button(action: prepareShareCard) {
+                        shareButtonLabel(title: isRendering ? "Kaart wordt geladen…" : "Genereer kaart")
+                    }
+                    .disabled(isRendering)
+                    .accessibilityLabel("Genereer share-kaart")
+                }
+
+                if isRendering {
+                    ProgressView("Bezig met renderen…")
+                        .font(.caption)
+                        .tint(.white)
+                } else {
+                    Text("Deel je Life XP-kaart direct als afbeelding, zonder screenshots.")
+                        .font(.caption)
+                        .foregroundColor(BrandTheme.mutedText)
+                        .multilineTextAlignment(.center)
                 }
             }
             .padding()
         }
         .navigationTitle("Share card")
         .navigationBarTitleDisplayMode(.inline)
+        .task { await ensureShareCardPrepared() }
+    }
+
+    private func shareButtonLabel(title: String) -> some View {
+        HStack {
+            Spacer()
+            Label(title, systemImage: "arrow.up.right.square")
+                .font(.callout.bold())
+            Spacer()
+        }
+        .padding()
+        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.white.opacity(0.12)))
+    }
+
+    private func prepareShareCard() {
+        guard !isRendering else { return }
+        isRendering = true
+
+        Task {
+            let rendered = await renderShareCard(for: model)
+            await MainActor.run {
+                shareCard = rendered
+                isRendering = false
+            }
+        }
+    }
+
+    private func ensureShareCardPrepared() async {
+        guard shareCard == nil else { return }
+        await MainActor.run { isRendering = true }
+        let rendered = await renderShareCard(for: model)
+        await MainActor.run {
+            shareCard = rendered
+            isRendering = false
+        }
     }
 }
 
 struct ShareEntryCard: View {
     @EnvironmentObject var model: AppModel
-
-    private var shareText: String {
-        let arcLine: String
-        if model.showArcProgressOnShare, let arc = model.highlightedArc {
-            let progress = Int(model.arcProgress(arc) * 100)
-            arcLine = " Arc ‘\(arc.title)’ staat op \(progress)% en levert \(arc.totalXP) XP."
-        } else {
-            arcLine = ""
-        }
-
-        let streakLine = (model.showStreaks && model.currentStreak > 0) ? " Streak: \(model.currentStreak)d." : ""
-        return "Ik heb \(Int(model.globalProgress * 100))% van mijn Life XP checklist unlocked en \(model.totalXP) XP verzameld." + arcLine + streakLine + " Pak jouw kaart in de app!"
-    }
+    @State private var shareCard: ShareCardImage?
+    @State private var isRendering = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -562,21 +666,37 @@ struct ShareEntryCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Deel je progress")
                         .font(.subheadline.weight(.semibold))
-                    Text("Story-ready kaart met jouw streak, XP en stats.")
+                    Text("Kaart met streak, XP en arc-progress als afbeelding.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
             }
 
-            ShareLink(item: shareText) {
-                HStack {
-                    Spacer()
-                    Label("Deel nu", systemImage: "arrow.up.right.square")
-                        .font(.footnote.bold())
-                    Spacer()
+            if let card = shareCard {
+                ShareLink(item: card, preview: SharePreview("Life XP-kaart", image: card.preview)) {
+                    HStack {
+                        Spacer()
+                        Label("Deel nu", systemImage: "arrow.up.right.square")
+                            .font(.footnote.bold())
+                        Spacer()
+                    }
+                    .padding(.vertical, 10)
+                    .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(BrandTheme.accent.opacity(0.12)))
                 }
-                .padding(.vertical, 10)
-                .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(BrandTheme.accent.opacity(0.12)))
+                .accessibilityLabel("Deel een afbeelding van je kaart")
+            } else {
+                Button(action: prepareShareCard) {
+                    HStack {
+                        Spacer()
+                        Label(isRendering ? "Kaart voorbereiden…" : "Maak share-card", systemImage: "wand.and.rays")
+                            .font(.footnote.bold())
+                        Spacer()
+                    }
+                    .padding(.vertical, 10)
+                    .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(BrandTheme.accent.opacity(0.12)))
+                }
+                .disabled(isRendering)
+                .accessibilityLabel("Bereid de share-kaart voor")
             }
 
             NavigationLink(destination: SharePreviewView()) {
@@ -584,11 +704,40 @@ struct ShareEntryCard: View {
                     .font(.caption)
                     .foregroundColor(.primary)
             }
+
+            if isRendering {
+                ProgressView("Bezig met renderen…")
+                    .font(.caption)
+            }
         }
         .padding()
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .shadow(radius: 6, y: 3)
+        .task { await ensureShareCardPrepared() }
+    }
+
+    private func prepareShareCard() {
+        guard !isRendering else { return }
+        isRendering = true
+
+        Task {
+            let rendered = await renderShareCard(for: model)
+            await MainActor.run {
+                shareCard = rendered
+                isRendering = false
+            }
+        }
+    }
+
+    private func ensureShareCardPrepared() async {
+        guard shareCard == nil else { return }
+        await MainActor.run { isRendering = true }
+        let rendered = await renderShareCard(for: model)
+        await MainActor.run {
+            shareCard = rendered
+            isRendering = false
+        }
     }
 }
 
@@ -724,4 +873,17 @@ struct ShareCardView: View {
         .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
         .shadow(radius: 24, y: 10)
     }
+}
+
+@MainActor
+private func renderShareCard(for model: AppModel, size: CGSize = CGSize(width: 360, height: 640)) -> ShareCardImage? {
+    let card = ShareCardView()
+        .environmentObject(model)
+        .frame(width: size.width, height: size.height)
+
+    let renderer = ImageRenderer(content: card)
+    renderer.scale = UIScreen.main.scale
+
+    guard let uiImage = renderer.uiImage else { return nil }
+    return ShareCardImage(image: uiImage)
 }

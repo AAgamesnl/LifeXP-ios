@@ -33,17 +33,9 @@ struct SettingsView: View {
                             }
                         }
                         .pickerStyle(.segmented)
-
-                        Stepper(value: $model.settings.maxConcurrentArcs, in: 1...3) {
-                            Text("Max actieve arcs: \(model.settings.maxConcurrentArcs)")
-                        }
-
-                        Toggle("Safe mode (lichte thema's)", isOn: $model.settings.safeMode)
                     }
 
                     Section(header: Text("Content"), footer: Text("Kies wat we wel of niet tonen op Home en in suggesties.")) {
-                        Toggle("Verberg Heart Repair/breakup content", isOn: $model.settings.showHeartRepairContent.negated())
-                            .tint(.pink)
                         Toggle("Toon PRO / locked teasers", isOn: $model.settings.showProTeasers)
                         Picker("Prioriteit dimensie", selection: $model.settings.primaryFocus) {
                             Text("Geen voorkeur").tag(LifeDimension?.none)
@@ -155,15 +147,5 @@ struct SettingsView: View {
                 Button("Annuleer", role: .cancel) { }
             }
         }
-    }
-}
-
-private extension Binding where Value == Bool {
-    /// Convenience for toggles that conceptually flip the meaning.
-    func negated() -> Binding<Bool> {
-        Binding<Bool>(
-            get: { !wrappedValue },
-            set: { wrappedValue = !$0 }
-        )
     }
 }
