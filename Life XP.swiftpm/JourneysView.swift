@@ -147,6 +147,9 @@ struct ArcHeroCard: View {
             }
         }
         .brandCard(cornerRadius: 22)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Arc \(arc.title)")
+        .accessibilityHint("\(Int(progress * 100)) percent complete. Tap to view arc details or start it.")
     }
 }
 

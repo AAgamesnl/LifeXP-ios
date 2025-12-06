@@ -35,14 +35,18 @@ struct OnboardingView: View {
                                 step -= 1
                             }
                         }
+                        .accessibilityLabel("Go back")
+                        .accessibilityHint("Return to the previous onboarding screen")
                     }
-                    
+
                     Spacer()
-                    
+
                     Button(step == 3 ? "Start Life XP" : "Next") {
                         handleNext()
                     }
                     .buttonStyle(.borderedProminent)
+                    .accessibilityLabel(step == 3 ? "Start Life XP" : "Next step")
+                    .accessibilityHint("Advance to the next onboarding step")
                 }
                 .padding()
             }
@@ -64,6 +68,7 @@ struct OnboardingView: View {
             Text("Welcome to Life XP")
                 .font(.largeTitle.bold())
                 .multilineTextAlignment(.center)
+                .accessibilityAddTraits(.isHeader)
             
             Text("Je leven is geen perfecte planning, maar je kunt het wel beetje bij beetje levelen. Life XP helpt je om bewuster keuzes te maken en alles een beetje minder chaotisch te maken.")
                 .font(.subheadline)
@@ -143,8 +148,12 @@ struct OnboardingView: View {
             Text("\(Int(overwhelmed)) / 5")
                 .font(.title3.bold())
                 .padding(.top, 16)
-            
+                .accessibilityLabel("Overwhelmed level")
+                .accessibilityValue("\(Int(overwhelmed)) out of 5")
+
             Slider(value: $overwhelmed, in: 1...5, step: 1)
+                .accessibilityLabel("How overwhelmed you feel")
+                .accessibilityValue("\(Int(overwhelmed)) out of 5")
             
             Spacer()
         }
@@ -202,6 +211,9 @@ struct OnboardingView: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(title)
+        .accessibilityHint("Select the \(title) tone")
+        .accessibilityValue(selectedTone == tone ? "Selected" : "Not selected")
     }
     
     private func handleNext() {

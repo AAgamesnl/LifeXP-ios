@@ -22,43 +22,43 @@ final class AppModel: ObservableObject {
 
     // MARK: - Preferences
     @Published var toneMode: ToneMode {
-        didSet { persistToneMode() }
+        didSet { persistState() }
     }
 
     @Published var appearanceMode: AppearanceMode {
-        didSet { persistAppearanceMode() }
+        didSet { persistState() }
     }
 
     @Published var hideHeavyTopics: Bool {
-        didSet { persistHideHeavyTopics() }
+        didSet { persistState() }
     }
 
     @Published var primaryFocus: LifeDimension? = nil {
-        didSet { persistPrimaryFocus() }
+        didSet { persistState() }
     }
     @Published var overwhelmedLevel: Int = 3 {
-        didSet { persistOverwhelmedLevel() }
+        didSet { persistState() }
     }
 
     // MARK: - Home customization
     @Published var showEnergyCard: Bool {
-        didSet { persistHomePrefs() }
+        didSet { persistState() }
     }
 
     @Published var showMomentumGrid: Bool {
-        didSet { persistHomePrefs() }
+        didSet { persistState() }
     }
 
     @Published var showQuickActions: Bool {
-        didSet { persistHomePrefs() }
+        didSet { persistState() }
     }
 
     @Published var compactHomeLayout: Bool {
-        didSet { persistHomePrefs() }
+        didSet { persistState() }
     }
 
     @Published var expandHomeCardsByDefault: Bool {
-        didSet { persistHomePrefs() }
+        didSet { persistState() }
     }
 
     // MARK: - Streaks
@@ -71,34 +71,15 @@ final class AppModel: ObservableObject {
 
     // MARK: - Environment
     private let calendar: Calendar
-    private let userDefaults: UserDefaults
+    private let persistence: PersistenceManaging
 
     /// Preferred color scheme based on the user's explicit appearance selection.
     var preferredColorScheme: ColorScheme? { appearanceMode.colorScheme }
 
-    private enum Keys {
-        static let completed = "lifeXP.completedItemIDs"
-        static let toneMode = "lifeXP.toneMode"
-        static let appearanceMode = "lifeXP.appearanceMode"
-        static let hideHeavy = "lifeXP.hideHeavy"
-        static let currentStreak = "lifeXP.currentStreak"
-        static let bestStreak = "lifeXP.bestStreak"
-        static let lastActiveDay = "lifeXP.lastActiveDay"
-        static let homeEnergy = "lifeXP.homeEnergy"
-        static let homeMomentum = "lifeXP.homeMomentum"
-        static let homeQuickActions = "lifeXP.homeQuickActions"
-        static let homeCompact = "lifeXP.homeCompact"
-        static let homeExpanded = "lifeXP.homeExpanded"
-        static let arcStarts = "lifeXP.arcStarts"
-        static let primaryFocus = "lifeXP.primaryFocus"
-        static let overwhelmLevel = "lifeXP.overwhelmLevel"
-    }
-
     // MARK: - Lifecycle
-
-    init(calendar: Calendar = .current, userDefaults: UserDefaults = .standard) {
+    init(calendar: Calendar = .current, persistence: PersistenceManaging = PersistenceManager()) {
         self.calendar = calendar
-        self.userDefaults = userDefaults
+        self.persistence = persistence
 
         self.packs = SampleContent.packs
         self.arcs = SampleContent.arcs
@@ -110,101 +91,80 @@ final class AppModel: ObservableObject {
             }
         }
         self.arcByQuestID = questMap
-        self.completedItemIDs = Set(userDefaults.stringArray(forKey: Keys.completed) ?? [])
 
-        if let rawTone = userDefaults.string(forKey: Keys.toneMode),
-           let storedTone = ToneMode(rawValue: rawTone) {
-            self.toneMode = storedTone
-        } else {
-            self.toneMode = .soft
-        }
+        let snapshot = persistence.loadSnapshot()
+        let sanitized = AppModel.sanitized(snapshot: snapshot, arcs: arcs, packs: packs)
 
-        if let rawAppearance = userDefaults.string(forKey: Keys.appearanceMode),
-           let storedAppearance = AppearanceMode(rawValue: rawAppearance) {
-            self.appearanceMode = storedAppearance
-        } else {
-            self.appearanceMode = .system
-        }
+        self.completedItemIDs = sanitized.progress.completedItemIDs
+        self.toneMode = sanitized.preferences.toneMode
+        self.appearanceMode = sanitized.preferences.appearanceMode
+        self.hideHeavyTopics = sanitized.preferences.hideHeavyTopics
+        self.primaryFocus = sanitized.preferences.primaryFocus
+        self.overwhelmedLevel = sanitized.preferences.overwhelmedLevel
 
-        self.hideHeavyTopics = userDefaults.bool(forKey: Keys.hideHeavy)
-        self.currentStreak = userDefaults.integer(forKey: Keys.currentStreak)
-        self.bestStreak = userDefaults.integer(forKey: Keys.bestStreak)
-        self.lastActiveDay = userDefaults.object(forKey: Keys.lastActiveDay) as? Date
+        self.currentStreak = sanitized.progress.currentStreak
+        self.bestStreak = sanitized.progress.bestStreak
+        self.lastActiveDay = sanitized.progress.lastActiveDay
 
-        self.showEnergyCard = userDefaults.object(forKey: Keys.homeEnergy) as? Bool ?? true
-        self.showMomentumGrid = userDefaults.object(forKey: Keys.homeMomentum) as? Bool ?? true
-        self.showQuickActions = userDefaults.object(forKey: Keys.homeQuickActions) as? Bool ?? true
-        self.compactHomeLayout = userDefaults.object(forKey: Keys.homeCompact) as? Bool ?? false
-        self.expandHomeCardsByDefault = userDefaults.object(forKey: Keys.homeExpanded) as? Bool ?? true
+        self.showEnergyCard = sanitized.home.showEnergyCard
+        self.showMomentumGrid = sanitized.home.showMomentumGrid
+        self.showQuickActions = sanitized.home.showQuickActions
+        self.compactHomeLayout = sanitized.home.compactHomeLayout
+        self.expandHomeCardsByDefault = sanitized.home.expandHomeCardsByDefault
 
-        if let storedFocus = userDefaults.string(forKey: Keys.primaryFocus) {
-            self.primaryFocus = LifeDimension(rawValue: storedFocus)
-        } else {
-            self.primaryFocus = nil
-        }
-
-        self.overwhelmedLevel = userDefaults.object(forKey: Keys.overwhelmLevel) as? Int ?? 3
-
-        if let storedStarts = userDefaults.dictionary(forKey: Keys.arcStarts) as? [String: TimeInterval] {
-            var hydrated: [String: Date] = [:]
-            for (key, timestamp) in storedStarts {
-                hydrated[key] = Date(timeIntervalSince1970: timestamp)
-            }
-            self.arcStartDates = hydrated
-        } else {
-            self.arcStartDates = [:]
-        }
+        self.arcStartDates = sanitized.progress.arcStartDates
     }
 
     // MARK: - Persistence
 
-    private func persistCompleted() {
-        userDefaults.set(Array(completedItemIDs), forKey: Keys.completed)
+    /// Persists the current snapshot to disk. Failures are ignored so the UI remains responsive even if storage is unavailable.
+    private func persistState() {
+        persistence.saveSnapshot(currentSnapshot())
     }
 
-    private func persistToneMode() {
-        userDefaults.set(toneMode.rawValue, forKey: Keys.toneMode)
+    private func currentSnapshot() -> PersistenceSnapshot {
+        PersistenceSnapshot(
+            version: PersistenceManager.currentVersion,
+            progress: ProgressState(
+                completedItemIDs: completedItemIDs,
+                currentStreak: currentStreak,
+                bestStreak: bestStreak,
+                lastActiveDay: lastActiveDay,
+                arcStartDates: arcStartDates
+            ),
+            preferences: PreferencesState(
+                toneMode: toneMode,
+                appearanceMode: appearanceMode,
+                hideHeavyTopics: hideHeavyTopics,
+                primaryFocus: primaryFocus,
+                overwhelmedLevel: overwhelmedLevel
+            ),
+            home: HomePreferences(
+                showEnergyCard: showEnergyCard,
+                showMomentumGrid: showMomentumGrid,
+                showQuickActions: showQuickActions,
+                compactHomeLayout: compactHomeLayout,
+                expandHomeCardsByDefault: expandHomeCardsByDefault
+            )
+        )
     }
 
-    private func persistAppearanceMode() {
-        userDefaults.set(appearanceMode.rawValue, forKey: Keys.appearanceMode)
-    }
+    private static func sanitized(snapshot: PersistenceSnapshot, arcs: [Arc], packs: [CategoryPack]) -> PersistenceSnapshot {
+        var snapshot = snapshot
 
-    private func persistHideHeavyTopics() {
-        userDefaults.set(hideHeavyTopics, forKey: Keys.hideHeavy)
-    }
+        let knownIDs = Set(packs.flatMap { $0.items.map { $0.id } } + arcs.flatMap { arc in
+            arc.chapters.flatMap { $0.quests.map { $0.id } }
+        })
+        snapshot.progress.completedItemIDs = snapshot.progress.completedItemIDs.intersection(knownIDs)
 
-    private func persistStreaks() {
-        userDefaults.set(currentStreak, forKey: Keys.currentStreak)
-        userDefaults.set(bestStreak, forKey: Keys.bestStreak)
-        if let last = lastActiveDay {
-            userDefaults.set(last, forKey: Keys.lastActiveDay)
-        }
-    }
+        let knownArcIDs = Set(arcs.map { $0.id })
+        snapshot.progress.arcStartDates = snapshot.progress.arcStartDates.filter { knownArcIDs.contains($0.key) }
 
-    private func persistHomePrefs() {
-        userDefaults.set(showEnergyCard, forKey: Keys.homeEnergy)
-        userDefaults.set(showMomentumGrid, forKey: Keys.homeMomentum)
-        userDefaults.set(showQuickActions, forKey: Keys.homeQuickActions)
-        userDefaults.set(compactHomeLayout, forKey: Keys.homeCompact)
-        userDefaults.set(expandHomeCardsByDefault, forKey: Keys.homeExpanded)
-    }
+        snapshot.progress.currentStreak = max(0, snapshot.progress.currentStreak)
+        snapshot.progress.bestStreak = max(snapshot.progress.currentStreak, snapshot.progress.bestStreak)
+        snapshot.preferences.overwhelmedLevel = max(1, snapshot.preferences.overwhelmedLevel)
 
-    private func persistArcStarts() {
-        let payload = arcStartDates.mapValues { $0.timeIntervalSince1970 }
-        userDefaults.set(payload, forKey: Keys.arcStarts)
-    }
-
-    private func persistPrimaryFocus() {
-        if let focus = primaryFocus {
-            userDefaults.set(focus.rawValue, forKey: Keys.primaryFocus)
-        } else {
-            userDefaults.removeObject(forKey: Keys.primaryFocus)
-        }
-    }
-
-    private func persistOverwhelmedLevel() {
-        userDefaults.set(overwhelmedLevel, forKey: Keys.overwhelmLevel)
+        return snapshot
     }
 
     // MARK: - Data helpers
@@ -270,7 +230,7 @@ final class AppModel: ObservableObject {
             completedItemIDs.insert(item.id)
             registerActivityToday()
         }
-        persistCompleted()
+        persistState()
     }
 
     /// Toggle a quest completion.
@@ -286,9 +246,20 @@ final class AppModel: ObservableObject {
                 startArcIfNeeded(arc)
             }
         }
-        persistCompleted()
+        persistState()
     }
 
+    /// Resets all progress-related data while keeping personalization intact.
+    func resetProgress() {
+        completedItemIDs.removeAll()
+        currentStreak = 0
+        bestStreak = 0
+        lastActiveDay = nil
+        arcStartDates.removeAll()
+        persistState()
+    }
+
+    /// Updates the streak counters based on activity today. Handles gaps gracefully by resetting to 1 when a streak is broken.
     private func registerActivityToday(date: Date = Date()) {
         let today = calendar.startOfDay(for: date)
 
@@ -310,7 +281,6 @@ final class AppModel: ObservableObject {
 
         lastActiveDay = today
         bestStreak = max(bestStreak, currentStreak)
-        persistStreaks()
     }
 
     /// Progress for a specific pack (0...1).
@@ -410,14 +380,15 @@ final class AppModel: ObservableObject {
     func startArcIfNeeded(_ arc: Arc, date: Date = Date()) {
         guard arcStartDates[arc.id] == nil else { return }
         arcStartDates[arc.id] = date
-        persistArcStarts()
+        persistState()
     }
 
     func resetArcStart(_ arc: Arc) {
         arcStartDates.removeValue(forKey: arc.id)
-        persistArcStarts()
+        persistState()
     }
 
+    /// Returns the day index (starting at 1) since the user started an arc, or nil when the arc hasn't started.
     func arcDay(for arc: Arc, date: Date = Date()) -> Int? {
         guard let start = arcStartDates[arc.id] else { return nil }
         let startDay = calendar.startOfDay(for: start)
@@ -804,6 +775,7 @@ final class AppModel: ObservableObject {
     // MARK: - Leveling
 
     /// Lightweight RPG-style level derived from total XP.
+    /// Lightweight RPG-style level derived from total XP, always at least 1.
     var level: Int {
         max(1, totalXP / 120 + 1)
     }

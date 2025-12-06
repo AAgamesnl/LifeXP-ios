@@ -67,9 +67,12 @@ struct StatsView: View {
                                         .foregroundColor(.secondary)
                                 }
                             }
-                            
+
                             Spacer()
                         }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("Overall progress")
+                        .accessibilityValue("\(Int(model.globalProgress * 100)) percent complete, total \(model.totalXP) XP")
                     }
                     .padding()
                     .background(.ultraThinMaterial)

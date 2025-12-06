@@ -37,6 +37,9 @@ struct HomeView: View {
                                         Capsule().fill(BrandTheme.accent.opacity(0.12))
                                     )
                                     .foregroundColor(BrandTheme.accent)
+                                    .accessibilityElement(children: .combine)
+                                    .accessibilityLabel("Current streak")
+                                    .accessibilityValue("\(model.currentStreak) days")
                                 }
                             }
                             
@@ -264,6 +267,9 @@ struct CurrentArcCard: View {
             }
         }
         .brandCard(cornerRadius: 22)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Arc: \(arc.title)")
+        .accessibilityHint(isSuggestion ? "Suggested arc with \(Int(progress * 100)) percent complete" : "Current arc with \(Int(progress * 100)) percent complete")
     }
 }
 

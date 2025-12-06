@@ -18,6 +18,7 @@ struct SettingsView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
+                    .accessibilityHint("Schakel PRO in voor alle packs tijdens testen")
                 }
 
                 Section(header: Text("Home screen"), footer: Text("Pas de startpagina aan zodat je alleen ziet wat nu belangrijk is. Compacte mode maakt de kaarten dichter bij elkaar.")) {
