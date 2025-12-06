@@ -187,6 +187,12 @@ struct ChallengeView: View {
 struct BadgesView: View {
     @EnvironmentObject var model: AppModel
 
+    private var lockedBadges: [Badge] {
+        badgeCatalog.filter { badge in
+            !model.unlockedBadges.contains(where: { $0.id == badge.id })
+        }
+    }
+
     private var badgeCatalog: [Badge] {
         [
             Badge(id: "badge_getting_started", name: "Getting Started", description: "50+ XP in de pocket.", iconSystemName: "sparkles"),
@@ -220,16 +226,12 @@ struct BadgesView: View {
                 }
 
                 Section("Locked goals") {
-                    let locked = badgeCatalog.filter { badge in
-                        !model.unlockedBadges.contains(where: { $0.id == badge.id })
-                    }
-
-                    if locked.isEmpty {
+                    if lockedBadges.isEmpty {
                         Text("Alles geclaimd! Nieuwe badges komen eraan.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     } else {
-                        ForEach(locked) { badge in
+                        ForEach(lockedBadges) { badge in
                             BadgeRow(badge: badge, unlocked: false)
                         }
                     }

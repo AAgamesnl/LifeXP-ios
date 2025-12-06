@@ -173,22 +173,30 @@ final class AppModel: ObservableObject {
 
     // MARK: - Lifecycle
     init(calendar: Calendar = .current, persistence: PersistenceManaging = PersistenceManager()) {
-        self.calendar = calendar
-        self.persistence = persistence
+        let calendar = calendar
+        let persistence = persistence
 
-        self.packs = SampleContent.packs
-        self.arcs = SampleContent.arcs
-        self.arcByID = Dictionary(uniqueKeysWithValues: arcs.map { ($0.id, $0) })
+        let packs = SampleContent.packs
+        let arcs = SampleContent.arcs
+        let arcByID = Dictionary(uniqueKeysWithValues: arcs.map { ($0.id, $0) })
+
         var questMap: [String: Arc] = [:]
         for arc in arcs {
             for quest in arc.chapters.flatMap({ $0.quests }) {
                 questMap[quest.id] = arc
             }
         }
-        self.arcByQuestID = questMap
 
         let snapshot = persistence.loadSnapshot()
         let sanitized = AppModel.sanitized(snapshot: snapshot, arcs: arcs, packs: packs)
+
+        self.calendar = calendar
+        self.persistence = persistence
+
+        self.packs = packs
+        self.arcs = arcs
+        self.arcByID = arcByID
+        self.arcByQuestID = questMap
 
         self.completedItemIDs = sanitized.progress.completedItemIDs
         self.settings = sanitized.settings
