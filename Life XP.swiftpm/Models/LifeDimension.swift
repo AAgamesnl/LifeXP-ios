@@ -32,7 +32,7 @@ enum LifeDimension: String, CaseIterable, Codable, Identifiable, Hashable {
 }
 
 /// Coaching tone preference for in-app messaging.
-enum ToneMode: String, CaseIterable, Identifiable, Hashable {
+enum ToneMode: String, CaseIterable, Identifiable, Hashable, Codable {
     case soft
     case realTalk
 

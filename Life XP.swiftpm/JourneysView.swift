@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ArcsView: View {
     @EnvironmentObject var model: AppModel
+    @State private var showHero = false
 
     private var currentArc: Arc? { model.activeArc }
     private var suggestions: [Arc] { model.suggestedArcs }
@@ -14,23 +15,30 @@ struct ArcsView: View {
 
                 ScrollView {
                     VStack(spacing: 16) {
-                    if let arc = currentArc {
-                        ArcHeroCard(arc: arc)
-                            .transition(.scale.combined(with: .opacity))
-                    } else {
-                        ArcEmptyState(suggestions: suggestions)
-                    }
+                        if let arc = currentArc {
+                            ArcHeroCard(arc: arc)
+                                .opacity(showHero ? 1 : 0)
+                                .scaleEffect(showHero ? 1 : 0.96)
+                                .animation(.easeOut(duration: 0.55), value: showHero)
+                        } else {
+                            ArcEmptyState(suggestions: suggestions)
+                        }
 
-                    SuggestedArcsGrid(suggestions: suggestions)
+                        SuggestedArcsGrid(suggestions: suggestions)
 
-                    QuestBoardView(arc: questBoard.arc, quests: questBoard.quests)
+                        QuestBoardView(arc: questBoard.arc, quests: questBoard.quests)
 
-                    ToolsPanel()
+                        ToolsPanel()
                     }
                     .padding()
                 }
             }
             .navigationTitle("Arcs")
+            .onAppear {
+                withAnimation(.easeOut(duration: 0.55)) {
+                    showHero = true
+                }
+            }
         }
     }
 }
@@ -47,71 +55,71 @@ struct ArcHeroCard: View {
         let progress = model.arcProgress(arc)
         let next = model.nextQuests(in: arc, limit: 2)
         let day = model.arcDay(for: arc)
-
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top, spacing: 14) {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.lg) {
+            HStack(alignment: .top, spacing: DesignSystem.spacing.lg) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
                         .fill(accent.opacity(0.16))
                     Image(systemName: arc.iconSystemName)
-                        .font(.system(size: 28, weight: .bold))
+                        .font(.system(size: 30, weight: .bold))
                         .foregroundColor(accent)
                 }
-                .frame(width: 70, height: 70)
+                .frame(width: 76, height: 76)
 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
                     Text(arc.title)
-                        .font(.title3.bold())
+                        .font(DesignSystem.text.heroTitle)
+                        .foregroundColor(BrandTheme.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
                     Text(arc.subtitle)
                         .font(.subheadline)
                         .foregroundColor(BrandTheme.mutedText)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    HStack(spacing: 6) {
-                        ForEach(arc.focusDimensions) { dim in
-                            Label(dim.label, systemImage: dim.systemImage)
-                                .font(.caption2.weight(.semibold))
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Capsule().fill(accent.opacity(0.14)))
-                                .foregroundColor(BrandTheme.mutedText)
-                        }
-                    }
+                    FlexibleLabelRow(items: arc.focusDimensions.map { ($0.label, $0.systemImage) }, accent: accent.opacity(0.14))
                 }
 
-                Spacer()
+                Spacer(minLength: DesignSystem.spacing.sm)
             }
 
-            ProgressView(value: progress) {
-                Text("\(Int(progress * 100))% • \(arc.chapters.count) chapters")
-                    .font(.caption)
-                    .foregroundColor(BrandTheme.mutedText)
-            }
-            .tint(accent)
-
-            if let day = day {
-                Label("Dag \(day) sinds start", systemImage: "clock.arrow.circlepath")
-                    .font(.caption.weight(.semibold))
-                    .foregroundColor(BrandTheme.accent)
+            VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                HStack {
+                    Text("\(Int(progress * 100))% • \(arc.chapters.count) chapters")
+                        .font(.caption)
+                        .foregroundColor(BrandTheme.mutedText)
+                        .fixedSize()
+                    Spacer()
+                    if let day = day {
+                        Label("Dag \(day)", systemImage: "clock.arrow.circlepath")
+                            .font(.caption.weight(.semibold))
+                            .foregroundColor(accent)
+                            .accessibilityLabel("Dag \(day) sinds start")
+                    }
+                }
+                ProgressView(value: progress)
+                    .tint(accent)
+                    .animation(.easeInOut(duration: 0.45), value: progress)
             }
 
             if !next.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                Text("Volgende quests")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundColor(BrandTheme.mutedText)
-                ForEach(next) { quest in
-                    QuestRow(quest: quest, accent: accent)
-                }
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+                    Text("Volgende quests")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundColor(BrandTheme.mutedText)
+                    VStack(spacing: DesignSystem.spacing.sm) {
+                        ForEach(next) { quest in
+                            QuestRow(quest: quest, accent: accent)
+                        }
+                    }
                 }
             }
 
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
                 Text("Chapters")
                     .font(.footnote.weight(.semibold))
                     .foregroundColor(BrandTheme.mutedText)
 
-                VStack(spacing: 8) {
+                VStack(spacing: DesignSystem.spacing.sm) {
                     ForEach(arc.chapters) { chapter in
                         ChapterProgressRow(
                             title: chapter.title,
@@ -119,16 +127,19 @@ struct ArcHeroCard: View {
                             progress: model.chapterProgress(chapter),
                             accent: accent
                         )
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("Chapter \(chapter.title), \(Int(model.chapterProgress(chapter) * 100)) procent voltooid")
                     }
                 }
             }
 
-            HStack(spacing: 10) {
+            HStack(spacing: DesignSystem.spacing.md) {
                 let canStart = model.remainingArcSlots > 0 || model.arcStartDates[arc.id] != nil
                 if model.arcStartDates[arc.id] == nil && model.remainingArcSlots == 0 {
                     Label("Max \(model.settings.maxConcurrentArcs) arcs actief", systemImage: "exclamationmark.triangle")
                         .font(.caption2)
                         .foregroundColor(.orange)
+                        .fixedSize()
                 }
 
                 NavigationLink(destination: ArcDetailView(arc: arc)) {
@@ -140,6 +151,7 @@ struct ArcHeroCard: View {
                         .foregroundColor(accent)
                         .clipShape(Capsule())
                 }
+                .accessibilityLabel("Open arc \(arc.title)")
 
                 Button {
                     model.startArcIfNeeded(arc)
@@ -152,9 +164,11 @@ struct ArcHeroCard: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(!canStart)
+                .accessibilityLabel(model.arcStartDates[arc.id] == nil ? "Start arc" : "Ga verder in arc")
+                .accessibilityHint(canStart ? "Start of hervat arc" : "Maximum actieve arcs bereikt")
             }
         }
-        .brandCard(cornerRadius: 22)
+        .brandCard(cornerRadius: DesignSystem.radius.lg)
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Arc \(arc.title)")
         .accessibilityHint("\(Int(progress * 100)) percent complete. Tap to view arc details or start it.")
@@ -168,20 +182,24 @@ struct ChapterProgressRow: View {
     let accent: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+            HStack(alignment: .firstTextBaseline) {
                 Text(title)
                     .font(.subheadline.weight(.semibold))
-                Spacer()
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: DesignSystem.spacing.sm)
                 Text("\(Int(progress * 100))%")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .fixedSize()
             }
             Text(summary)
                 .font(.caption)
                 .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             ProgressView(value: progress)
                 .tint(accent)
+                .animation(.easeInOut(duration: 0.45), value: progress)
         }
     }
 }
@@ -348,9 +366,10 @@ struct QuestBoardView: View {
                 }
             }
         }
-        .padding()
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .brandCard()
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Quest board")
+        .accessibilityHint(quests.isEmpty ? "Geen quests beschikbaar" : "\(quests.count) quests weergegeven")
     }
 }
 
@@ -358,72 +377,92 @@ struct QuestRow: View {
     @EnvironmentObject var model: AppModel
     let quest: Quest
     let accent: Color
+    @State private var isBouncing = false
 
     var body: some View {
         Button {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            let willComplete = !model.isCompleted(quest)
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
                 model.toggle(quest)
             }
+            if willComplete {
+                HapticsEngine.lightImpact()
+                withAnimation(.spring(response: 0.32, dampingFraction: 0.7)) { isBouncing = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
+                    withAnimation(.easeOut(duration: 0.22)) { isBouncing = false }
+                }
+            }
         } label: {
-            HStack(alignment: .top, spacing: 10) {
+            HStack(alignment: .top, spacing: DesignSystem.spacing.md) {
                 Image(systemName: model.isCompleted(quest) ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(model.isCompleted(quest) ? accent : Color(.systemGray4))
                     .font(.system(size: 22, weight: .semibold))
                     .padding(.top, 2)
 
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                    HStack(alignment: .firstTextBaseline, spacing: DesignSystem.spacing.sm) {
                         Text(quest.title)
                             .font(.subheadline.weight(.semibold))
                             .foregroundColor(.primary)
+                            .fixedSize(horizontal: false, vertical: true)
                         Label(quest.kind.label, systemImage: quest.kind.systemImage)
                             .font(.caption2)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 4)
+                            .padding(.horizontal, DesignSystem.spacing.sm)
+                            .padding(.vertical, DesignSystem.spacing.xs)
                             .background(Capsule().fill(accent.opacity(0.14)))
                             .foregroundColor(accent)
+                            .accessibilityLabel("Type: \(quest.kind.label)")
                     }
 
                     if let detail = quest.detail {
                         Text(detail)
                             .font(.footnote)
                             .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
 
-                    HStack(spacing: 8) {
+                    HStack(spacing: DesignSystem.spacing.sm) {
                         Text("\(quest.xp) XP")
                             .font(.caption2)
-                            .padding(.horizontal, 8)
+                            .padding(.horizontal, DesignSystem.spacing.sm)
                             .padding(.vertical, 3)
                             .background(Capsule().fill(accent.opacity(0.12)))
                             .foregroundColor(accent)
+                            .accessibilityLabel("\(quest.xp) XP")
 
                         if let minutes = quest.estimatedMinutes {
                             Label("\(minutes) min", systemImage: "clock")
                                 .font(.caption2)
-                                .padding(.horizontal, 8)
+                                .padding(.horizontal, DesignSystem.spacing.sm)
                                 .padding(.vertical, 3)
                                 .background(Capsule().fill(Color(.systemGray6)))
+                                .accessibilityLabel("Tijd: \(minutes) minuten")
                         }
 
                         ForEach(quest.dimensions) { dim in
                             Label(dim.label, systemImage: dim.systemImage)
                                 .font(.caption2)
-                                .padding(.horizontal, 6)
+                                .padding(.horizontal, DesignSystem.spacing.sm)
                                 .padding(.vertical, 3)
                                 .background(Capsule().fill(Color(.systemGray6)))
+                                .accessibilityLabel("Dimensie: \(dim.label)")
                         }
                     }
 
                     Text(quest.kind.guidance)
                         .font(.caption2)
                         .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 Spacer()
             }
             .contentShape(Rectangle())
+            .scaleEffect(isBouncing ? 1.03 : 1.0)
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Quest: \(quest.title), \(quest.xp) XP")
+        .accessibilityHint("Dubbel tik om te voltooien of markeer als openstaand")
     }
 }
 
@@ -439,71 +478,81 @@ struct ArcDetailView: View {
 
         List {
             Section {
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+                    HStack(alignment: .top, spacing: DesignSystem.spacing.md) {
                         ZStack {
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .fill(accent.opacity(0.15))
+                            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                                .fill(accent.opacity(0.18))
                             Image(systemName: arc.iconSystemName)
-                                .font(.system(size: 30, weight: .semibold))
+                                .font(.system(size: 34, weight: .bold))
                                 .foregroundColor(accent)
                         }
-                        .frame(width: 70, height: 70)
+                        .frame(width: 82, height: 82)
 
-                        VStack(alignment: .leading, spacing: 6) {
+                        VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
                             Text(arc.title)
-                                .font(.title2.bold())
+                                .font(DesignSystem.text.heroTitle)
+                                .foregroundColor(BrandTheme.textPrimary)
+                                .fixedSize(horizontal: false, vertical: true)
                             Text(arc.subtitle)
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(BrandTheme.mutedText)
                                 .fixedSize(horizontal: false, vertical: true)
 
-                            ProgressView(value: progress)
-                                .tint(accent)
-
-                            Text("\(Int(progress * 100))% voltooid • \(arc.questCount) quests")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                            VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                                HStack(alignment: .firstTextBaseline) {
+                                    Text("\(Int(progress * 100))% voltooid • \(arc.questCount) quests")
+                                        .font(.caption)
+                                        .foregroundColor(BrandTheme.mutedText)
+                                        .fixedSize()
+                                    Spacer(minLength: DesignSystem.spacing.sm)
+                                    if let day = model.arcDay(for: arc) {
+                                        Label("Dag \(day)", systemImage: "clock")
+                                            .font(.caption.weight(.semibold))
+                                            .foregroundColor(accent)
+                                            .accessibilityLabel("Live dag \(day)")
+                                    }
+                                }
+                                ProgressView(value: progress)
+                                    .tint(accent)
+                                    .animation(.easeInOut(duration: 0.45), value: progress)
+                            }
                         }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("\(arc.title), \(Int(progress * 100)) procent, \(arc.questCount) quests")
                     }
 
-                    HStack(spacing: 10) {
+                    if !arc.focusDimensions.isEmpty {
+                        FlexibleLabelRow(items: arc.focusDimensions.map { ($0.label, $0.systemImage) }, accent: Color(.systemGray6))
+                    }
+
+                    HStack(spacing: DesignSystem.spacing.md) {
                         Button {
                             model.startArcIfNeeded(arc)
                         } label: {
                             Label(model.arcStartDates[arc.id] == nil ? "Start arc" : "Ga verder", systemImage: "play.fill")
                                 .font(.footnote.weight(.semibold))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
+                                .padding(.horizontal, DesignSystem.spacing.md)
+                                .padding(.vertical, DesignSystem.spacing.sm)
                                 .background(Capsule().fill(accent.opacity(0.18)))
                         }
                         .buttonStyle(.plain)
+                        .accessibilityHint(model.arcStartDates[arc.id] == nil ? "Start deze arc" : "Ga verder in actieve arc")
 
                         if let day = model.arcDay(for: arc) {
                             Text("Live dag \(day)")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                        }
-                    }
-
-                    if !arc.focusDimensions.isEmpty {
-                        HStack(spacing: 8) {
-                            ForEach(arc.focusDimensions) { dim in
-                                HStack(spacing: 4) {
-                                    Image(systemName: dim.systemImage)
-                                    Text(dim.label)
-                                }
-                                .font(.caption2)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(
-                                    Capsule().fill(Color(.systemGray6))
-                                )
-                            }
+                                .accessibilityLabel("Live dag \(day)")
                         }
                     }
                 }
-                .padding(.vertical, 4)
+                .brandCard(cornerRadius: DesignSystem.radius.lg)
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel("Arc overzicht voor \(arc.title)")
+                .accessibilityHint("\(Int(progress * 100)) procent voltooid, \(arc.questCount) quests")
             }
 
             ForEach(arc.chapters) { chapter in
@@ -525,21 +574,27 @@ struct ChapterHeader: View {
     let progress: Double
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+            HStack(alignment: .firstTextBaseline) {
                 Text(chapter.title)
                     .font(.subheadline.weight(.semibold))
-                Spacer()
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: DesignSystem.spacing.sm)
                 Text("\(Int(progress * 100))%")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .fixedSize()
             }
             Text(chapter.summary)
                 .font(.caption)
                 .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             ProgressView(value: progress)
                 .tint(accent)
+                .animation(.easeInOut(duration: 0.45), value: progress)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Chapter \(chapter.title) \(Int(progress * 100)) procent")
     }
 }
 
@@ -547,20 +602,71 @@ struct ChapterHeader: View {
 
 struct ToolsPanel: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
             Text("Tools")
-                .font(.headline)
+                .font(DesignSystem.text.sectionTitle)
+                .foregroundColor(BrandTheme.textPrimary)
 
-            NavigationLink(destination: ChallengeView()) {
-                Label("Weekend Challenge", systemImage: "flag.checkered")
-            }
+            VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+                NavigationLink(destination: ChallengeView()) {
+                    Label("Weekend Challenge", systemImage: "flag.checkered")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(BrandTheme.textPrimary)
+                        .accessibilityHint("Open weekend challenge")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                                .fill(BrandTheme.cardBackground.opacity(0.7))
+                        )
+                }
 
-            NavigationLink(destination: BadgesView()) {
-                Label("Badges", systemImage: "rosette")
+                NavigationLink(destination: BadgesView()) {
+                    Label("Badges", systemImage: "rosette")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(BrandTheme.textPrimary)
+                        .accessibilityHint("Bekijk je badges")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                                .fill(BrandTheme.cardBackground.opacity(0.7))
+                        )
+                }
             }
         }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .brandCard()
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Tools overzicht")
+    }
+}
+
+private struct FlexibleLabelRow: View {
+    let items: [(String, String)]
+    let accent: Color
+
+    var body: some View {
+        FlexibleStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+            ForEach(items, id: \.0) { item in
+                Label(item.0, systemImage: item.1)
+                    .font(.caption2.weight(.semibold))
+                    .padding(.horizontal, DesignSystem.spacing.sm)
+                    .padding(.vertical, DesignSystem.spacing.xs)
+                    .background(Capsule().fill(accent))
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+        }
+    }
+}
+
+private struct FlexibleStack<Content: View>: View {
+    let alignment: HorizontalAlignment
+    let spacing: CGFloat
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: spacing)], alignment: alignment, spacing: spacing) {
+            content()
+        }
     }
 }

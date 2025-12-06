@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// User-facing control over the app appearance.
-enum AppearanceMode: String, CaseIterable, Identifiable, Hashable {
+enum AppearanceMode: String, CaseIterable, Identifiable, Hashable, Codable {
     case system
     case light
     case dark
