@@ -2764,6 +2764,7 @@ enum PackLibrary {
     )
 
     private static let basePacks: [CategoryPack] = [
+        lifeChecklist,
         relationshipCore,
         glowUp,
         breakupHealing,
@@ -2813,8 +2814,7 @@ enum PackLibrary {
         seasonalReset,
         healthAdmin,
         workLifeBoundaries,
-        creatorSocialStarter,
-        lifeChecklist
+        creatorSocialStarter
     ]
 
     static let all: [CategoryPack] = basePacks

@@ -64,6 +64,12 @@ struct UserSettings: Codable {
     var showEnergyCard: Bool
     var showMomentumGrid: Bool
     var showQuickActions: Bool
+    var showWeeklyBlueprint: Bool
+    var showFocusDimensionCard: Bool
+    var showFocusPlaylistCard: Bool
+    var showLegendaryQuestCard: Bool
+    var showSeasonalSpotlight: Bool
+    var showSuggestionCard: Bool
     var compactHomeLayout: Bool
     var expandHomeCardsByDefault: Bool
     var showHeroCards: Bool
@@ -72,6 +78,66 @@ struct UserSettings: Codable {
 
     var primaryFocus: LifeDimension?
     var overwhelmedLevel: Int
+
+    private enum CodingKeys: String, CodingKey {
+        case toneMode
+        case appearanceMode
+        case safeMode
+        case dailyNudgeIntensity
+        case maxConcurrentArcs
+        case questBoardDensity
+        case showHeartRepairContent
+        case enabledDimensions
+        case showProTeasers
+        case showEnergyCard
+        case showMomentumGrid
+        case showQuickActions
+        case showWeeklyBlueprint
+        case showFocusDimensionCard
+        case showFocusPlaylistCard
+        case showLegendaryQuestCard
+        case showSeasonalSpotlight
+        case showSuggestionCard
+        case compactHomeLayout
+        case expandHomeCardsByDefault
+        case showHeroCards
+        case showStreaks
+        case showArcProgressOnShare
+        case primaryFocus
+        case overwhelmedLevel
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        toneMode = try container.decodeIfPresent(ToneMode.self, forKey: .toneMode) ?? .soft
+        appearanceMode = try container.decodeIfPresent(AppearanceMode.self, forKey: .appearanceMode) ?? .system
+        safeMode = try container.decodeIfPresent(Bool.self, forKey: .safeMode) ?? false
+        dailyNudgeIntensity = try container.decodeIfPresent(NudgeIntensity.self, forKey: .dailyNudgeIntensity) ?? .standard
+        maxConcurrentArcs = try container.decodeIfPresent(Int.self, forKey: .maxConcurrentArcs) ?? 2
+        questBoardDensity = try container.decodeIfPresent(QuestBoardDensity.self, forKey: .questBoardDensity) ?? .balanced
+        showHeartRepairContent = try container.decodeIfPresent(Bool.self, forKey: .showHeartRepairContent) ?? true
+        enabledDimensions = try container.decodeIfPresent(Set<LifeDimension>.self, forKey: .enabledDimensions) ?? Set(LifeDimension.allCases)
+        showProTeasers = try container.decodeIfPresent(Bool.self, forKey: .showProTeasers) ?? true
+
+        showEnergyCard = try container.decodeIfPresent(Bool.self, forKey: .showEnergyCard) ?? false
+        showMomentumGrid = try container.decodeIfPresent(Bool.self, forKey: .showMomentumGrid) ?? true
+        showQuickActions = try container.decodeIfPresent(Bool.self, forKey: .showQuickActions) ?? true
+        showWeeklyBlueprint = try container.decodeIfPresent(Bool.self, forKey: .showWeeklyBlueprint) ?? false
+        showFocusDimensionCard = try container.decodeIfPresent(Bool.self, forKey: .showFocusDimensionCard) ?? false
+        showFocusPlaylistCard = try container.decodeIfPresent(Bool.self, forKey: .showFocusPlaylistCard) ?? false
+        showLegendaryQuestCard = try container.decodeIfPresent(Bool.self, forKey: .showLegendaryQuestCard) ?? false
+        showSeasonalSpotlight = try container.decodeIfPresent(Bool.self, forKey: .showSeasonalSpotlight) ?? false
+        showSuggestionCard = try container.decodeIfPresent(Bool.self, forKey: .showSuggestionCard) ?? false
+        compactHomeLayout = try container.decodeIfPresent(Bool.self, forKey: .compactHomeLayout) ?? false
+        expandHomeCardsByDefault = try container.decodeIfPresent(Bool.self, forKey: .expandHomeCardsByDefault) ?? true
+        showHeroCards = try container.decodeIfPresent(Bool.self, forKey: .showHeroCards) ?? true
+        showStreaks = try container.decodeIfPresent(Bool.self, forKey: .showStreaks) ?? true
+        showArcProgressOnShare = try container.decodeIfPresent(Bool.self, forKey: .showArcProgressOnShare) ?? true
+
+        primaryFocus = try container.decodeIfPresent(LifeDimension.self, forKey: .primaryFocus)
+        overwhelmedLevel = try container.decodeIfPresent(Int.self, forKey: .overwhelmedLevel) ?? 3
+    }
 }
 
 /// Central source of truth for Life XP state, progress, and preferences.
@@ -154,6 +220,36 @@ final class AppModel: ObservableObject {
     var showArcProgressOnShare: Bool {
         get { settings.showArcProgressOnShare }
         set { settings.showArcProgressOnShare = newValue }
+    }
+
+    var showWeeklyBlueprint: Bool {
+        get { settings.showWeeklyBlueprint }
+        set { settings.showWeeklyBlueprint = newValue }
+    }
+
+    var showFocusDimensionCard: Bool {
+        get { settings.showFocusDimensionCard }
+        set { settings.showFocusDimensionCard = newValue }
+    }
+
+    var showFocusPlaylistCard: Bool {
+        get { settings.showFocusPlaylistCard }
+        set { settings.showFocusPlaylistCard = newValue }
+    }
+
+    var showLegendaryQuestCard: Bool {
+        get { settings.showLegendaryQuestCard }
+        set { settings.showLegendaryQuestCard = newValue }
+    }
+
+    var showSeasonalSpotlight: Bool {
+        get { settings.showSeasonalSpotlight }
+        set { settings.showSeasonalSpotlight = newValue }
+    }
+
+    var showSuggestionCard: Bool {
+        get { settings.showSuggestionCard }
+        set { settings.showSuggestionCard = newValue }
     }
 
     // MARK: - Streaks

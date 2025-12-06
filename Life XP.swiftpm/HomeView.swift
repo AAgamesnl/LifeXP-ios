@@ -9,7 +9,7 @@ struct HomeView: View {
             ZStack {
                 BrandBackground()
 
-                ScrollView {
+                ScrollView(.vertical, showsIndicators: false) {
                     let spacing: CGFloat = model.compactHomeLayout ? DesignSystem.spacing.xl : DesignSystem.spacing.xxl
                     VStack(spacing: spacing) {
                         // Life score + streak
@@ -43,28 +43,28 @@ struct HomeView: View {
                                     .accessibilityValue("\(model.currentStreak) days")
                                 }
                             }
-                            
+
                             HStack(spacing: 20) {
                                 ProgressRing(progress: model.globalProgress)
                                     .frame(width: 110, height: 110)
-                                
+
                                 VStack(alignment: .leading, spacing: 8) {
                                     Text("Life Score")
                                         .font(.headline)
                                     Text("\(Int(model.globalProgress * 100))% completed")
                                         .font(.title2.bold())
-                                    
+
                                     Text("\(model.totalXP) XP earned")
                                         .font(.subheadline)
                                         .foregroundColor(BrandTheme.mutedText)
-                                    
+
                                     if model.bestStreak > 0 {
                                         Text("Best streak: \(model.bestStreak) days")
                                             .font(.caption)
                                             .foregroundColor(BrandTheme.mutedText)
                                     }
                                 }
-                                
+
                                 Spacer()
                             }
 
@@ -76,6 +76,62 @@ struct HomeView: View {
                         }
                         .brandCard()
 
+                        // Today's quests / next actions
+                        DailyBriefingCard(
+                            affirmation: model.dailyAffirmation,
+                            ritual: model.ritualOfTheDay,
+                            focusHeadline: model.focusHeadline,
+                            nextUnlock: model.nextUnlockMessage,
+                            streak: model.showStreaks ? model.currentStreak : 0,
+                            defaultExpanded: model.expandHomeCardsByDefault
+                        )
+                        .environmentObject(model)
+
+                        // Hero checklist entry point
+                        if let lifeChecklist = model.packs.first(where: { $0.id == "life_checklist_classic" }) {
+                            NavigationLink(destination: PackDetailView(pack: lifeChecklist)) {
+                                LifeChecklistCard(
+                                    pack: lifeChecklist,
+                                    progress: model.progress(for: lifeChecklist)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        // Level / streak summary
+                        LevelCard(
+                            level: model.level,
+                            progress: model.levelProgress,
+                            xpToNext: model.xpToNextLevel,
+                            nextUnlock: model.nextUnlockMessage
+                        )
+                        .environmentObject(model)
+
+                        // Balance overview
+                        VStack(spacing: 16) {
+                            HStack {
+                                Text("Your balance")
+                                    .font(.headline)
+                                Spacer()
+                            }
+
+                            ForEach(LifeDimension.allCases) { dim in
+                                DimensionRow(dimension: dim)
+                            }
+                        }
+                        .brandCard(cornerRadius: 20)
+
+                        // Momentum & micro wins
+                        if model.showMomentumGrid {
+                            MomentumGrid(rankings: model.dimensionRankings)
+                                .environmentObject(model)
+                        }
+
+                        if !model.microWins.isEmpty {
+                            MicroWinsCard(items: model.microWins)
+                        }
+
+                        // Arc preview
                         if let arcPreview = model.highlightedArc, model.showHeroCards {
                             let board = model.nextQuestBoard(limit: model.questBoardLimit)
                             let next = board.arc?.id == arcPreview.id ? board.quests : model.nextQuests(in: arcPreview, limit: 2)
@@ -95,79 +151,6 @@ struct HomeView: View {
                             CompactArcSummary(arc: arcPreview, progress: model.arcProgress(arcPreview), nextQuests: model.nextQuests(in: arcPreview, limit: 1))
                         }
 
-                        DailyBriefingCard(
-                            affirmation: model.dailyAffirmation,
-                            ritual: model.ritualOfTheDay,
-                            focusHeadline: model.focusHeadline,
-                            nextUnlock: model.nextUnlockMessage,
-                            streak: model.showStreaks ? model.currentStreak : 0,
-                            defaultExpanded: model.expandHomeCardsByDefault
-                        )
-                        .environmentObject(model)
-
-                        if model.showEnergyCard {
-                            EnergyCheckCard(
-                                headline: model.energyCheckIn,
-                                prompts: model.recoveryPrompts,
-                                remaining: model.remainingCount,
-                                defaultExpanded: model.expandHomeCardsByDefault
-                            )
-                            .environmentObject(model)
-                        }
-
-                        LevelCard(
-                            level: model.level,
-                            progress: model.levelProgress,
-                            xpToNext: model.xpToNextLevel,
-                            nextUnlock: model.nextUnlockMessage
-                        )
-                        .environmentObject(model)
-
-                        if let spotlight = model.seasonalSpotlight {
-                            SeasonalSpotlightCard(theme: spotlight.theme, items: spotlight.items)
-                        }
-
-                        if model.settings.showProTeasers, let legendary = model.legendaryQuest, let pack = model.pack(for: legendary.id) {
-                            LegendaryQuestCard(pack: pack, item: legendary)
-                        }
-
-                        WeeklyBlueprintCard(steps: model.weeklyBlueprint)
-
-                        // Suggestion card
-                        if let suggestion = model.suggestedItem {
-                            NavigationLink(destination: PackDetailView(pack: suggestion.pack)) {
-                                SuggestionCardView(pack: suggestion.pack, item: suggestion.item)
-                            }
-                            .buttonStyle(.plain)
-                        }
-
-                        if let dim = model.lowestDimension, !model.focusSuggestions.isEmpty {
-                            FocusDimensionCard(dimension: dim, items: model.focusSuggestions)
-                        }
-
-                        if !model.focusPlaylist.isEmpty {
-                            FocusPlaylistCard(items: model.focusPlaylist)
-                        }
-
-                        // Quick dimension bars
-                        VStack(spacing: 16) {
-                            HStack {
-                                Text("Your balance")
-                                    .font(.headline)
-                                Spacer()
-                            }
-
-                            ForEach(LifeDimension.allCases) { dim in
-                                DimensionRow(dimension: dim)
-                            }
-                        }
-                        .brandCard(cornerRadius: 20)
-
-                        if model.showMomentumGrid {
-                            MomentumGrid(rankings: model.dimensionRankings)
-                                .environmentObject(model)
-                        }
-
                         if !model.boosterPacks.isEmpty {
                             BoosterCarousel(boosterPacks: model.boosterPacks)
                         }
@@ -185,7 +168,7 @@ struct HomeView: View {
                                     QuickActionRow(
                                         icon: "map.fill",
                                         title: "Arcs hub",
-                                        subtitle: "Zie je huidige arc, suggesties en quest board."
+                                        subtitle: "Zie je huidige arc, suggesties en quest board.",
                                     )
                                 }
                                 .buttonStyle(.plain)
@@ -194,15 +177,49 @@ struct HomeView: View {
                                     QuickActionRow(
                                         icon: "flag.checkered",
                                         title: "Weekend Challenge",
-                                        subtitle: "Laat Life XP een challenge voor je samenstellen."
+                                        subtitle: "Laat Life XP een challenge voor je samenstellen.",
                                     )
                                 }
                                 .buttonStyle(.plain)
-
-                                if !model.microWins.isEmpty {
-                                    MicroWinsCard(items: model.microWins)
-                                }
                             }
+                        }
+
+                        // Secondary content (hidden by default)
+                        if model.showEnergyCard {
+                            EnergyCheckCard(
+                                headline: model.energyCheckIn,
+                                prompts: model.recoveryPrompts,
+                                remaining: model.remainingCount,
+                                defaultExpanded: model.expandHomeCardsByDefault
+                            )
+                            .environmentObject(model)
+                        }
+
+                        if model.showWeeklyBlueprint {
+                            WeeklyBlueprintCard(steps: model.weeklyBlueprint)
+                        }
+
+                        if model.showLegendaryQuestCard, model.settings.showProTeasers, let legendary = model.legendaryQuest, let pack = model.pack(for: legendary.id) {
+                            LegendaryQuestCard(pack: pack, item: legendary)
+                        }
+
+                        if model.showSeasonalSpotlight, let spotlight = model.seasonalSpotlight {
+                            SeasonalSpotlightCard(theme: spotlight.theme, items: spotlight.items)
+                        }
+
+                        if model.showSuggestionCard, let suggestion = model.suggestedItem {
+                            NavigationLink(destination: PackDetailView(pack: suggestion.pack)) {
+                                SuggestionCardView(pack: suggestion.pack, item: suggestion.item)
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        if model.showFocusDimensionCard, let dim = model.lowestDimension, !model.focusSuggestions.isEmpty {
+                            FocusDimensionCard(dimension: dim, items: model.focusSuggestions)
+                        }
+
+                        if model.showFocusPlaylistCard, !model.focusPlaylist.isEmpty {
+                            FocusPlaylistCard(items: model.focusPlaylist)
                         }
                     }
                     .padding()
@@ -215,6 +232,59 @@ struct HomeView: View {
                 }
             }
         }
+    }
+}
+
+struct LifeChecklistCard: View {
+    let pack: CategoryPack
+    let progress: Double
+
+    var body: some View {
+        let accent = Color(hex: pack.accentColorHex, default: .accentColor)
+
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                Image(systemName: pack.iconSystemName)
+                    .foregroundColor(.white)
+                    .font(.system(size: 22, weight: .bold))
+                    .padding(12)
+                    .background(Circle().fill(accent))
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Life Checklist")
+                        .font(.headline)
+                    Text(pack.subtitle)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                }
+
+                Spacer()
+            }
+
+            HStack(spacing: 10) {
+                Text("Hero checklist")
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Capsule().fill(accent.opacity(0.16)))
+                    .foregroundColor(accent)
+
+                Spacer()
+
+                Text("\(Int(progress * 100))% complete")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            ProgressView(value: progress)
+                .tint(accent)
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .shadow(color: Color.black.opacity(0.06), radius: 10, y: 5)
     }
 }
 
@@ -936,52 +1006,77 @@ struct BoosterCarousel: View {
                 HStack(spacing: 12) {
                     ForEach(Array(boosterPacks.prefix(4)).indices, id: \.self) { index in
                         let entry = boosterPacks[index]
-                        let accent = Color(hex: entry.pack.accentColorHex, default: .accentColor)
-
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Image(systemName: entry.pack.iconSystemName)
-                                    .foregroundColor(accent)
-                                Text(entry.pack.title)
-                                    .font(.subheadline.weight(.semibold))
-                                Spacer()
-                            }
-
-                            HStack {
-                                Text("\(Int(entry.progress * 100))%")
-                                    .font(.caption.weight(.medium))
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Capsule().fill(accent.opacity(0.16)))
-                                    .foregroundColor(accent)
-                                Text("Nog \(entry.remaining) quests")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-
-                            GeometryReader { geo in
-                                ZStack(alignment: .leading) {
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(Color(.systemGray6))
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(accent)
-                                        .frame(width: max(10, geo.size.width * CGFloat(min(1, max(0, entry.progress)))))
-                                }
-                            }
-                            .frame(height: 10)
+                        NavigationLink(destination: PackDetailView(pack: entry.pack)) {
+                            BoosterCard(entry: entry)
                         }
-                        .padding()
-                        .frame(width: 220)
-                        .background(Color(.systemBackground))
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        .shadow(color: Color.black.opacity(0.06), radius: 8, y: 3)
+                        .buttonStyle(.plain)
                     }
                 }
+                .padding(.vertical, 2)
             }
         }
         .padding()
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+}
+
+private struct BoosterCard: View {
+    let entry: (pack: CategoryPack, remaining: Int, progress: Double)
+
+    var body: some View {
+        let accent = Color(hex: entry.pack.accentColorHex, default: .accentColor)
+
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Image(systemName: entry.pack.iconSystemName)
+                    .foregroundColor(accent)
+                    .font(.system(size: 18, weight: .semibold))
+                    .padding(10)
+                    .background(Circle().fill(accent.opacity(0.14)))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(entry.pack.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                    Text(entry.pack.subtitle)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                }
+
+                Spacer()
+            }
+
+            HStack(spacing: 10) {
+                Text("\(Int(entry.progress * 100))%")
+                    .font(.caption.weight(.medium))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(accent.opacity(0.16)))
+                    .foregroundColor(accent)
+                Text("Nog \(entry.remaining) quests")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color(.systemGray6))
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(accent)
+                        .frame(width: max(10, geo.size.width * CGFloat(min(1, max(0, entry.progress)))))
+                }
+            }
+            .frame(height: 10)
+        }
+        .padding()
+        .frame(width: 240)
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .shadow(color: Color.black.opacity(0.06), radius: 8, y: 3)
     }
 }
 
