@@ -7,7 +7,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                BrandBackground()
+                BrandBackground(
 
                 ScrollView(.vertical, showsIndicators: false) {
                     let spacing: CGFloat = model.compactHomeLayout ? DesignSystem.spacing.xl : DesignSystem.spacing.xxl
