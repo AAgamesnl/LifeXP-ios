@@ -7,7 +7,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                BrandBackground(
+                BrandBackground()
 
                 ScrollView(.vertical, showsIndicators: false) {
                     let spacing: CGFloat = model.compactHomeLayout ? DesignSystem.spacing.xl : DesignSystem.spacing.xxl
@@ -168,7 +168,7 @@ struct HomeView: View {
                                     QuickActionRow(
                                         icon: "map.fill",
                                         title: "Arcs hub",
-                                        subtitle: "Zie je huidige arc, suggesties en quest board.",
+                                        subtitle: "Zie je huidige arc, suggesties en quest board."
                                     )
                                 }
                                 .buttonStyle(.plain)
@@ -177,7 +177,7 @@ struct HomeView: View {
                                     QuickActionRow(
                                         icon: "flag.checkered",
                                         title: "Weekend Challenge",
-                                        subtitle: "Laat Life XP een challenge voor je samenstellen.",
+                                        subtitle: "Laat Life XP een challenge voor je samenstellen."
                                     )
                                 }
                                 .buttonStyle(.plain)
