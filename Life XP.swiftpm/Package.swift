@@ -5,14 +5,18 @@
 // Do not edit it by hand because the contents will be replaced.
 
 import PackageDescription
-import AppleProductTypes
 
-let package = Package(
-    name: "Life XP",
-    platforms: [
-        .iOS("17.0")
-    ],
-    products: [
+#if canImport(AppleProductTypes)
+import AppleProductTypes
+#endif
+
+// Conditionally define the product list so the manifest can be parsed outside
+// of Apple platforms (for example in CI on Linux). When AppleProductTypes is
+// unavailable we expose a lightweight library product, which keeps SwiftPM
+// happy without changing the iOS app configuration used in Xcode.
+private let products: [Product] = {
+#if canImport(AppleProductTypes)
+    return [
         .iOSApplication(
             name: "Life XP",
             targets: ["AppModule"],
@@ -34,8 +38,17 @@ let package = Package(
             ],
             appCategory: .lifestyle
         )
-    ],
-    targets: [
+    ]
+#else
+    return [
+        .library(name: "AppModule", targets: ["AppModule"])
+    ]
+#endif
+}()
+
+private let targets: [Target] = {
+#if canImport(AppleProductTypes)
+    return [
         .executableTarget(
             name: "AppModule",
             path: ".",
@@ -44,4 +57,24 @@ let package = Package(
             ]
         )
     ]
+#else
+    return [
+        .target(
+            name: "AppModule",
+            path: ".",
+            swiftSettings: [
+                .enableUpcomingFeature("BareSlashRegexLiterals")
+            ]
+        )
+    ]
+#endif
+}()
+
+let package = Package(
+    name: "Life XP",
+    platforms: [
+        .iOS("17.0")
+    ],
+    products: products,
+    targets: targets
 )
