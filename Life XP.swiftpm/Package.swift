@@ -56,6 +56,7 @@ private let targets: [Target] = {
         .executableTarget(
             name: "AppModule",
             path: ".",
+            exclude: ["Tests"],
             swiftSettings: commonSwiftSettings
         ),
         .testTarget(
@@ -73,6 +74,7 @@ private let targets: [Target] = {
         .target(
             name: "AppModule",
             path: "LinuxSupport",
+            exclude: ["Tests"],
             swiftSettings: commonSwiftSettings
         ),
         .testTarget(
