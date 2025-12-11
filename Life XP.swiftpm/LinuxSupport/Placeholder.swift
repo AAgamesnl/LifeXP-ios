@@ -3,6 +3,10 @@
 
 import Foundation
 
-public func runLifeXPPlaceholder() {
-    print("Life XP placeholder build for non-Apple platforms.")
+/// Returns a short message confirming the placeholder build is being used and prints it.
+@discardableResult
+public func runLifeXPPlaceholder() -> String {
+    let message = "Life XP placeholder build for non-Apple platforms."
+    print(message)
+    return message
 }

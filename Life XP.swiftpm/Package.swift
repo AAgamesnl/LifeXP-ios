@@ -47,14 +47,16 @@ private let products: [Product] = {
 }()
 
 private let targets: [Target] = {
+    let commonSwiftSettings: [SwiftSetting] = [
+        .enableUpcomingFeature("BareSlashRegexLiterals")
+    ]
+
 #if canImport(AppleProductTypes)
     return [
         .executableTarget(
             name: "AppModule",
             path: ".",
-            swiftSettings: [
-                .enableUpcomingFeature("BareSlashRegexLiterals")
-            ]
+            swiftSettings: commonSwiftSettings
         ),
         .testTarget(
             name: "AppModuleTests",
@@ -71,9 +73,7 @@ private let targets: [Target] = {
         .target(
             name: "AppModule",
             path: "LinuxSupport",
-            swiftSettings: [
-                .enableUpcomingFeature("BareSlashRegexLiterals")
-            ]
+            swiftSettings: commonSwiftSettings
         ),
         .testTarget(
             name: "AppModuleTests",

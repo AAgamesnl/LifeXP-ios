@@ -8,8 +8,8 @@ final class AppModuleTests: XCTestCase {
         XCTAssertTrue(true)
         #else
         // In Linux CI we expect the placeholder entry point to be callable.
-        runLifeXPPlaceholder()
-        XCTAssertTrue(true)
+        let message = runLifeXPPlaceholder()
+        XCTAssertEqual(message, "Life XP placeholder build for non-Apple platforms.")
         #endif
     }
 }
