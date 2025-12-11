@@ -55,16 +55,30 @@ private let targets: [Target] = {
             swiftSettings: [
                 .enableUpcomingFeature("BareSlashRegexLiterals")
             ]
+        ),
+        .testTarget(
+            name: "AppModuleTests",
+            dependencies: ["AppModule"],
+            path: "Tests"
         )
     ]
 #else
     return [
+        // Use a lightweight placeholder target when Apple-only dependencies such
+        // as SwiftUI are unavailable. This keeps `swift build` and `swift test`
+        // working in Linux-based CI without altering the iOS app used on Apple
+        // platforms.
         .target(
             name: "AppModule",
-            path: ".",
+            path: "LinuxSupport",
             swiftSettings: [
                 .enableUpcomingFeature("BareSlashRegexLiterals")
             ]
+        ),
+        .testTarget(
+            name: "AppModuleTests",
+            dependencies: ["AppModule"],
+            path: "Tests"
         )
     ]
 #endif
