@@ -286,7 +286,7 @@ struct OnboardingView: View {
     private func toneOption(tone: ToneMode, title: String, description: String) -> some View {
         let isSelected = selectedTone == tone
 
-        Button {
+        return Button {
             selectedTone = tone
         } label: {
             HStack(alignment: .top, spacing: 12) {

@@ -75,7 +75,7 @@ struct ChallengeView: View {
                 Text("Arc focus")
                     .font(.headline)
                 Spacer()
-                if let arc = board.arc {
+                if board.arc != nil {
                     Text(model.arcProgressHeadline)
                         .font(.caption)
                         .foregroundColor(.secondary)

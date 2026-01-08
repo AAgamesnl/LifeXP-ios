@@ -614,28 +614,28 @@ struct ArcDetailView: View {
     @State private var pendingArcToStart: Arc?
     @State private var showArcLimitDialog = false
 
+    private func attemptStartArc() {
+        let wasActive = model.arcStartDates[arc.id] != nil
+        if model.startArcIfNeeded(arc), !wasActive {
+            HapticsEngine.lightImpact()
+        } else if !wasActive && model.remainingArcSlots == 0 {
+            pendingArcToStart = arc
+            showArcLimitDialog = true
+        }
+    }
+
+    private func swapArc(_ active: Arc) {
+        model.resetArcStart(active)
+        if model.startArcIfNeeded(arc) {
+            HapticsEngine.lightImpact()
+        }
+        pendingArcToStart = nil
+    }
+
     var body: some View {
         let accent = Color(hex: arc.accentColorHex, default: .accentColor)
         let progress = model.arcProgress(arc)
         let isActive = model.arcStartDates[arc.id] != nil && progress < 1
-
-        func attemptStartArc() {
-            let wasActive = model.arcStartDates[arc.id] != nil
-            if model.startArcIfNeeded(arc), !wasActive {
-                HapticsEngine.lightImpact()
-            } else if !wasActive && model.remainingArcSlots == 0 {
-                pendingArcToStart = arc
-                showArcLimitDialog = true
-            }
-        }
-
-        func swapArc(_ active: Arc) {
-            model.resetArcStart(active)
-            if model.startArcIfNeeded(arc) {
-                HapticsEngine.lightImpact()
-            }
-            pendingArcToStart = nil
-        }
 
         List {
             Section {
