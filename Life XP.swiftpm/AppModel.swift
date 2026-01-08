@@ -264,6 +264,9 @@ final class AppModel: ObservableObject {
     // MARK: - Environment
     private let calendar: Calendar
     private let persistence: PersistenceManaging
+    private let persistenceQueue = DispatchQueue(label: "lifeXP.persistence", qos: .utility)
+    private var pendingPersistWorkItem: DispatchWorkItem?
+    private let persistDebounceInterval: TimeInterval = 0.35
 
     /// Preferred color scheme based on the user's explicit appearance selection.
     var preferredColorScheme: ColorScheme? { settings.appearanceMode.colorScheme }
@@ -308,8 +311,21 @@ final class AppModel: ObservableObject {
     // MARK: - Persistence
 
     /// Persists the current snapshot to disk. Failures are ignored so the UI remains responsive even if storage is unavailable.
-    private func persistState() {
-        persistence.saveSnapshot(currentSnapshot())
+    private func persistState(immediately: Bool = false) {
+        let snapshot = currentSnapshot()
+        pendingPersistWorkItem?.cancel()
+
+        let workItem = DispatchWorkItem { [persistence] in
+            persistence.saveSnapshot(snapshot)
+        }
+
+        if immediately {
+            persistenceQueue.async(execute: workItem)
+            return
+        }
+
+        pendingPersistWorkItem = workItem
+        persistenceQueue.asyncAfter(deadline: .now() + persistDebounceInterval, execute: workItem)
     }
 
     private func currentSnapshot() -> PersistenceSnapshot {
