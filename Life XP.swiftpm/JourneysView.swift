@@ -195,8 +195,8 @@ struct ArcHeroCard: View {
                 }
             }
 
+            let canStart = model.canStartArc(arc)
             HStack(spacing: DesignSystem.spacing.md) {
-                let canStart = model.canStartArc(arc)
                 if model.arcStartDates[arc.id] == nil && model.remainingArcSlots == 0 {
                     Label("Max \(model.settings.maxConcurrentArcs) arcs actief", systemImage: "exclamationmark.triangle")
                         .font(.caption2)

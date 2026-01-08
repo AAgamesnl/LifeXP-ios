@@ -107,6 +107,60 @@ struct UserSettings: Codable {
         case overwhelmedLevel
     }
 
+    init(
+        toneMode: ToneMode = .soft,
+        appearanceMode: AppearanceMode = .system,
+        safeMode: Bool = false,
+        dailyNudgeIntensity: NudgeIntensity = .standard,
+        maxConcurrentArcs: Int = 2,
+        questBoardDensity: QuestBoardDensity = .balanced,
+        showHeartRepairContent: Bool = true,
+        enabledDimensions: Set<LifeDimension> = Set(LifeDimension.allCases),
+        showProTeasers: Bool = true,
+        showEnergyCard: Bool = false,
+        showMomentumGrid: Bool = true,
+        showQuickActions: Bool = true,
+        showWeeklyBlueprint: Bool = false,
+        showFocusDimensionCard: Bool = false,
+        showFocusPlaylistCard: Bool = false,
+        showLegendaryQuestCard: Bool = false,
+        showSeasonalSpotlight: Bool = false,
+        showSuggestionCard: Bool = false,
+        compactHomeLayout: Bool = false,
+        expandHomeCardsByDefault: Bool = true,
+        showHeroCards: Bool = true,
+        showStreaks: Bool = true,
+        showArcProgressOnShare: Bool = true,
+        primaryFocus: LifeDimension? = nil,
+        overwhelmedLevel: Int = 3
+    ) {
+        self.toneMode = toneMode
+        self.appearanceMode = appearanceMode
+        self.safeMode = safeMode
+        self.dailyNudgeIntensity = dailyNudgeIntensity
+        self.maxConcurrentArcs = maxConcurrentArcs
+        self.questBoardDensity = questBoardDensity
+        self.showHeartRepairContent = showHeartRepairContent
+        self.enabledDimensions = enabledDimensions
+        self.showProTeasers = showProTeasers
+        self.showEnergyCard = showEnergyCard
+        self.showMomentumGrid = showMomentumGrid
+        self.showQuickActions = showQuickActions
+        self.showWeeklyBlueprint = showWeeklyBlueprint
+        self.showFocusDimensionCard = showFocusDimensionCard
+        self.showFocusPlaylistCard = showFocusPlaylistCard
+        self.showLegendaryQuestCard = showLegendaryQuestCard
+        self.showSeasonalSpotlight = showSeasonalSpotlight
+        self.showSuggestionCard = showSuggestionCard
+        self.compactHomeLayout = compactHomeLayout
+        self.expandHomeCardsByDefault = expandHomeCardsByDefault
+        self.showHeroCards = showHeroCards
+        self.showStreaks = showStreaks
+        self.showArcProgressOnShare = showArcProgressOnShare
+        self.primaryFocus = primaryFocus
+        self.overwhelmedLevel = overwhelmedLevel
+    }
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 

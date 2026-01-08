@@ -559,7 +559,9 @@ struct ShareCardImage: Transferable {
     var preview: Image { Image(uiImage: image) }
 
     static var transferRepresentation: some TransferRepresentation {
-        DataRepresentation(exportedContentType: .png) { image.pngData() ?? Data() }
+        DataRepresentation(exportedContentType: .png) { item in
+            item.image.pngData() ?? Data()
+        }
     }
 }
 
@@ -623,7 +625,7 @@ struct SharePreviewView: View {
         isRendering = true
 
         Task {
-            let rendered = await renderShareCard(for: model)
+            let rendered = await MainActor.run { renderShareCard(for: model) }
             await MainActor.run {
                 shareCard = rendered
                 isRendering = false
@@ -634,7 +636,7 @@ struct SharePreviewView: View {
     private func ensureShareCardPrepared() async {
         guard shareCard == nil else { return }
         await MainActor.run { isRendering = true }
-        let rendered = await renderShareCard(for: model)
+        let rendered = await MainActor.run { renderShareCard(for: model) }
         await MainActor.run {
             shareCard = rendered
             isRendering = false
@@ -718,7 +720,7 @@ struct ShareEntryCard: View {
         isRendering = true
 
         Task {
-            let rendered = await renderShareCard(for: model)
+            let rendered = await MainActor.run { renderShareCard(for: model) }
             await MainActor.run {
                 shareCard = rendered
                 isRendering = false
@@ -729,7 +731,7 @@ struct ShareEntryCard: View {
     private func ensureShareCardPrepared() async {
         guard shareCard == nil else { return }
         await MainActor.run { isRendering = true }
-        let rendered = await renderShareCard(for: model)
+        let rendered = await MainActor.run { renderShareCard(for: model) }
         await MainActor.run {
             shareCard = rendered
             isRendering = false
