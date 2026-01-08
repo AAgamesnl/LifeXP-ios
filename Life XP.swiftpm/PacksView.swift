@@ -1,217 +1,587 @@
 import SwiftUI
 
+// MARK: - Packs View
+
 struct PacksView: View {
     @EnvironmentObject var model: AppModel
+    @State private var searchText = ""
+    @State private var selectedFilter: PackFilter = .all
+    
+    enum PackFilter: String, CaseIterable {
+        case all = "All"
+        case inProgress = "In Progress"
+        case completed = "Completed"
+        case premium = "Premium"
+    }
+    
+    private var filteredPacks: [CategoryPack] {
+        var packs = model.packs
+        
+        // Apply search
+        if !searchText.isEmpty {
+            packs = packs.filter { pack in
+                pack.title.localizedCaseInsensitiveContains(searchText) ||
+                pack.subtitle.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+        
+        // Apply filter
+        switch selectedFilter {
+        case .all:
+            break
+        case .inProgress:
+            packs = packs.filter { model.progress(for: $0) > 0 && model.progress(for: $0) < 1 }
+        case .completed:
+            packs = packs.filter { model.progress(for: $0) >= 1 }
+        case .premium:
+            packs = packs.filter { $0.isPremium }
+        }
+        
+        return packs
+    }
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                LazyVStack(spacing: 18) {
-                    ForEach(model.packs) { pack in
-                        NavigationLink(destination: PackDetailView(pack: pack)) {
-                            PackCardView(pack: pack)
+            ZStack {
+                BrandBackgroundStatic()
+                
+                ScrollView {
+                    VStack(spacing: DesignSystem.spacing.lg) {
+                        // Stats header
+                        PacksStatsHeader()
+                        
+                        // Filter chips
+                        FilterChipsRow(selectedFilter: $selectedFilter)
+                        
+                        // Pack list
+                        LazyVStack(spacing: DesignSystem.spacing.md) {
+                            ForEach(filteredPacks) { pack in
+                                NavigationLink(destination: PackDetailView(pack: pack)) {
+                                    PackCard(pack: pack)
+                                }
+                                .buttonStyle(CardButtonStyle())
+                            }
                         }
-                        .buttonStyle(.plain)
+                        
+                        // Empty state
+                        if filteredPacks.isEmpty {
+                            EmptyStateView(
+                                icon: "checklist",
+                                title: "No packs found",
+                                message: "Try adjusting your search or filter."
+                            )
+                            .padding(.top, DesignSystem.spacing.xxl)
+                        }
                     }
+                    .padding(.horizontal, DesignSystem.spacing.lg)
+                    .padding(.bottom, DesignSystem.spacing.xxl)
                 }
-                .padding()
             }
             .navigationTitle("Life Packs")
+            .searchable(text: $searchText, prompt: "Search packs")
         }
     }
 }
 
-struct PackCardView: View {
+// MARK: - Packs Stats Header
+
+struct PacksStatsHeader: View {
+    @EnvironmentObject var model: AppModel
+    
+    private var completedPacks: Int {
+        model.packs.filter { model.progress(for: $0) >= 1 }.count
+    }
+    
+    private var inProgressPacks: Int {
+        model.packs.filter { model.progress(for: $0) > 0 && model.progress(for: $0) < 1 }.count
+    }
+    
+    var body: some View {
+        HStack(spacing: DesignSystem.spacing.md) {
+            PackStatTile(
+                icon: "checklist.checked",
+                value: "\(completedPacks)",
+                label: "Completed",
+                color: BrandTheme.success
+            )
+            
+            PackStatTile(
+                icon: "clock.arrow.circlepath",
+                value: "\(inProgressPacks)",
+                label: "In Progress",
+                color: BrandTheme.warning
+            )
+            
+            PackStatTile(
+                icon: "star.fill",
+                value: "\(model.totalXP)",
+                label: "Total XP",
+                color: BrandTheme.accent
+            )
+        }
+    }
+}
+
+struct PackStatTile: View {
+    let icon: String
+    let value: String
+    let label: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: DesignSystem.spacing.xs) {
+            Image(systemName: icon)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(color)
+            
+            Text(value)
+                .font(DesignSystem.text.headlineMedium)
+                .foregroundColor(BrandTheme.textPrimary)
+            
+            Text(label)
+                .font(.caption2)
+                .foregroundColor(BrandTheme.mutedText)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, DesignSystem.spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                .fill(color.opacity(0.1))
+        )
+    }
+}
+
+// MARK: - Filter Chips Row
+
+struct FilterChipsRow: View {
+    @Binding var selectedFilter: PacksView.PackFilter
+    
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: DesignSystem.spacing.sm) {
+                ForEach(PacksView.PackFilter.allCases, id: \.rawValue) { filter in
+                    FilterChip(
+                        title: filter.rawValue,
+                        isSelected: selectedFilter == filter
+                    ) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            selectedFilter = filter
+                        }
+                        HapticsEngine.lightImpact()
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct FilterChip: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(DesignSystem.text.labelSmall)
+                .foregroundColor(isSelected ? .white : BrandTheme.textSecondary)
+                .padding(.horizontal, DesignSystem.spacing.md)
+                .padding(.vertical, DesignSystem.spacing.sm)
+                .background(
+                    Capsule()
+                        .fill(isSelected ? BrandTheme.accent : BrandTheme.cardBackground.opacity(0.8))
+                )
+                .overlay(
+                    Capsule()
+                        .strokeBorder(isSelected ? Color.clear : BrandTheme.borderSubtle, lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Pack Card
+
+struct PackCard: View {
     @EnvironmentObject var model: AppModel
     let pack: CategoryPack
     
+    private var accent: Color {
+        Color(hex: pack.accentColorHex, default: BrandTheme.accent)
+    }
+    
+    private var progress: Double {
+        model.progress(for: pack)
+    }
+    
+    private var itemCount: Int {
+        model.items(for: pack).count
+    }
+    
+    private var completedCount: Int {
+        model.items(for: pack).filter { model.isCompleted($0) }.count
+    }
+    
     var body: some View {
-        let accent = Color(hex: pack.accentColorHex, default: .accentColor)
-        
-        HStack(spacing: 16) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(accent.opacity(0.15))
-                
-                Image(systemName: pack.iconSystemName)
-                    .font(.system(size: 26, weight: .semibold))
-                    .foregroundColor(accent)
-            }
-            .frame(width: 60, height: 60)
+        HStack(spacing: DesignSystem.spacing.lg) {
+            // Icon
+            IconContainer(
+                systemName: pack.iconSystemName,
+                color: accent,
+                size: .large,
+                style: progress >= 1 ? .gradient : .soft
+            )
             
-            VStack(alignment: .leading, spacing: 6) {
+            // Content
+            VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
                 HStack {
                     Text(pack.title)
-                        .font(.headline)
+                        .font(DesignSystem.text.headlineMedium)
+                        .foregroundColor(BrandTheme.textPrimary)
                     
                     if pack.isPremium {
-                        Text("PRO")
-                            .font(.caption2.bold())
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(
-                                Capsule().fill(Color.yellow.opacity(0.2))
-                            )
-                            .overlay(
-                                Capsule().stroke(Color.yellow.opacity(0.7), lineWidth: 1)
-                            )
+                        ProBadge()
+                    }
+                    
+                    if progress >= 1 {
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(BrandTheme.success)
                     }
                 }
                 
                 Text(pack.subtitle)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .font(DesignSystem.text.bodySmall)
+                    .foregroundColor(BrandTheme.mutedText)
                     .lineLimit(2)
                 
-                ProgressView(
-                    value: model.progress(for: pack),
-                    total: 1
-                )
-                .tint(accent.opacity(0.9))
-                
-                Text("\(Int(model.progress(for: pack) * 100))% completed")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                // Progress section
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                    AnimatedProgressBar(progress: progress, height: 6, color: accent)
+                    
+                    HStack {
+                        Text("\(Int(progress * 100))% complete")
+                            .font(.caption)
+                            .foregroundColor(BrandTheme.mutedText)
+                        
+                        Spacer()
+                        
+                        Text("\(completedCount)/\(itemCount) items")
+                            .font(.caption)
+                            .foregroundColor(BrandTheme.mutedText)
+                    }
+                }
             }
             
-            Spacer()
+            // Arrow
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(BrandTheme.mutedText)
         }
-        .padding(14)
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .shadow(radius: 8, y: 4)
+        .brandCard()
     }
 }
 
-// MARK: - Pack Detail
+struct ProBadge: View {
+    var body: some View {
+        Text("PRO")
+            .font(.system(size: 10, weight: .black))
+            .foregroundColor(BrandTheme.warning)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(
+                Capsule()
+                    .fill(BrandTheme.warning.opacity(0.15))
+            )
+            .overlay(
+                Capsule()
+                    .strokeBorder(BrandTheme.warning.opacity(0.3), lineWidth: 1)
+            )
+    }
+}
+
+// MARK: - Pack Detail View
 
 struct PackDetailView: View {
     @EnvironmentObject var model: AppModel
     let pack: CategoryPack
     
-    var items: [ChecklistItem] {
-        model.items(for: pack)
+    @State private var showCompletedItems = true
+    @State private var searchText = ""
+    
+    private var accent: Color {
+        Color(hex: pack.accentColorHex, default: BrandTheme.accent)
+    }
+    
+    private var items: [ChecklistItem] {
+        var filteredItems = model.items(for: pack)
+        
+        if !searchText.isEmpty {
+            filteredItems = filteredItems.filter { item in
+                item.title.localizedCaseInsensitiveContains(searchText) ||
+                (item.detail?.localizedCaseInsensitiveContains(searchText) ?? false)
+            }
+        }
+        
+        if !showCompletedItems {
+            filteredItems = filteredItems.filter { !model.isCompleted($0) }
+        }
+        
+        return filteredItems
+    }
+    
+    private var progress: Double {
+        model.progress(for: pack)
+    }
+    
+    private var completedCount: Int {
+        model.items(for: pack).filter { model.isCompleted($0) }.count
+    }
+    
+    private var totalXP: Int {
+        model.items(for: pack).reduce(0) { $0 + $1.xp }
+    }
+    
+    private var earnedXP: Int {
+        model.items(for: pack).filter { model.isCompleted($0) }.reduce(0) { $0 + $1.xp }
     }
     
     var body: some View {
-        let accent = Color(hex: pack.accentColorHex, default: .accentColor)
-        
-        List {
-            Section {
-                HStack(alignment: .top, spacing: 16) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .fill(accent.opacity(0.15))
-                        
-                        Image(systemName: pack.iconSystemName)
-                            .font(.system(size: 28, weight: .semibold))
-                            .foregroundColor(accent)
-                    }
-                    .frame(width: 64, height: 64)
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(pack.title)
-                            .font(.title2.bold())
-                        
-                        Text(pack.subtitle)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        
-                        ProgressView(value: model.progress(for: pack))
-                            .tint(accent)
-                        
-                        Text("\(Int(model.progress(for: pack) * 100))% completed")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .listRowBackground(Color.clear)
-            }
+        ZStack {
+            BrandBackgroundStatic()
             
-            Section(header: Text("Checklist")) {
-                ForEach(items) { item in
-                    ChecklistRow(item: item, accent: accent)
+            ScrollView {
+                VStack(spacing: DesignSystem.spacing.lg) {
+                    // Header card
+                    PackDetailHeader(
+                        pack: pack,
+                        progress: progress,
+                        completedCount: completedCount,
+                        totalItems: model.items(for: pack).count,
+                        earnedXP: earnedXP,
+                        totalXP: totalXP
+                    )
+                    
+                    // Filter toggle
+                    HStack {
+                        Text("Items")
+                            .font(DesignSystem.text.headlineMedium)
+                            .foregroundColor(BrandTheme.textPrimary)
+                        
+                        Spacer()
+                        
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                showCompletedItems.toggle()
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: showCompletedItems ? "eye.fill" : "eye.slash.fill")
+                                Text(showCompletedItems ? "Show all" : "Hide done")
+                            }
+                            .font(.caption.weight(.medium))
+                            .foregroundColor(BrandTheme.accent)
+                            .padding(.horizontal, DesignSystem.spacing.sm)
+                            .padding(.vertical, DesignSystem.spacing.xs)
+                            .background(
+                                Capsule()
+                                    .fill(BrandTheme.accent.opacity(0.1))
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(.horizontal, DesignSystem.spacing.lg)
+                    
+                    // Items list
+                    LazyVStack(spacing: DesignSystem.spacing.sm) {
+                        ForEach(items) { item in
+                            ChecklistItemRow(item: item, accent: accent)
+                        }
+                    }
+                    .padding(.horizontal, DesignSystem.spacing.lg)
+                    
+                    // Empty state
+                    if items.isEmpty {
+                        EmptyStateView(
+                            icon: "checkmark.circle.fill",
+                            title: showCompletedItems ? "No items found" : "All done!",
+                            message: showCompletedItems ? "Try adjusting your search." : "Great job completing all items!"
+                        )
+                        .padding(.top, DesignSystem.spacing.xl)
+                    }
+                    
+                    Color.clear.frame(height: DesignSystem.spacing.xxl)
                 }
             }
         }
         .navigationTitle(pack.title)
         .navigationBarTitleDisplayMode(.inline)
+        .searchable(text: $searchText, prompt: "Search items")
     }
 }
 
-// MARK: - Checklist Row
+// MARK: - Pack Detail Header
 
-struct ChecklistRow: View {
+struct PackDetailHeader: View {
+    let pack: CategoryPack
+    let progress: Double
+    let completedCount: Int
+    let totalItems: Int
+    let earnedXP: Int
+    let totalXP: Int
+    
+    private var accent: Color {
+        Color(hex: pack.accentColorHex, default: BrandTheme.accent)
+    }
+    
+    var body: some View {
+        VStack(spacing: DesignSystem.spacing.lg) {
+            HStack(alignment: .top, spacing: DesignSystem.spacing.lg) {
+                // Icon
+                IconContainer(
+                    systemName: pack.iconSystemName,
+                    color: accent,
+                    size: .hero,
+                    style: progress >= 1 ? .gradient : .soft
+                )
+                
+                // Info
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+                    HStack {
+                        Text(pack.title)
+                            .font(DesignSystem.text.headlineLarge)
+                            .foregroundColor(BrandTheme.textPrimary)
+                        
+                        if pack.isPremium {
+                            ProBadge()
+                        }
+                    }
+                    
+                    Text(pack.subtitle)
+                        .font(DesignSystem.text.bodySmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                        .lineLimit(3)
+                }
+                
+                Spacer()
+            }
+            
+            // Progress section
+            VStack(spacing: DesignSystem.spacing.sm) {
+                AnimatedProgressBar(progress: progress, height: 10, cornerRadius: 5, color: accent, showGlow: true)
+                
+                HStack {
+                    HStack(spacing: DesignSystem.spacing.sm) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(BrandTheme.success)
+                        Text("\(completedCount)/\(totalItems) items")
+                    }
+                    .font(.caption)
+                    .foregroundColor(BrandTheme.mutedText)
+                    
+                    Spacer()
+                    
+                    HStack(spacing: DesignSystem.spacing.sm) {
+                        Image(systemName: "star.fill")
+                            .foregroundColor(BrandTheme.warning)
+                        Text("\(earnedXP)/\(totalXP) XP")
+                    }
+                    .font(.caption)
+                    .foregroundColor(BrandTheme.mutedText)
+                }
+            }
+            
+            // Completion badge
+            if progress >= 1 {
+                HStack(spacing: DesignSystem.spacing.sm) {
+                    Image(systemName: "trophy.fill")
+                        .foregroundColor(BrandTheme.warning)
+                    Text("Pack completed!")
+                        .font(DesignSystem.text.labelMedium)
+                        .foregroundColor(BrandTheme.textPrimary)
+                }
+                .padding(DesignSystem.spacing.md)
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                        .fill(BrandTheme.warning.opacity(0.1))
+                )
+            }
+        }
+        .elevatedCard(accentColor: accent)
+        .padding(.horizontal, DesignSystem.spacing.lg)
+        .padding(.top, DesignSystem.spacing.md)
+    }
+}
+
+// MARK: - Checklist Item Row
+
+struct ChecklistItemRow: View {
     @EnvironmentObject var model: AppModel
     let item: ChecklistItem
     let accent: Color
     
     @State private var showPaywall = false
+    @State private var isAnimating = false
+    
+    private var isCompleted: Bool {
+        model.isCompleted(item)
+    }
     
     var body: some View {
         Button {
-            if item.isPremium && !model.premiumUnlocked {
-                showPaywall = true
-            } else {
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                    model.toggle(item)
-                }
-            }
+            handleTap()
         } label: {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: model.isCompleted(item) ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundColor(model.isCompleted(item) ? accent : Color(.systemGray4))
-                    .padding(.top, 2)
+            HStack(alignment: .top, spacing: DesignSystem.spacing.md) {
+                // Checkbox
+                ZStack {
+                    Circle()
+                        .stroke(isCompleted ? accent : BrandTheme.borderSubtle, lineWidth: 2)
+                        .frame(width: 28, height: 28)
+                    
+                    if isCompleted {
+                        Circle()
+                            .fill(accent)
+                            .frame(width: 28, height: 28)
+                        
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
+                .scaleEffect(isAnimating ? 1.2 : 1)
                 
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack(spacing: 6) {
+                // Content
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                    HStack(spacing: DesignSystem.spacing.sm) {
                         Text(item.title)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundColor(.primary)
+                            .font(DesignSystem.text.labelLarge)
+                            .foregroundColor(isCompleted ? BrandTheme.mutedText : BrandTheme.textPrimary)
+                            .strikethrough(isCompleted)
                             .fixedSize(horizontal: false, vertical: true)
                         
                         if item.isPremium {
-                            Text("PRO")
-                                .font(.caption2.bold())
-                                .padding(.horizontal, 5)
-                                .padding(.vertical, 2)
-                                .background(
-                                    Capsule().fill(Color.yellow.opacity(0.16))
-                                )
-                                .overlay(
-                                    Capsule().stroke(Color.yellow.opacity(0.7), lineWidth: 0.8)
-                                )
+                            ProBadge()
                         }
                     }
                     
                     if let detail = item.detail {
                         Text(detail)
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
+                            .font(DesignSystem.text.bodySmall)
+                            .foregroundColor(BrandTheme.mutedText)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     
-                    HStack(spacing: 8) {
-                        Text("\(item.xp) XP")
-                            .font(.caption2.weight(.medium))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(
-                                Capsule().fill(accent.opacity(0.12))
-                            )
-                            .foregroundColor(accent)
+                    // Tags
+                    HStack(spacing: DesignSystem.spacing.sm) {
+                        XPChip(xp: item.xp, size: .small)
                         
-                        ForEach(item.dimensions) { dim in
-                            HStack(spacing: 4) {
-                                Image(systemName: dim.systemImage)
-                                Text(dim.label)
-                            }
-                            .font(.caption2)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 3)
-                            .background(
-                                Capsule().fill(Color(.systemGray6))
+                        ForEach(item.dimensions.prefix(2)) { dim in
+                            ChipView(
+                                text: dim.label,
+                                icon: dim.systemImage,
+                                color: BrandTheme.dimensionColor(dim),
+                                size: .small
                             )
                         }
                     }
@@ -219,12 +589,78 @@ struct ChecklistRow: View {
                 
                 Spacer()
             }
+            .padding(DesignSystem.spacing.md)
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                    .fill(isCompleted ? BrandTheme.cardBackgroundElevated.opacity(0.5) : BrandTheme.cardBackground.opacity(0.8))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                    .strokeBorder(
+                        isCompleted ? accent.opacity(0.3) : BrandTheme.borderSubtle.opacity(0.3),
+                        lineWidth: 1
+                    )
+            )
             .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
         .alert("Life XP PRO", isPresented: $showPaywall) {
             Button("Later", role: .cancel) { }
         } message: {
-            Text("Deze task hoort bij Life XP PRO.\n\nIn de echte app kun je PRO ontgrendelen via een eenmalige in-app aankoop. Voor nu kun je PRO testen via de dev toggle in Settings.")
+            Text("This item is part of Life XP PRO.\n\nYou can test PRO features via the dev toggle in Settings.")
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(item.title), \(item.xp) XP, \(isCompleted ? "completed" : "not completed")")
+        .accessibilityHint("Double tap to toggle completion")
+    }
+    
+    private func handleTap() {
+        if item.isPremium && !model.premiumUnlocked {
+            showPaywall = true
+            return
+        }
+        
+        let willComplete = !isCompleted
+        
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            isAnimating = true
+        }
+        
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            model.toggle(item)
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                isAnimating = false
+            }
+        }
+        
+        if willComplete {
+            HapticsEngine.lightImpact()
+        }
+    }
+}
+
+// MARK: - Legacy Support
+
+struct PackCardView: View {
+    @EnvironmentObject var model: AppModel
+    let pack: CategoryPack
+    
+    var body: some View {
+        PackCard(pack: pack)
+            .environmentObject(model)
+    }
+}
+
+struct ChecklistRow: View {
+    @EnvironmentObject var model: AppModel
+    let item: ChecklistItem
+    let accent: Color
+    
+    var body: some View {
+        ChecklistItemRow(item: item, accent: accent)
+            .environmentObject(model)
     }
 }

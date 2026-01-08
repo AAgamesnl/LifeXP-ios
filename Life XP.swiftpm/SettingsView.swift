@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - Settings View
+
 struct SettingsView: View {
     @EnvironmentObject var model: AppModel
 
@@ -7,145 +9,657 @@ struct SettingsView: View {
     @State private var confirmResetArcs = false
     @State private var confirmResetStreaks = false
     @State private var confirmResetStats = false
+    @State private var showResetOptions = false
 
     var body: some View {
         NavigationStack {
             ZStack {
-                BrandBackground()
+                BrandBackgroundStatic()
 
-                Form {
-                    Section(header: Text("Experience"), footer: Text("Kies hoe direct Life XP coacht en hoeveel nudges je op Home ziet.")) {
-                        Picker("Tone", selection: $model.settings.toneMode) {
-                            ForEach(ToneMode.allCases) { tone in
-                                Text(tone.label).tag(tone)
-                            }
-                        }
-
-                        Picker("Daily nudges", selection: $model.settings.dailyNudgeIntensity) {
-                            ForEach(NudgeIntensity.allCases) { mode in
-                                Text(mode.label).tag(mode)
-                            }
-                        }
-
-                        Picker("Quest board", selection: $model.settings.questBoardDensity) {
-                            ForEach(QuestBoardDensity.allCases) { density in
-                                Text(density.label).tag(density)
-                            }
-                        }
-                        .pickerStyle(.segmented)
+                ScrollView {
+                    VStack(spacing: DesignSystem.spacing.xl) {
+                        // Profile Summary
+                        ProfileSummaryCard()
+                        
+                        // Experience Settings
+                        ExperienceSettingsSection()
+                        
+                        // Content Settings
+                        ContentSettingsSection()
+                        
+                        // Visual Settings
+                        VisualSettingsSection()
+                        
+                        // Home Customization
+                        HomeCustomizationSection()
+                        
+                        // Data & Reset
+                        DataResetSection(
+                            showResetOptions: $showResetOptions,
+                            confirmResetAll: $confirmResetAll,
+                            confirmResetArcs: $confirmResetArcs,
+                            confirmResetStreaks: $confirmResetStreaks,
+                            confirmResetStats: $confirmResetStats
+                        )
+                        
+                        // Developer Options
+                        DeveloperSection()
+                        
+                        // App Info
+                        AppInfoSection()
+                        
+                        Color.clear.frame(height: DesignSystem.spacing.xxl)
                     }
-
-                    Section(header: Text("Content"), footer: Text("Kies wat we wel of niet tonen op Home en in suggesties.")) {
-                        Toggle("Toon PRO / locked teasers", isOn: $model.settings.showProTeasers)
-                        Picker("Prioriteit dimensie", selection: $model.settings.primaryFocus) {
-                            Text("Geen voorkeur").tag(LifeDimension?.none)
-                            ForEach(LifeDimension.allCases) { dim in
-                                Text(dim.label).tag(Optional(dim))
-                            }
-                        }
-
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Benadruk dimensies")
-                                .font(.subheadline.weight(.semibold))
-                            Text("We tonen vooral suggesties in deze levensgebieden.")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-
-                            ForEach(LifeDimension.allCases) { dim in
-                                Toggle(isOn: Binding(
-                                    get: { model.settings.enabledDimensions.contains(dim) },
-                                    set: { newValue in
-                                        var set = model.settings.enabledDimensions
-                                        if newValue {
-                                            set.insert(dim)
-                                        } else if set.count > 1 {
-                                            set.remove(dim)
-                                        }
-                                        model.settings.enabledDimensions = set
-                                    }
-                                )) {
-                                    Label(dim.label, systemImage: dim.systemImage)
-                                }
-                            }
-                        }
-                    }
-
-                    Section(header: Text("Visuals"), footer: Text("Pas Home aan: compact of juist hero-kaarten, streaks en share info.")) {
-                        Picker("Thema", selection: $model.settings.appearanceMode) {
-                            ForEach(AppearanceMode.allCases) { mode in
-                                Text(mode.label).tag(mode)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-
-                        Toggle("Compacte lay-out", isOn: $model.settings.compactHomeLayout)
-                        Toggle("Hero kaarten tonen", isOn: $model.settings.showHeroCards)
-                        Toggle("Kaarten standaard uitgeklapt", isOn: $model.settings.expandHomeCardsByDefault)
-
-                        Toggle("Toon energy check-in", isOn: $model.settings.showEnergyCard)
-                        Toggle("Toon momentum grid", isOn: $model.settings.showMomentumGrid)
-                        Toggle("Toon quick actions", isOn: $model.settings.showQuickActions)
-                        Toggle("Streaks op Home", isOn: $model.settings.showStreaks)
-                        Toggle("Arc progress op share-card", isOn: $model.settings.showArcProgressOnShare)
-                    }
-
-                    Section(header: Text("Data & reset"), footer: Text("We vragen altijd om bevestiging zodat je niet per ongeluk progress verliest.")) {
-                        Button(role: .destructive) {
-                            confirmResetAll = true
-                        } label: {
-                            Label("Reset alles (XP, arcs, streaks)", systemImage: "trash.fill")
-                        }
-
-                        Button {
-                            confirmResetArcs = true
-                        } label: {
-                            Label("Reset alleen arcs", systemImage: "map")
-                        }
-
-                        Button {
-                            confirmResetStreaks = true
-                        } label: {
-                            Label("Reset alleen streaks", systemImage: "flame")
-                        }
-
-                        Button {
-                            confirmResetStats = true
-                        } label: {
-                            Label("Reset alleen stats", systemImage: "chart.line.downtrend.xyaxis")
-                        }
-                    }
-
-                    Section(header: Text("Advanced / Dev")) {
-                        Toggle(isOn: $model.premiumUnlocked) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Forceer PRO (dev)")
-                                Text("Gebruik dit om alle PRO-packs te testen.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .accessibilityHint("Schakel PRO in voor alle packs tijdens testen")
-                    }
+                    .padding(.horizontal, DesignSystem.spacing.lg)
                 }
-                .scrollContentBackground(.hidden)
             }
             .navigationTitle("Settings")
-            .confirmationDialog("Reset alles?", isPresented: $confirmResetAll, titleVisibility: .visible) {
+            .confirmationDialog("Reset Everything?", isPresented: $confirmResetAll, titleVisibility: .visible) {
                 Button("Reset Life XP", role: .destructive) { model.resetAllProgress() }
-                Button("Annuleer", role: .cancel) { }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("This will reset all your XP, arcs, streaks, and progress. This cannot be undone.")
             }
-            .confirmationDialog("Reset arcs?", isPresented: $confirmResetArcs, titleVisibility: .visible) {
-                Button("Verwijder arc progress", role: .destructive) { model.resetArcProgress() }
-                Button("Annuleer", role: .cancel) { }
+            .confirmationDialog("Reset Arcs?", isPresented: $confirmResetArcs, titleVisibility: .visible) {
+                Button("Reset Arc Progress", role: .destructive) { model.resetArcProgress() }
+                Button("Cancel", role: .cancel) { }
             }
-            .confirmationDialog("Reset streaks?", isPresented: $confirmResetStreaks, titleVisibility: .visible) {
-                Button("Reset streak teller", role: .destructive) { model.resetStreaksOnly() }
-                Button("Annuleer", role: .cancel) { }
+            .confirmationDialog("Reset Streaks?", isPresented: $confirmResetStreaks, titleVisibility: .visible) {
+                Button("Reset Streak Counter", role: .destructive) { model.resetStreaksOnly() }
+                Button("Cancel", role: .cancel) { }
             }
-            .confirmationDialog("Reset stats?", isPresented: $confirmResetStats, titleVisibility: .visible) {
-                Button("Reset statistieken", role: .destructive) { model.resetStatsOnly() }
-                Button("Annuleer", role: .cancel) { }
+            .confirmationDialog("Reset Stats?", isPresented: $confirmResetStats, titleVisibility: .visible) {
+                Button("Reset Statistics", role: .destructive) { model.resetStatsOnly() }
+                Button("Cancel", role: .cancel) { }
             }
+        }
+    }
+}
+
+// MARK: - Profile Summary Card
+
+struct ProfileSummaryCard: View {
+    @EnvironmentObject var model: AppModel
+    
+    var body: some View {
+        HStack(spacing: DesignSystem.spacing.lg) {
+            // Level badge
+            ZStack {
+                Circle()
+                    .fill(BrandTheme.accent)
+                    .frame(width: 64, height: 64)
+                
+                Text("\(model.level)")
+                    .font(.system(size: 28, weight: .black, design: .rounded))
+                    .foregroundColor(.white)
+            }
+            .shadow(color: BrandTheme.accent.opacity(0.4), radius: 8, y: 4)
+            
+            VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                Text("Level \(model.level)")
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Text("\(model.totalXP) XP total • \(model.unlockedBadges.count) badges")
+                    .font(DesignSystem.text.bodySmall)
+                    .foregroundColor(BrandTheme.mutedText)
+                
+                if model.currentStreak > 0 {
+                    HStack(spacing: 4) {
+                        Image(systemName: "flame.fill")
+                            .foregroundColor(BrandTheme.error)
+                        Text("\(model.currentStreak) day streak")
+                            .foregroundColor(BrandTheme.textSecondary)
+                    }
+                    .font(.caption)
+                }
+            }
+            
+            Spacer()
+        }
+        .brandCard()
+        .padding(.top, DesignSystem.spacing.md)
+    }
+}
+
+// MARK: - Experience Settings Section
+
+struct ExperienceSettingsSection: View {
+    @EnvironmentObject var model: AppModel
+    
+    var body: some View {
+        SettingsSection(title: "Experience", icon: "sparkles", color: BrandTheme.accent) {
+            VStack(spacing: DesignSystem.spacing.md) {
+                // Tone
+                SettingsPicker(
+                    title: "Coaching Tone",
+                    subtitle: "How Life XP speaks to you",
+                    selection: $model.settings.toneMode,
+                    options: ToneMode.allCases
+                )
+                
+                Divider().background(BrandTheme.divider)
+                
+                // Nudge Intensity
+                SettingsPicker(
+                    title: "Daily Nudges",
+                    subtitle: "How often we suggest actions",
+                    selection: $model.settings.dailyNudgeIntensity,
+                    options: NudgeIntensity.allCases
+                )
+                
+                Divider().background(BrandTheme.divider)
+                
+                // Quest Board
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+                    Text("Quest Board Density")
+                        .font(DesignSystem.text.labelMedium)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    Text("How many quests to show at once")
+                        .font(.caption)
+                        .foregroundColor(BrandTheme.mutedText)
+                    
+                    Picker("Quest Board", selection: $model.settings.questBoardDensity) {
+                        ForEach(QuestBoardDensity.allCases) { density in
+                            Text(density.label).tag(density)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Content Settings Section
+
+struct ContentSettingsSection: View {
+    @EnvironmentObject var model: AppModel
+    
+    var body: some View {
+        SettingsSection(title: "Content", icon: "slider.horizontal.3", color: BrandTheme.info) {
+            VStack(spacing: DesignSystem.spacing.md) {
+                // PRO Teasers
+                SettingsToggle(
+                    title: "Show PRO Teasers",
+                    subtitle: "Display locked premium content hints",
+                    isOn: $model.settings.showProTeasers
+                )
+                
+                Divider().background(BrandTheme.divider)
+                
+                // Primary Focus
+                SettingsPicker(
+                    title: "Primary Focus",
+                    subtitle: "Your main life dimension",
+                    selection: Binding(
+                        get: { model.settings.primaryFocus ?? .love },
+                        set: { model.settings.primaryFocus = $0 }
+                    ),
+                    options: LifeDimension.allCases
+                )
+                
+                Divider().background(BrandTheme.divider)
+                
+                // Enabled Dimensions
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+                    Text("Active Dimensions")
+                        .font(DesignSystem.text.labelMedium)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    Text("Show suggestions for these areas")
+                        .font(.caption)
+                        .foregroundColor(BrandTheme.mutedText)
+                    
+                    ForEach(LifeDimension.allCases) { dim in
+                        DimensionToggleRow(dimension: dim)
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct DimensionToggleRow: View {
+    @EnvironmentObject var model: AppModel
+    let dimension: LifeDimension
+    
+    private var isEnabled: Bool {
+        model.settings.enabledDimensions.contains(dimension)
+    }
+    
+    var body: some View {
+        Toggle(isOn: Binding(
+            get: { isEnabled },
+            set: { newValue in
+                var set = model.settings.enabledDimensions
+                if newValue {
+                    set.insert(dimension)
+                } else if set.count > 1 {
+                    set.remove(dimension)
+                }
+                model.settings.enabledDimensions = set
+            }
+        )) {
+            Label {
+                Text(dimension.label)
+                    .font(DesignSystem.text.labelSmall)
+            } icon: {
+                Image(systemName: dimension.systemImage)
+                    .foregroundColor(BrandTheme.dimensionColor(dimension))
+            }
+        }
+        .tint(BrandTheme.dimensionColor(dimension))
+    }
+}
+
+// MARK: - Visual Settings Section
+
+struct VisualSettingsSection: View {
+    @EnvironmentObject var model: AppModel
+    
+    var body: some View {
+        SettingsSection(title: "Appearance", icon: "paintbrush.fill", color: BrandTheme.mind) {
+            VStack(spacing: DesignSystem.spacing.md) {
+                // Theme
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+                    Text("Theme")
+                        .font(DesignSystem.text.labelMedium)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    Picker("Theme", selection: $model.settings.appearanceMode) {
+                        ForEach(AppearanceMode.allCases) { mode in
+                            Text(mode.label).tag(mode)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+                
+                Divider().background(BrandTheme.divider)
+                
+                // Compact Layout
+                SettingsToggle(
+                    title: "Compact Layout",
+                    subtitle: "Reduce spacing between cards",
+                    isOn: $model.settings.compactHomeLayout
+                )
+                
+                Divider().background(BrandTheme.divider)
+                
+                // Hero Cards
+                SettingsToggle(
+                    title: "Hero Cards",
+                    subtitle: "Show large featured cards",
+                    isOn: $model.settings.showHeroCards
+                )
+                
+                Divider().background(BrandTheme.divider)
+                
+                // Cards Expanded
+                SettingsToggle(
+                    title: "Expand Cards by Default",
+                    subtitle: "Show full card content initially",
+                    isOn: $model.settings.expandHomeCardsByDefault
+                )
+            }
+        }
+    }
+}
+
+// MARK: - Home Customization Section
+
+struct HomeCustomizationSection: View {
+    @EnvironmentObject var model: AppModel
+    @State private var isExpanded = false
+    
+    var body: some View {
+        SettingsSection(title: "Home Screen", icon: "house.fill", color: BrandTheme.love) {
+            VStack(spacing: DesignSystem.spacing.md) {
+                // Essential toggles
+                SettingsToggle(
+                    title: "Show Streaks",
+                    subtitle: "Display streak counter on home",
+                    isOn: $model.settings.showStreaks
+                )
+                
+                Divider().background(BrandTheme.divider)
+                
+                SettingsToggle(
+                    title: "Momentum Grid",
+                    subtitle: "Show dimension balance grid",
+                    isOn: $model.settings.showMomentumGrid
+                )
+                
+                Divider().background(BrandTheme.divider)
+                
+                SettingsToggle(
+                    title: "Quick Actions",
+                    subtitle: "Show quick action buttons",
+                    isOn: $model.settings.showQuickActions
+                )
+                
+                // Expandable section for more options
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        isExpanded.toggle()
+                    }
+                } label: {
+                    HStack {
+                        Text("More Options")
+                            .font(DesignSystem.text.labelMedium)
+                            .foregroundColor(BrandTheme.accent)
+                        
+                        Spacer()
+                        
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(BrandTheme.accent)
+                    }
+                }
+                .buttonStyle(.plain)
+                
+                if isExpanded {
+                    VStack(spacing: DesignSystem.spacing.md) {
+                        Divider().background(BrandTheme.divider)
+                        
+                        SettingsToggle(
+                            title: "Energy Check-in",
+                            subtitle: "Show energy level card",
+                            isOn: $model.settings.showEnergyCard
+                        )
+                        
+                        SettingsToggle(
+                            title: "Weekly Blueprint",
+                            subtitle: "Show weekly ritual card",
+                            isOn: $model.settings.showWeeklyBlueprint
+                        )
+                        
+                        SettingsToggle(
+                            title: "Focus Dimension",
+                            subtitle: "Highlight weakest dimension",
+                            isOn: $model.settings.showFocusDimensionCard
+                        )
+                        
+                        SettingsToggle(
+                            title: "Focus Playlist",
+                            subtitle: "Show quick focus tasks",
+                            isOn: $model.settings.showFocusPlaylistCard
+                        )
+                        
+                        SettingsToggle(
+                            title: "Legendary Quest",
+                            subtitle: "Show boss fight card",
+                            isOn: $model.settings.showLegendaryQuestCard
+                        )
+                        
+                        SettingsToggle(
+                            title: "Seasonal Spotlight",
+                            subtitle: "Show themed content",
+                            isOn: $model.settings.showSeasonalSpotlight
+                        )
+                        
+                        SettingsToggle(
+                            title: "Daily Suggestion",
+                            subtitle: "Show personalized task",
+                            isOn: $model.settings.showSuggestionCard
+                        )
+                        
+                        SettingsToggle(
+                            title: "Arc Progress on Share",
+                            subtitle: "Include arc in share card",
+                            isOn: $model.settings.showArcProgressOnShare
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Data Reset Section
+
+struct DataResetSection: View {
+    @EnvironmentObject var model: AppModel
+    @Binding var showResetOptions: Bool
+    @Binding var confirmResetAll: Bool
+    @Binding var confirmResetArcs: Bool
+    @Binding var confirmResetStreaks: Bool
+    @Binding var confirmResetStats: Bool
+    
+    var body: some View {
+        SettingsSection(title: "Data & Reset", icon: "arrow.counterclockwise", color: BrandTheme.error) {
+            VStack(spacing: DesignSystem.spacing.md) {
+                Text("Reset options require confirmation to prevent accidental data loss.")
+                    .font(.caption)
+                    .foregroundColor(BrandTheme.mutedText)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        showResetOptions.toggle()
+                    }
+                } label: {
+                    HStack {
+                        Text("Show Reset Options")
+                            .font(DesignSystem.text.labelMedium)
+                            .foregroundColor(BrandTheme.error)
+                        
+                        Spacer()
+                        
+                        Image(systemName: showResetOptions ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(BrandTheme.error)
+                    }
+                }
+                .buttonStyle(.plain)
+                
+                if showResetOptions {
+                    VStack(spacing: DesignSystem.spacing.sm) {
+                        ResetButton(
+                            title: "Reset Everything",
+                            subtitle: "XP, arcs, streaks - start fresh",
+                            icon: "trash.fill",
+                            isDestructive: true
+                        ) {
+                            confirmResetAll = true
+                        }
+                        
+                        ResetButton(
+                            title: "Reset Arcs Only",
+                            subtitle: "Keep XP, reset arc progress",
+                            icon: "map"
+                        ) {
+                            confirmResetArcs = true
+                        }
+                        
+                        ResetButton(
+                            title: "Reset Streaks Only",
+                            subtitle: "Keep everything else",
+                            icon: "flame"
+                        ) {
+                            confirmResetStreaks = true
+                        }
+                        
+                        ResetButton(
+                            title: "Reset Stats Only",
+                            subtitle: "Reset completion tracking",
+                            icon: "chart.line.downtrend.xyaxis"
+                        ) {
+                            confirmResetStats = true
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct ResetButton: View {
+    let title: String
+    let subtitle: String
+    let icon: String
+    var isDestructive: Bool = false
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: DesignSystem.spacing.md) {
+                Image(systemName: icon)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(isDestructive ? .white : BrandTheme.error)
+                    .frame(width: 32, height: 32)
+                    .background(
+                        Circle()
+                            .fill(isDestructive ? BrandTheme.error : BrandTheme.error.opacity(0.15))
+                    )
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(DesignSystem.text.labelMedium)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundColor(BrandTheme.mutedText)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+            .padding(DesignSystem.spacing.md)
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                    .fill(BrandTheme.cardBackgroundElevated.opacity(0.5))
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Developer Section
+
+struct DeveloperSection: View {
+    @EnvironmentObject var model: AppModel
+    
+    var body: some View {
+        SettingsSection(title: "Developer", icon: "hammer.fill", color: BrandTheme.warning) {
+            VStack(spacing: DesignSystem.spacing.md) {
+                SettingsToggle(
+                    title: "Force PRO Mode",
+                    subtitle: "Unlock all premium content for testing",
+                    isOn: $model.premiumUnlocked
+                )
+                
+                HStack(spacing: DesignSystem.spacing.sm) {
+                    Image(systemName: "info.circle.fill")
+                        .foregroundColor(BrandTheme.info)
+                    
+                    Text("This is for testing purposes only. In the real app, PRO would be unlocked via in-app purchase.")
+                        .font(.caption)
+                        .foregroundColor(BrandTheme.mutedText)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - App Info Section
+
+struct AppInfoSection: View {
+    var body: some View {
+        VStack(spacing: DesignSystem.spacing.md) {
+            Text("Life XP")
+                .font(DesignSystem.text.headlineMedium)
+                .foregroundColor(BrandTheme.textPrimary)
+            
+            Text("Version 2.0")
+                .font(.caption)
+                .foregroundColor(BrandTheme.mutedText)
+            
+            Text("Built with ❤️ for personal growth")
+                .font(.caption)
+                .foregroundColor(BrandTheme.mutedText)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(DesignSystem.spacing.xl)
+    }
+}
+
+// MARK: - Settings Components
+
+struct SettingsSection<Content: View>: View {
+    let title: String
+    let icon: String
+    let color: Color
+    @ViewBuilder let content: () -> Content
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            HStack(spacing: DesignSystem.spacing.sm) {
+                IconContainer(systemName: icon, color: color, size: .small, style: .soft)
+                
+                Text(title)
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+            }
+            
+            content()
+        }
+        .brandCard()
+    }
+}
+
+struct SettingsToggle: View {
+    let title: String
+    let subtitle: String
+    @Binding var isOn: Bool
+    
+    var body: some View {
+        Toggle(isOn: $isOn) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(DesignSystem.text.labelMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+        }
+        .tint(BrandTheme.accent)
+    }
+}
+
+struct SettingsPicker<T: Hashable & Identifiable & CaseIterable>: View where T.AllCases: RandomAccessCollection {
+    let title: String
+    let subtitle: String
+    @Binding var selection: T
+    let options: T.AllCases
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(DesignSystem.text.labelMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+            
+            Picker(title, selection: $selection) {
+                ForEach(options, id: \.id) { option in
+                    Text(String(describing: option).capitalized)
+                        .tag(option)
+                }
+            }
+            .pickerStyle(.menu)
+            .tint(BrandTheme.accent)
         }
     }
 }

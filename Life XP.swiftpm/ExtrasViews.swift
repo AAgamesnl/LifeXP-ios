@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Lightweight tools and overviews that support the main Life XP flows.
+// MARK: - Challenge View
+
 struct ChallengeView: View {
     @EnvironmentObject var model: AppModel
 
@@ -11,181 +12,489 @@ struct ChallengeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                BrandBackground()
-                    .opacity(0.25)
+                BrandBackgroundStatic()
 
                 ScrollView {
-                    VStack(spacing: 18) {
-                        challengeHeader
-                        arcChallengeSection
-                        heroSection
-                        microWinsSection
+                    VStack(spacing: DesignSystem.spacing.xl) {
+                        // Challenge Header
+                        ChallengeHeaderCard()
+                        
+                        // Arc Challenge
+                        ArcChallengeSection(arc: board.arc, quests: board.quests)
+                        
+                        // Boss Fights
+                        BossFightsSection()
+                        
+                        // Micro Wins
+                        MicroWinsChallengeSection()
+                        
+                        // Recovery
+                        RecoverySection()
+
+                        Color.clear.frame(height: DesignSystem.spacing.xxl)
                     }
-                    .padding()
+                    .padding(.horizontal, DesignSystem.spacing.lg)
                 }
             }
             .navigationTitle("Weekend Challenge")
         }
     }
+}
 
-    private var challengeHeader: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Label("Fast track naar momentum", systemImage: "flag.checkered")
-                .font(.caption.weight(.semibold))
-                .foregroundColor(.secondary)
-            Text("We mixen je actieve arc met een hero quest en micro wins. Kies 1 grote + 1 kleine actie en claim die XP.")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+// MARK: - Challenge Header Card
 
-            HStack(spacing: 12) {
-                streakChip
-                xpChip
+struct ChallengeHeaderCard: View {
+    @EnvironmentObject var model: AppModel
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            HStack(spacing: DesignSystem.spacing.md) {
+                IconContainer(systemName: "flag.checkered", color: BrandTheme.warning, size: .large, style: .gradient)
+                
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                    Text("Fast Track to Momentum")
+                        .font(DesignSystem.text.headlineMedium)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    Text("Mix of arc quests, boss fights, and micro wins curated for you")
+                        .font(DesignSystem.text.bodySmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                }
+            }
+            
+            // Stats chips
+            HStack(spacing: DesignSystem.spacing.md) {
+                if model.currentStreak > 0 {
+                    StreakChip(days: model.currentStreak, size: .medium)
+                }
+                
+                XPChip(xp: model.totalXP, size: .medium)
+                
+                if let weakest = model.lowestDimension {
+                    ChipView(
+                        text: "Focus: \(weakest.label)",
+                        icon: weakest.systemImage,
+                        color: BrandTheme.dimensionColor(weakest),
+                        size: .medium
+                    )
+                }
+            }
+            
+            // Affirmation
+            Text(model.dailyAffirmation)
+                .font(DesignSystem.text.bodySmall)
+                .foregroundColor(BrandTheme.textSecondary)
+                .italic()
+                .padding(DesignSystem.spacing.md)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                        .fill(BrandTheme.accentMuted.opacity(0.5))
+                )
+        }
+        .elevatedCard(accentColor: BrandTheme.warning)
+        .padding(.top, DesignSystem.spacing.md)
+    }
+}
+
+// MARK: - Arc Challenge Section
+
+struct ArcChallengeSection: View {
+    @EnvironmentObject var model: AppModel
+    let arc: Arc?
+    let quests: [Quest]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            HStack {
+                IconContainer(systemName: "map.fill", color: BrandTheme.accent, size: .small, style: .soft)
+                
+                Text("Arc Focus")
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Spacer()
+                
+                if let arc = arc {
+                    Text(model.arcProgressHeadline)
+                        .font(.caption)
+                        .foregroundColor(BrandTheme.mutedText)
+                }
+            }
+
+            if let arc = arc, !quests.isEmpty {
+                let accent = Color(hex: arc.accentColorHex, default: BrandTheme.accent)
+                
+                // Arc info
+                HStack(spacing: DesignSystem.spacing.md) {
+                    IconContainer(systemName: arc.iconSystemName, color: accent, size: .medium, style: .soft)
+                    
+                    VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                        Text(arc.title)
+                            .font(DesignSystem.text.labelLarge)
+                            .foregroundColor(BrandTheme.textPrimary)
+                        
+                        Text(arc.subtitle)
+                            .font(DesignSystem.text.bodySmall)
+                            .foregroundColor(BrandTheme.mutedText)
+                            .lineLimit(1)
+                        
+                        HStack(spacing: DesignSystem.spacing.sm) {
+                            AnimatedProgressBar(progress: model.arcProgress(arc), height: 6, color: accent)
+                                .frame(maxWidth: 100)
+                            
+                            Text("\(Int(model.arcProgress(arc) * 100))%")
+                                .font(.caption.weight(.semibold))
+                                .foregroundColor(accent)
+                        }
+                    }
+                    
+                    Spacer()
+                }
+                .padding(DesignSystem.spacing.md)
+                .background(
+                    RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                        .fill(accent.opacity(0.08))
+                )
+                
+                Divider().background(BrandTheme.divider)
+                
+                // Quests
+                ForEach(quests) { quest in
+                    ChallengeQuestRow(quest: quest, accent: accent)
+                }
+            } else {
+                // Empty state
+                VStack(spacing: DesignSystem.spacing.md) {
+                    IconContainer(systemName: "map", color: BrandTheme.mutedText, size: .large, style: .soft)
+                    
+                    Text("No Arc Selected")
+                        .font(DesignSystem.text.labelLarge)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    Text("Open the Arcs hub and choose a story. We'll show your quests here automatically.")
+                        .font(DesignSystem.text.bodySmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                        .multilineTextAlignment(.center)
+                    
+                    NavigationLink(destination: ArcsView()) {
+                        Text("Go to Arcs")
+                    }
+                    .buttonStyle(SoftButtonStyle())
+                }
+                .padding(DesignSystem.spacing.xl)
             }
         }
         .brandCard()
     }
+}
 
-    private var streakChip: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "flame.fill")
-            Text("\(model.currentStreak)-day streak")
-        }
-        .font(.caption.weight(.medium))
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(Capsule().fill(Color.orange.opacity(0.12)))
-        .foregroundColor(.orange)
-    }
+struct ChallengeQuestRow: View {
+    @EnvironmentObject var model: AppModel
+    let quest: Quest
+    let accent: Color
+    
+    @State private var isAnimating = false
+    
+    private var isCompleted: Bool { model.isCompleted(quest) }
 
-    private var xpChip: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "star.fill")
-            Text("\(model.totalXP) XP totaal")
-        }
-        .font(.caption.weight(.medium))
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(Capsule().fill(Color.accentColor.opacity(0.12)))
-    }
-
-    private var arcChallengeSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Arc focus")
-                    .font(.headline)
-                Spacer()
-                if board.arc != nil {
-                    Text(model.arcProgressHeadline)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+    var body: some View {
+        Button {
+            let willComplete = !isCompleted
+            
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                isAnimating = true
+            }
+            
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                model.toggle(quest)
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    isAnimating = false
                 }
             }
-
-            if let arc = board.arc, !board.quests.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(spacing: 10) {
-                        Image(systemName: arc.iconSystemName)
-                            .foregroundColor(Color(hex: arc.accentColorHex, default: .accentColor))
-                        VStack(alignment: .leading) {
-                            Text(arc.title)
-                                .font(.subheadline.weight(.semibold))
-                            Text(arc.subtitle)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .lineLimit(2)
-                        }
-                        Spacer()
-                        Text("\(Int(model.arcProgress(arc) * 100))%")
+            
+            if willComplete {
+                HapticsEngine.lightImpact()
+            }
+        } label: {
+            HStack(spacing: DesignSystem.spacing.md) {
+                // Checkbox
+                ZStack {
+                    Circle()
+                        .stroke(isCompleted ? accent : BrandTheme.borderSubtle, lineWidth: 2)
+                        .frame(width: 24, height: 24)
+                    
+                    if isCompleted {
+                        Circle()
+                            .fill(accent)
+                            .frame(width: 24, height: 24)
+                        
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
+                .scaleEffect(isAnimating ? 1.2 : 1)
+                
+                // Content
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                    Text(quest.title)
+                        .font(DesignSystem.text.labelMedium)
+                        .foregroundColor(isCompleted ? BrandTheme.mutedText : BrandTheme.textPrimary)
+                        .strikethrough(isCompleted)
+                    
+                    if let detail = quest.detail {
+                        Text(detail)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(BrandTheme.mutedText)
+                            .lineLimit(1)
                     }
-
-                    Divider()
-
-                    ForEach(board.quests) { quest in
-                        QuestSummaryRow(quest: quest, accent: Color(hex: arc.accentColorHex, default: .accentColor))
+                    
+                    HStack(spacing: DesignSystem.spacing.sm) {
+                        ChipView(text: quest.kind.label, icon: quest.kind.systemImage, color: accent, size: .small)
+                        
+                        if let minutes = quest.estimatedMinutes {
+                            ChipView(text: "~\(minutes) min", icon: "clock", color: BrandTheme.mutedText, size: .small)
+                        }
                     }
                 }
-                .padding()
-                .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            } else {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Geen arc gekozen")
-                        .font(.subheadline.weight(.semibold))
-                    Text("Open de Arcs hub en kies een verhaal om te spelen. We tonen daarna automatisch je volgende quests hier.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .brandCard()
-            }
-        }
-    }
-
-    private var heroSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("Boss fight")
-                    .font(.headline)
+                
                 Spacer()
-                Text("Hoogste XP")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                
+                XPChip(xp: quest.xp, size: .small)
             }
-
-            if model.heroQuests.isEmpty {
-                Text("Claim eerst wat basis XP of kies een arc. Dan tonen we hier je drie zwaarste quests.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.secondarySystemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            } else {
-                VStack(spacing: 10) {
-                    ForEach(model.heroQuests) { quest in
-                        ChecklistSummaryRow(item: quest)
-                    }
-                }
-            }
+            .padding(DesignSystem.spacing.md)
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                    .fill(isCompleted ? BrandTheme.cardBackgroundElevated.opacity(0.3) : BrandTheme.cardBackgroundElevated.opacity(0.5))
+            )
         }
-    }
-
-    private var microWinsSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("Micro wins")
-                    .font(.headline)
-                Spacer()
-                Text("Dopamine snacks")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            if model.microWins.isEmpty {
-                Text("Alles voltooid! Kies een arc of pak een boss fight om momentum te houden.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.secondarySystemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            } else {
-                VStack(spacing: 8) {
-                    ForEach(model.microWins) { quest in
-                        ChecklistSummaryRow(item: quest)
-                    }
-                }
-            }
-        }
+        .buttonStyle(.plain)
     }
 }
 
-/// Dedicated badge gallery for unlocked milestones.
+// MARK: - Boss Fights Section
+
+struct BossFightsSection: View {
+    @EnvironmentObject var model: AppModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            HStack {
+                IconContainer(systemName: "bolt.circle.fill", color: BrandTheme.error, size: .small, style: .soft)
+                
+                Text("Boss Fights")
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Spacer()
+                
+                Text("Highest XP")
+                    .font(.caption)
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+
+            if model.heroQuests.isEmpty {
+                EmptyMiniState(
+                    icon: "bolt.circle",
+                    message: "Complete some basic quests first. Then we'll show you your boss fights."
+                )
+            } else {
+                ForEach(model.heroQuests) { quest in
+                    BossFightRow(item: quest)
+                }
+            }
+        }
+        .brandCard()
+    }
+}
+
+struct BossFightRow: View {
+    let item: ChecklistItem
+
+    var body: some View {
+        HStack(spacing: DesignSystem.spacing.md) {
+            Image(systemName: "bolt.circle.fill")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(BrandTheme.error)
+
+            VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                Text(item.title)
+                    .font(DesignSystem.text.labelMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                if let detail = item.detail {
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundColor(BrandTheme.mutedText)
+                        .lineLimit(2)
+                }
+                
+                HStack(spacing: DesignSystem.spacing.sm) {
+                    ForEach(item.dimensions.prefix(2)) { dim in
+                        ChipView(text: dim.label, color: BrandTheme.dimensionColor(dim), size: .small)
+                    }
+                }
+            }
+
+            Spacer()
+
+            XPChip(xp: item.xp, size: .medium)
+        }
+        .padding(DesignSystem.spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                .fill(BrandTheme.error.opacity(0.08))
+        )
+    }
+}
+
+// MARK: - Micro Wins Challenge Section
+
+struct MicroWinsChallengeSection: View {
+    @EnvironmentObject var model: AppModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            HStack {
+                IconContainer(systemName: "bolt.fill", color: BrandTheme.warning, size: .small, style: .soft)
+                
+                Text("Micro Wins")
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Spacer()
+                
+                Text("Dopamine snacks")
+                    .font(.caption)
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+
+            if model.microWins.isEmpty {
+                EmptyMiniState(
+                    icon: "checkmark.circle",
+                    message: "All caught up! Pick an arc or boss fight for momentum."
+                )
+            } else {
+                ForEach(model.microWins) { item in
+                    MicroWinChallengeRow(item: item)
+                }
+            }
+        }
+        .brandCard()
+    }
+}
+
+struct MicroWinChallengeRow: View {
+    let item: ChecklistItem
+
+    var body: some View {
+        HStack(spacing: DesignSystem.spacing.md) {
+            Image(systemName: "bolt.fill")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(BrandTheme.warning)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.title)
+                    .font(DesignSystem.text.labelSmall)
+                    .foregroundColor(BrandTheme.textPrimary)
+                    .lineLimit(1)
+                
+                if let detail = item.detail {
+                    Text(detail)
+                        .font(.caption2)
+                        .foregroundColor(BrandTheme.mutedText)
+                        .lineLimit(1)
+                }
+            }
+
+            Spacer()
+
+            XPChip(xp: item.xp, size: .small)
+        }
+        .padding(DesignSystem.spacing.sm)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.sm, style: .continuous)
+                .fill(BrandTheme.cardBackgroundElevated.opacity(0.5))
+        )
+    }
+}
+
+// MARK: - Recovery Section
+
+struct RecoverySection: View {
+    @EnvironmentObject var model: AppModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            HStack {
+                IconContainer(systemName: "leaf.fill", color: BrandTheme.success, size: .small, style: .soft)
+                
+                Text("Recovery Mode")
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Spacer()
+            }
+            
+            Text("Low energy? These gentle resets help you recharge.")
+                .font(DesignSystem.text.bodySmall)
+                .foregroundColor(BrandTheme.mutedText)
+
+            ForEach(model.recoveryPrompts.prefix(3), id: \.self) { prompt in
+                HStack(alignment: .top, spacing: DesignSystem.spacing.md) {
+                    Image(systemName: "sparkle")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(BrandTheme.success)
+                        .padding(.top, 2)
+
+                    Text(prompt)
+                        .font(DesignSystem.text.bodySmall)
+                        .foregroundColor(BrandTheme.textSecondary)
+                }
+            }
+        }
+        .brandCard()
+    }
+}
+
+struct EmptyMiniState: View {
+    let icon: String
+    let message: String
+
+    var body: some View {
+        HStack(spacing: DesignSystem.spacing.md) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
+                .foregroundColor(BrandTheme.mutedText)
+            
+            Text(message)
+                .font(DesignSystem.text.bodySmall)
+                .foregroundColor(BrandTheme.mutedText)
+        }
+        .padding(DesignSystem.spacing.md)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                .fill(BrandTheme.cardBackgroundElevated.opacity(0.5))
+        )
+    }
+}
+
+// MARK: - Badges View
+
 struct BadgesView: View {
     @EnvironmentObject var model: AppModel
+    
+    @State private var selectedTab: BadgeTab = .unlocked
+
+    enum BadgeTab: String, CaseIterable {
+        case unlocked = "Unlocked"
+        case locked = "Locked"
+    }
 
     private var lockedBadges: [Badge] {
         badgeCatalog.filter { badge in
@@ -195,45 +504,70 @@ struct BadgesView: View {
 
     private var badgeCatalog: [Badge] {
         [
-            Badge(id: "badge_getting_started", name: "Getting Started", description: "50+ XP in de pocket.", iconSystemName: "sparkles"),
-            Badge(id: "badge_leveling_up", name: "Leveling Up", description: "200+ XP verzameld.", iconSystemName: "arrow.up.circle.fill"),
-            Badge(id: "badge_architect", name: "Life Architect", description: "500+ XP en duidelijke architect van je leven.", iconSystemName: "rectangle.3.group.fill"),
-            Badge(id: "badge_legend", name: "Level 100 Vibes", description: "1000+ XP: Legendary status.", iconSystemName: "star.circle.fill"),
-            Badge(id: "badge_soft_lover", name: "Soft Lover", description: "80+ Love XP.", iconSystemName: "heart.circle.fill"),
-            Badge(id: "badge_money_minded", name: "Money Minded", description: "80+ Money XP.", iconSystemName: "banknote"),
-            Badge(id: "badge_mind_monk", name: "Mind Monk", description: "80+ Mind XP.", iconSystemName: "brain.head.profile"),
-            Badge(id: "badge_explorer", name: "Explorer", description: "120+ Adventure XP.", iconSystemName: "globe.europe.africa.fill"),
-            Badge(id: "badge_streak_7", name: "Consistency Era", description: "7-daagse streak.", iconSystemName: "calendar.badge.clock"),
-            Badge(id: "badge_streak_21", name: "Unstoppable", description: "21-daagse streak.", iconSystemName: "flame"),
-            Badge(id: "badge_arc_champion", name: "Story Arc", description: "Rond een hele arc af.", iconSystemName: "map.fill"),
-            Badge(id: "badge_arcs_master", name: "Arc Master", description: "Voltooi 3 arcs.", iconSystemName: "rosette"),
+            Badge(id: "badge_getting_started", name: "Getting Started", description: "50+ XP collected", iconSystemName: "sparkles"),
+            Badge(id: "badge_leveling_up", name: "Leveling Up", description: "200+ XP collected", iconSystemName: "arrow.up.circle.fill"),
+            Badge(id: "badge_architect", name: "Life Architect", description: "500+ XP - you're designing your life", iconSystemName: "rectangle.3.group.fill"),
+            Badge(id: "badge_legend", name: "Level 100 Vibes", description: "1000+ XP - legendary status", iconSystemName: "star.circle.fill"),
+            Badge(id: "badge_soft_lover", name: "Soft Lover", description: "80+ Love XP", iconSystemName: "heart.circle.fill"),
+            Badge(id: "badge_money_minded", name: "Money Minded", description: "80+ Money XP", iconSystemName: "banknote.fill"),
+            Badge(id: "badge_inner_work", name: "Inner Work", description: "150+ Mind XP", iconSystemName: "brain"),
+            Badge(id: "badge_explorer", name: "Explorer", description: "120+ Adventure XP", iconSystemName: "safari.fill"),
+            Badge(id: "badge_streak_3", name: "On A Roll", description: "3+ day streak", iconSystemName: "flame.fill"),
+            Badge(id: "badge_streak_7", name: "Consistency Era", description: "7+ day streak", iconSystemName: "calendar.badge.checkmark"),
+            Badge(id: "badge_unstoppable", name: "Unstoppable", description: "21+ day streak", iconSystemName: "bolt.fill"),
+            Badge(id: "badge_story_arc", name: "Story Arc", description: "Complete 1 arc", iconSystemName: "book.circle.fill"),
+            Badge(id: "badge_arc_collector", name: "Arc Collector", description: "Complete 3 arcs", iconSystemName: "rectangle.stack.fill"),
+            Badge(id: "badge_chapter_closer", name: "Chapter Closer", description: "Complete 3+ chapters", iconSystemName: "book.closed.fill"),
+            Badge(id: "badge_balanced", name: "Balanced", description: "60%+ in all dimensions", iconSystemName: "circle.grid.cross"),
         ]
     }
 
     var body: some View {
         NavigationStack {
-            List {
-                Section("Unlocked") {
-                    if model.unlockedBadges.isEmpty {
-                        Text("Nog geen badges. Claim XP en bouw je streak om ze vrij te spelen.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    } else {
-                        ForEach(model.unlockedBadges) { badge in
-                            BadgeRow(badge: badge, unlocked: true)
+            ZStack {
+                BrandBackgroundStatic()
+
+                VStack(spacing: 0) {
+                    // Tab selector
+                    HStack(spacing: DesignSystem.spacing.md) {
+                        ForEach(BadgeTab.allCases, id: \.rawValue) { tab in
+                            Button {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                    selectedTab = tab
+                                }
+                            } label: {
+                                Text(tab.rawValue)
+                                    .font(DesignSystem.text.labelMedium)
+                                    .foregroundColor(selectedTab == tab ? .white : BrandTheme.textSecondary)
+                                    .padding(.horizontal, DesignSystem.spacing.lg)
+                                    .padding(.vertical, DesignSystem.spacing.sm)
+                                    .background(
+                                        Capsule()
+                                            .fill(selectedTab == tab ? BrandTheme.accent : Color.clear)
+                                    )
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
-                }
-
-                Section("Locked goals") {
-                    if lockedBadges.isEmpty {
-                        Text("Alles geclaimd! Nieuwe badges komen eraan.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    } else {
-                        ForEach(lockedBadges) { badge in
-                            BadgeRow(badge: badge, unlocked: false)
+                    .padding(DesignSystem.spacing.md)
+                    .background(BrandTheme.cardBackground.opacity(0.8))
+                    
+                    // Content
+                    ScrollView {
+                        VStack(spacing: DesignSystem.spacing.lg) {
+                            // Stats
+                            BadgeStatsCard()
+                            
+                            // Badges
+                            if selectedTab == .unlocked {
+                                UnlockedBadgesSection()
+                            } else {
+                                LockedBadgesSection(badges: lockedBadges)
+                            }
+                            
+                            Color.clear.frame(height: DesignSystem.spacing.xxl)
                         }
+                        .padding(.horizontal, DesignSystem.spacing.lg)
                     }
                 }
             }
@@ -242,86 +576,224 @@ struct BadgesView: View {
     }
 }
 
-struct BadgeRow: View {
+// MARK: - Badge Stats Card
+
+struct BadgeStatsCard: View {
+    @EnvironmentObject var model: AppModel
+
+    var body: some View {
+        HStack(spacing: DesignSystem.spacing.lg) {
+            // Unlocked count
+            VStack(spacing: DesignSystem.spacing.xs) {
+                ZStack {
+                    Circle()
+                        .fill(BrandTheme.success.opacity(0.15))
+                        .frame(width: 60, height: 60)
+                    
+                    Text("\(model.unlockedBadges.count)")
+                        .font(.system(size: 28, weight: .black, design: .rounded))
+                        .foregroundColor(BrandTheme.success)
+                }
+                
+                Text("Unlocked")
+                    .font(DesignSystem.text.labelSmall)
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+            
+            // Total XP
+            VStack(spacing: DesignSystem.spacing.xs) {
+                ZStack {
+                    Circle()
+                        .fill(BrandTheme.warning.opacity(0.15))
+                        .frame(width: 60, height: 60)
+                    
+                    Text("\(model.totalXP)")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundColor(BrandTheme.warning)
+                }
+                
+                Text("Total XP")
+                    .font(DesignSystem.text.labelSmall)
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+            
+            // Best streak
+            VStack(spacing: DesignSystem.spacing.xs) {
+                ZStack {
+                    Circle()
+                        .fill(BrandTheme.error.opacity(0.15))
+                        .frame(width: 60, height: 60)
+                    
+                    HStack(spacing: 2) {
+                        Image(systemName: "flame.fill")
+                            .font(.system(size: 14, weight: .bold))
+                        Text("\(model.bestStreak)")
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                    }
+                    .foregroundColor(BrandTheme.error)
+                }
+                
+                Text("Best Streak")
+                    .font(DesignSystem.text.labelSmall)
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+            
+            // Arcs completed
+            VStack(spacing: DesignSystem.spacing.xs) {
+                ZStack {
+                    Circle()
+                        .fill(BrandTheme.accent.opacity(0.15))
+                        .frame(width: 60, height: 60)
+                    
+                    Text("\(model.completedArcs.count)")
+                        .font(.system(size: 28, weight: .black, design: .rounded))
+                        .foregroundColor(BrandTheme.accent)
+                }
+                
+                Text("Arcs Done")
+                    .font(DesignSystem.text.labelSmall)
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+        }
+        .brandCard()
+        .padding(.top, DesignSystem.spacing.md)
+    }
+}
+
+// MARK: - Unlocked Badges Section
+
+struct UnlockedBadgesSection: View {
+    @EnvironmentObject var model: AppModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            Text("Your Achievements")
+                .font(DesignSystem.text.headlineMedium)
+                .foregroundColor(BrandTheme.textPrimary)
+
+            if model.unlockedBadges.isEmpty {
+                EmptyStateView(
+                    icon: "rosette",
+                    title: "No badges yet",
+                    message: "Collect XP and build streaks to unlock badges!",
+                    actionTitle: "Go to Home",
+                    action: nil
+                )
+            } else {
+                LazyVStack(spacing: DesignSystem.spacing.md) {
+                    ForEach(model.unlockedBadges) { badge in
+                        BadgeCard(badge: badge, unlocked: true)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Locked Badges Section
+
+struct LockedBadgesSection: View {
+    let badges: [Badge]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            Text("Goals to Unlock")
+                .font(DesignSystem.text.headlineMedium)
+                .foregroundColor(BrandTheme.textPrimary)
+
+            if badges.isEmpty {
+                VStack(spacing: DesignSystem.spacing.md) {
+                    IconContainer(systemName: "trophy.fill", color: BrandTheme.warning, size: .hero, style: .soft)
+                    
+                    Text("All badges unlocked!")
+                        .font(DesignSystem.text.headlineMedium)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    Text("You've achieved everything. New badges coming soon!")
+                        .font(DesignSystem.text.bodySmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(DesignSystem.spacing.xxl)
+            } else {
+                LazyVStack(spacing: DesignSystem.spacing.md) {
+                    ForEach(badges) { badge in
+                        BadgeCard(badge: badge, unlocked: false)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Badge Card
+
+struct BadgeCard: View {
     let badge: Badge
     var unlocked: Bool = true
 
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: badge.iconSystemName)
-                .font(.system(size: 26, weight: .semibold))
-                .foregroundColor(unlocked ? .accentColor : .secondary)
-                .padding(12)
-                .background(
-                    Circle().fill(unlocked ? Color.accentColor.opacity(0.14) : Color(.systemGray6))
-                )
+        HStack(spacing: DesignSystem.spacing.lg) {
+            // Icon
+            ZStack {
+                Circle()
+                    .fill(unlocked ? BrandTheme.accent : BrandTheme.borderSubtle)
+                    .frame(width: 56, height: 56)
+                
+                Image(systemName: badge.iconSystemName)
+                    .font(.system(size: 24, weight: .semibold))
+                    .foregroundColor(unlocked ? .white : BrandTheme.mutedText)
+            }
+            .shadow(color: unlocked ? BrandTheme.accent.opacity(0.4) : .clear, radius: 8, y: 4)
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(badge.name)
-                    .font(.subheadline.weight(.semibold))
+            // Content
+            VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                HStack {
+                    Text(badge.name)
+                        .font(DesignSystem.text.labelLarge)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    if unlocked {
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(BrandTheme.success)
+                    }
+                }
+                
                 Text(badge.description)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .font(DesignSystem.text.bodySmall)
+                    .foregroundColor(BrandTheme.mutedText)
             }
 
             Spacer()
 
-            if unlocked {
-                Image(systemName: "checkmark.seal.fill")
-                    .foregroundColor(.green)
-            } else {
-                Image(systemName: "lock")
-                    .foregroundColor(.secondary)
+            // Status indicator
+            if !unlocked {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 16))
+                    .foregroundColor(BrandTheme.mutedText)
             }
         }
-        .padding(.vertical, 6)
+        .padding(DesignSystem.spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
+                .fill(unlocked ? BrandTheme.success.opacity(0.08) : BrandTheme.cardBackgroundElevated.opacity(0.5))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
+                .strokeBorder(unlocked ? BrandTheme.success.opacity(0.2) : BrandTheme.borderSubtle.opacity(0.3), lineWidth: 1)
+        )
     }
 }
+
+// MARK: - Legacy Support
 
 struct QuestSummaryRow: View {
     let quest: Quest
     let accent: Color
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: quest.kind.systemImage)
-                .foregroundColor(accent)
-                .font(.headline)
-                .frame(width: 28)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(quest.title)
-                    .font(.subheadline.weight(.semibold))
-                if let detail = quest.detail {
-                    Text(detail)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .lineLimit(2)
-                }
-                HStack(spacing: 8) {
-                    if let duration = quest.durationLabel {
-                        Label(duration, systemImage: "clock")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                    Text(quest.kind.label)
-                        .font(.caption2.weight(.medium))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Capsule().fill(accent.opacity(0.12)))
-                        .foregroundColor(accent)
-                }
-            }
-
-            Spacer()
-
-            Text("\(quest.xp) XP")
-                .font(.caption.weight(.semibold))
-                .foregroundColor(.secondary)
-        }
-        .padding(10)
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        ChallengeQuestRow(quest: quest, accent: accent)
     }
 }
 
@@ -329,47 +801,15 @@ struct ChecklistSummaryRow: View {
     let item: ChecklistItem
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: "checkmark.circle")
-                .foregroundColor(.accentColor)
-                .font(.headline)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(item.title)
-                    .font(.subheadline.weight(.semibold))
-                if let detail = item.detail {
-                    Text(detail)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .lineLimit(2)
-                }
-                HStack(spacing: 8) {
-                    ForEach(item.dimensions.prefix(2)) { dim in
-                        Text(dim.label)
-                            .font(.caption2.weight(.medium))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Capsule().fill(Color(.systemGray6)))
-                    }
-                }
-            }
-
-            Spacer()
-
-            Text("\(item.xp) XP")
-                .font(.caption.weight(.semibold))
-                .foregroundColor(.secondary)
-        }
-        .padding(10)
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        MicroWinChallengeRow(item: item)
     }
 }
 
-struct ChallengeView_Previews: PreviewProvider {
-    static var previews: some View {
-        ChallengeView()
-            .environmentObject(AppModel())
-            .preferredColorScheme(.dark)
+struct BadgeRow: View {
+    let badge: Badge
+    var unlocked: Bool = true
+
+    var body: some View {
+        BadgeRow2(badge: badge, unlocked: unlocked)
     }
 }

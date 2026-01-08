@@ -2,153 +2,59 @@ import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 
+// MARK: - Stats View
+
 struct StatsView: View {
     @EnvironmentObject var model: AppModel
+    @State private var selectedTimeframe: Timeframe = .allTime
+    
+    enum Timeframe: String, CaseIterable {
+        case week = "Week"
+        case month = "Month"
+        case allTime = "All Time"
+    }
 
     var body: some View {
         NavigationStack {
             ZStack {
-                BrandBackground()
+                BrandBackgroundStatic()
 
                 ScrollView {
-                    VStack(spacing: 24) {
-                    LevelSummaryCard(
-                        level: model.level,
-                        progress: model.levelProgress,
-                        xpToNext: model.xpToNextLevel,
-                        nextUnlock: model.nextUnlockMessage
-                    )
-
-                    ProgressSnapshotCard(
-                        completed: model.completedCount,
-                        remaining: model.remainingCount,
-                        balanceScore: model.dimensionBalanceScore,
-                        streak: model.showStreaks ? model.currentStreak : 0
-                    )
-
-                    if let arc = model.highlightedArc {
-                        ArcSnapshotCard(
-                            arc: arc,
-                            progress: model.arcProgress(arc),
-                            day: model.arcDay(for: arc),
-                            nextQuests: model.nextQuestBoard(limit: model.questBoardLimit).quests
-                        )
-                    }
-
-                    // Overall card
-                    VStack(spacing: 8) {
-                        Text("Overall")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                    VStack(spacing: DesignSystem.spacing.xl) {
+                        // Level Hero Card
+                        LevelHeroCard()
                         
-                        HStack(alignment: .center, spacing: 20) {
-                            ProgressRing(progress: model.globalProgress)
-                                .frame(width: 120, height: 120)
-                            
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text("Life Score")
-                                    .font(.headline)
-                                Text("\(Int(model.globalProgress * 100))% completed")
-                                    .font(.title2.bold())
-                                Text("\(model.totalXP) XP total")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                                
-                                if model.showStreaks && model.currentStreak > 0 {
-                                    HStack {
-                                        Image(systemName: "flame.fill")
-                                        Text("Current streak: \(model.currentStreak) days")
-                                    }
-                                    .font(.caption)
-                                    .foregroundColor(.orange)
-                                }
-
-                                if model.showStreaks && model.bestStreak > 0 {
-                                    Text("Best streak: \(model.bestStreak) days")
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-
-                            Spacer()
+                        // Progress Snapshot
+                        ProgressSnapshotCard2()
+                        
+                        // Arc Focus
+                        if let arc = model.highlightedArc {
+                            ArcFocusCard(arc: arc)
                         }
-                        .accessibilityElement(children: .combine)
-                        .accessibilityLabel("Overall progress")
-                        .accessibilityValue("\(Int(model.globalProgress * 100)) percent complete, total \(model.totalXP) XP")
+                        
+                        // Overall Progress
+                        OverallProgressCard()
+                        
+                        // Insights Card
+                        InsightsCard2()
+                        
+                        // Dimension Stats
+                        DimensionStatsCard()
+                        
+                        // Arc Progress
+                        ArcProgressCard()
+                        
+                        // Badges Preview
+                        if !model.unlockedBadges.isEmpty {
+                            BadgesPreviewCard()
+                        }
+                        
+                        // Share Card
+                        ShareEntryCard2()
+                        
+                        Color.clear.frame(height: DesignSystem.spacing.xxl)
                     }
-                    .padding()
-                    .background(.ultraThinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                    .shadow(radius: 10, y: 5)
-
-                    InsightsCard(
-                        balanceScore: model.dimensionBalanceScore,
-                        focusHeadline: model.focusHeadline,
-                        ritual: model.ritualOfTheDay,
-                        heroQuests: model.heroQuests
-                    )
-
-                    // Dimensions
-                    VStack(spacing: 16) {
-                        HStack {
-                            Text("Dimensions")
-                                .font(.headline)
-                            Spacer()
-                        }
-
-                        ForEach(LifeDimension.allCases) { dim in
-                            StatsDimensionCard(dimension: dim)
-                        }
-                    }
-                    .padding()
-                    .background(Color(.secondarySystemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-
-                    VStack(spacing: 12) {
-                        HStack {
-                            Text("Arcs")
-                                .font(.headline)
-                            Spacer()
-                            Text("\(model.completedArcs.count) completed")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-
-                        ForEach(model.visibleArcs) { arc in
-                            ArcProgressRow(arc: arc)
-                        }
-                    }
-                    .padding()
-                    .background(.regularMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                    .shadow(radius: 6, y: 3)
-
-                    // Badges quick view
-                    if !model.unlockedBadges.isEmpty {
-                        VStack(spacing: 12) {
-                            HStack {
-                                Text("Badges")
-                                    .font(.headline)
-                                Spacer()
-                                NavigationLink(destination: BadgesView()) {
-                                    Text("View all")
-                                        .font(.caption)
-                                }
-                            }
-                            
-                            ForEach(model.unlockedBadges.prefix(3)) { badge in
-                                BadgeRow(badge: badge)
-                            }
-                        }
-                        .padding()
-                        .background(.regularMaterial)
-                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                        .shadow(radius: 6, y: 3)
-                    }
-
-                        ShareEntryCard()
-                    }
-                    .padding()
+                    .padding(.horizontal, DesignSystem.spacing.lg)
                 }
             }
             .navigationTitle("Stats")
@@ -156,468 +62,673 @@ struct StatsView: View {
     }
 }
 
-struct StatsDimensionCard: View {
+// MARK: - Level Hero Card
+
+struct LevelHeroCard: View {
+    @EnvironmentObject var model: AppModel
+    @State private var animatePulse = false
+    
+    var body: some View {
+        HStack(spacing: DesignSystem.spacing.xl) {
+            // Level badge
+            ZStack {
+                // Glow
+                Circle()
+                    .fill(BrandTheme.accent.opacity(0.2))
+                    .frame(width: 120, height: 120)
+                    .scaleEffect(animatePulse ? 1.1 : 1)
+                
+                // Ring
+                Circle()
+                    .stroke(BrandTheme.accent.opacity(0.3), lineWidth: 4)
+                    .frame(width: 100, height: 100)
+                
+                // Progress ring
+                Circle()
+                    .trim(from: 0, to: model.levelProgress)
+                    .stroke(BrandTheme.accent, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                    .frame(width: 100, height: 100)
+                    .rotationEffect(.degrees(-90))
+                
+                // Level number
+                VStack(spacing: 0) {
+                    Text("LEVEL")
+                        .font(.caption2.weight(.bold))
+                        .foregroundColor(BrandTheme.mutedText)
+                    
+                    Text("\(model.level)")
+                        .font(.system(size: 42, weight: .black, design: .rounded))
+                        .foregroundColor(BrandTheme.textPrimary)
+                }
+            }
+            
+            // Stats
+            VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Total XP")
+                        .font(DesignSystem.text.labelSmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                    
+                    Text("\(model.totalXP)")
+                        .font(DesignSystem.text.displaySmall)
+                        .foregroundColor(BrandTheme.textPrimary)
+                }
+                
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                    HStack {
+                        Text("\(Int(model.levelProgress * 100))%")
+                            .font(DesignSystem.text.labelMedium)
+                            .foregroundColor(BrandTheme.accent)
+                        
+                        Text("to Level \(model.level + 1)")
+                            .font(.caption)
+                            .foregroundColor(BrandTheme.mutedText)
+                    }
+                    
+                    AnimatedProgressBar(progress: model.levelProgress, height: 8, color: BrandTheme.accent)
+                    
+                    Text("\(model.xpToNextLevel) XP remaining")
+                        .font(.caption2)
+                        .foregroundColor(BrandTheme.mutedText)
+                }
+            }
+            
+            Spacer()
+        }
+        .elevatedCard(accentColor: BrandTheme.accent)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
+                animatePulse = true
+            }
+        }
+    }
+}
+
+// MARK: - Progress Snapshot Card 2.0
+
+struct ProgressSnapshotCard2: View {
+    @EnvironmentObject var model: AppModel
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            HStack {
+                Text("Momentum Snapshot")
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Spacer()
+                
+                if model.dimensionBalanceScore > 0 {
+                    ChipView(text: "Balance \(model.dimensionBalanceScore)%", icon: "circle.grid.cross", color: balanceColor, size: .small)
+                }
+            }
+            
+            HStack(spacing: DesignSystem.spacing.md) {
+                SnapshotTile2(
+                    icon: "checkmark.circle.fill",
+                    value: "\(model.completedCount)",
+                    label: "Completed",
+                    color: BrandTheme.success
+                )
+                
+                SnapshotTile2(
+                    icon: "target",
+                    value: "\(model.remainingCount)",
+                    label: "Remaining",
+                    color: BrandTheme.warning
+                )
+                
+                if model.showStreaks {
+                    SnapshotTile2(
+                        icon: "flame.fill",
+                        value: "\(model.currentStreak)d",
+                        label: "Streak",
+                        color: BrandTheme.error
+                    )
+                }
+            }
+        }
+        .brandCard()
+    }
+    
+    private var balanceColor: Color {
+        if model.dimensionBalanceScore >= 70 {
+            return BrandTheme.success
+        } else if model.dimensionBalanceScore >= 40 {
+            return BrandTheme.warning
+        } else {
+            return BrandTheme.error
+        }
+    }
+}
+
+struct SnapshotTile2: View {
+    let icon: String
+    let value: String
+    let label: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: DesignSystem.spacing.sm) {
+            Image(systemName: icon)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(color)
+            
+            Text(value)
+                .font(DesignSystem.text.headlineMedium)
+                .foregroundColor(BrandTheme.textPrimary)
+            
+            Text(label)
+                .font(.caption2)
+                .foregroundColor(BrandTheme.mutedText)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, DesignSystem.spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                .fill(color.opacity(0.1))
+        )
+    }
+}
+
+// MARK: - Arc Focus Card
+
+struct ArcFocusCard: View {
+    @EnvironmentObject var model: AppModel
+    let arc: Arc
+    
+    private var accent: Color { Color(hex: arc.accentColorHex, default: BrandTheme.accent) }
+    private var progress: Double { model.arcProgress(arc) }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            HStack {
+                Text("Arc Focus")
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Spacer()
+                
+                if let day = model.arcDay(for: arc) {
+                    ChipView(text: "Day \(day)", icon: "calendar", color: BrandTheme.mutedText, size: .small)
+                }
+            }
+            
+            HStack(spacing: DesignSystem.spacing.md) {
+                IconContainer(systemName: arc.iconSystemName, color: accent, size: .medium, style: .soft)
+                
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                    Text(arc.title)
+                        .font(DesignSystem.text.labelLarge)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    Text(arc.subtitle)
+                        .font(DesignSystem.text.bodySmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                        .lineLimit(1)
+                    
+                    HStack(spacing: DesignSystem.spacing.sm) {
+                        AnimatedProgressBar(progress: progress, height: 6, color: accent)
+                            .frame(maxWidth: 120)
+                        
+                        Text("\(Int(progress * 100))%")
+                            .font(.caption.weight(.semibold))
+                            .foregroundColor(accent)
+                    }
+                }
+                
+                Spacer()
+            }
+            
+            // Next quests
+            let nextQuests = model.nextQuestBoard(limit: 2).quests
+            if !nextQuests.isEmpty {
+                Divider().background(BrandTheme.divider)
+                
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+                    Text("Next quests")
+                        .font(DesignSystem.text.labelSmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                    
+                    ForEach(nextQuests) { quest in
+                        HStack(spacing: DesignSystem.spacing.sm) {
+                            Image(systemName: quest.kind.systemImage)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(accent)
+                            
+                            Text(quest.title)
+                                .font(DesignSystem.text.labelSmall)
+                                .foregroundColor(BrandTheme.textPrimary)
+                                .lineLimit(1)
+                            
+                            Spacer()
+                            
+                            Text("\(quest.xp) XP")
+                                .font(.caption2)
+                                .foregroundColor(BrandTheme.mutedText)
+                        }
+                    }
+                }
+            }
+        }
+        .brandCard()
+    }
+}
+
+// MARK: - Overall Progress Card
+
+struct OverallProgressCard: View {
+    @EnvironmentObject var model: AppModel
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            Text("Overall Progress")
+                .font(DesignSystem.text.headlineMedium)
+                .foregroundColor(BrandTheme.textPrimary)
+            
+            HStack(spacing: DesignSystem.spacing.xl) {
+                AnimatedProgressRing(
+                    progress: model.globalProgress,
+                    lineWidth: 14,
+                    showPercentage: true
+                )
+                .frame(width: 140, height: 140)
+                
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Life Score")
+                            .font(DesignSystem.text.labelMedium)
+                            .foregroundColor(BrandTheme.mutedText)
+                        
+                        Text("\(Int(model.globalProgress * 100))%")
+                            .font(DesignSystem.text.displaySmall)
+                            .foregroundColor(BrandTheme.textPrimary)
+                    }
+                    
+                    if model.showStreaks && model.currentStreak > 0 {
+                        HStack(spacing: DesignSystem.spacing.xs) {
+                            Image(systemName: "flame.fill")
+                                .foregroundColor(BrandTheme.error)
+                            Text("\(model.currentStreak) day streak")
+                                .font(DesignSystem.text.labelSmall)
+                                .foregroundColor(BrandTheme.textPrimary)
+                        }
+                    }
+                    
+                    if model.showStreaks && model.bestStreak > 0 {
+                        Text("Best: \(model.bestStreak) days")
+                            .font(.caption)
+                            .foregroundColor(BrandTheme.mutedText)
+                    }
+                }
+                
+                Spacer()
+            }
+        }
+        .brandCard()
+    }
+}
+
+// MARK: - Insights Card 2.0
+
+struct InsightsCard2: View {
+    @EnvironmentObject var model: AppModel
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            HStack {
+                Text("Insights")
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Spacer()
+            }
+            
+            // Focus headline
+            HStack(spacing: DesignSystem.spacing.md) {
+                IconContainer(systemName: "lightbulb.fill", color: BrandTheme.warning, size: .small, style: .soft)
+                
+                Text(model.focusHeadline)
+                    .font(DesignSystem.text.bodySmall)
+                    .foregroundColor(BrandTheme.textSecondary)
+            }
+            
+            // Daily ritual
+            HStack(spacing: DesignSystem.spacing.md) {
+                IconContainer(systemName: "sparkles", color: BrandTheme.accent, size: .small, style: .soft)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Ritual of the Day")
+                        .font(DesignSystem.text.labelSmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                    Text(model.ritualOfTheDay)
+                        .font(DesignSystem.text.bodySmall)
+                        .foregroundColor(BrandTheme.textSecondary)
+                }
+            }
+            
+            // Hero quests
+            if !model.heroQuests.isEmpty {
+                Divider().background(BrandTheme.divider)
+                
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+                    HStack {
+                        Text("High Impact")
+                            .font(DesignSystem.text.labelMedium)
+                            .foregroundColor(BrandTheme.textPrimary)
+                        
+                        Spacer()
+                        
+                        Text("Top XP quests")
+                            .font(.caption)
+                            .foregroundColor(BrandTheme.mutedText)
+                    }
+                    
+                    ForEach(model.heroQuests.prefix(3)) { quest in
+                        HStack(spacing: DesignSystem.spacing.md) {
+                            Image(systemName: "bolt.circle.fill")
+                                .foregroundColor(BrandTheme.warning)
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(quest.title)
+                                    .font(DesignSystem.text.labelSmall)
+                                    .foregroundColor(BrandTheme.textPrimary)
+                                    .lineLimit(1)
+                                
+                                if let detail = quest.detail {
+                                    Text(detail)
+                                        .font(.caption2)
+                                        .foregroundColor(BrandTheme.mutedText)
+                                        .lineLimit(1)
+                                }
+                            }
+                            
+                            Spacer()
+                            
+                            XPChip(xp: quest.xp, size: .small)
+                        }
+                    }
+                }
+            }
+        }
+        .brandCard()
+    }
+}
+
+// MARK: - Dimension Stats Card
+
+struct DimensionStatsCard: View {
+    @EnvironmentObject var model: AppModel
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            Text("Dimensions")
+                .font(DesignSystem.text.headlineMedium)
+                .foregroundColor(BrandTheme.textPrimary)
+            
+            ForEach(LifeDimension.allCases) { dim in
+                DimensionStatRow(dimension: dim)
+            }
+        }
+        .brandCard()
+    }
+}
+
+struct DimensionStatRow: View {
     @EnvironmentObject var model: AppModel
     let dimension: LifeDimension
     
+    private var earned: Int { model.xp(for: dimension) }
+    private var total: Int { model.maxXP(for: dimension) }
     private var ratio: Double {
-        let maxXP = model.maxXP(for: dimension)
-        guard maxXP > 0 else { return 0 }
-        return Double(model.xp(for: dimension)) / Double(maxXP)
+        guard total > 0 else { return 0 }
+        return Double(earned) / Double(total)
+    }
+    private var color: Color { BrandTheme.dimensionColor(dimension) }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+            HStack {
+                Label {
+                    Text(dimension.label)
+                        .font(DesignSystem.text.labelMedium)
+                } icon: {
+                    Image(systemName: dimension.systemImage)
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                .foregroundColor(color)
+                
+                Spacer()
+                
+                Text("\(earned) / \(total) XP")
+                    .font(.caption)
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+            
+            AnimatedProgressBar(progress: ratio, height: 10, cornerRadius: 5, color: color)
+        }
+        .padding(DesignSystem.spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                .fill(color.opacity(0.08))
+        )
+    }
+}
+
+// MARK: - Arc Progress Card
+
+struct ArcProgressCard: View {
+    @EnvironmentObject var model: AppModel
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            HStack {
+                Text("Arcs")
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Spacer()
+                
+                Text("\(model.completedArcs.count) completed")
+                    .font(.caption)
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+            
+            ForEach(model.visibleArcs) { arc in
+                ArcProgressRow2(arc: arc)
+            }
+        }
+        .brandCard()
+    }
+}
+
+struct ArcProgressRow2: View {
+    @EnvironmentObject var model: AppModel
+    let arc: Arc
+    
+    private var accent: Color { Color(hex: arc.accentColorHex, default: BrandTheme.accent) }
+    private var progress: Double { model.arcProgress(arc) }
+    private var completedQuests: Int {
+        arc.chapters.flatMap { $0.quests }.filter { model.isCompleted($0) }.count
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: dimension.systemImage)
-                Text(dimension.label)
-                    .font(.subheadline.weight(.semibold))
-                Spacer()
-                Text("\(model.xp(for: dimension)) / \(model.maxXP(for: dimension)) XP")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+        HStack(spacing: DesignSystem.spacing.md) {
+            IconContainer(systemName: arc.iconSystemName, color: accent, size: .small, style: progress >= 1 ? .gradient : .soft)
             
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(.systemGray5))
-                    
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color.accentColor.opacity(0.9),
-                                Color.accentColor.opacity(0.5)
-                            ]),
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        ))
-                        .frame(width: max(10, geo.size.width * CGFloat(min(1, max(0, ratio)))))
-                }
-            }
-            .frame(height: 12)
-        }
-        .padding(12)
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .shadow(color: Color.black.opacity(0.04), radius: 6, y: 2)
-    }
-}
-
-struct InsightsCard: View {
-    let balanceScore: Int
-    let focusHeadline: String
-    let ritual: String
-    let heroQuests: [ChecklistItem]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Insights")
-                    .font(.headline)
-                Spacer()
-                if balanceScore > 0 {
-                    Text("Balance \(balanceScore)%")
-                        .font(.caption.weight(.semibold))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(Capsule().fill(Color.accentColor.opacity(0.12)))
-                }
-            }
-
-            Text(focusHeadline)
-                .font(.subheadline)
-            Text(ritual)
-                .font(.caption)
-                .foregroundColor(.secondary)
-
-            Divider()
-
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
                 HStack {
-                    Text("High impact")
-                        .font(.caption.weight(.semibold))
-                    Spacer()
-                    Text("Top XP quests")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
-
-                if heroQuests.isEmpty {
-                    Text("Claim eerst wat basis XP, dan droppen we je boss fights.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                } else {
-                    ForEach(heroQuests) { quest in
-                        HStack(alignment: .top, spacing: 10) {
-                            Image(systemName: "bolt.circle.fill")
-                                .foregroundColor(.orange)
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(quest.title)
-                                    .font(.subheadline.weight(.semibold))
-                                if let detail = quest.detail {
-                                    Text(detail)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                        .lineLimit(2)
-                                }
-                            }
-                            Spacer()
-                            Text("\(quest.xp) XP")
-                                .font(.caption.weight(.medium))
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Capsule().fill(Color(.systemGray6)))
-                        }
-                    }
-                }
-            }
-        }
-        .brandCard(cornerRadius: 20)
-    }
-}
-
-struct LevelSummaryCard: View {
-    let level: Int
-    let progress: Double
-    let xpToNext: Int
-    let nextUnlock: String
-
-    @State private var animateBurst = false
-    @State private var animatePulse = false
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .center) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Level")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    HStack(alignment: .firstTextBaseline, spacing: 12) {
-                        Text("\(level)")
-                            .font(.system(size: 64, weight: .black, design: .rounded))
-                            .foregroundColor(.primary)
-                            .shadow(color: Color.black.opacity(0.08), radius: 6, y: 4)
-                            .scaleEffect(animatePulse ? 1.08 : 1)
-                            .animation(.spring(response: 0.6, dampingFraction: 0.7), value: animatePulse)
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("\(Int(progress * 100))%")
-                                .font(.caption2.weight(.semibold))
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Capsule().fill(Color.accentColor.opacity(0.14)))
-                            Text("Nog \(xpToNext) XP tot level \(level + 1)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-
-                Spacer()
-
-                ProgressRing(progress: progress)
-                    .frame(width: 96, height: 96)
-            }
-
-            Text(nextUnlock)
-                .font(.footnote)
-                .foregroundColor(.secondary)
-        }
-        .padding()
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .shadow(radius: 8, y: 4)
-        .overlay(confettiOverlay)
-        .onChange(of: level, initial: false) { oldValue, newValue in
-            guard newValue > oldValue else { return }
-
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.65)) {
-                animatePulse = true
-            }
-            withAnimation(.easeOut(duration: 1)) {
-                animateBurst = true
-            }
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                    animatePulse = false
-                }
-            }
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                animateBurst = false
-            }
-        }
-    }
-
-    private var confettiOverlay: some View {
-        ZStack {
-            ForEach(0..<12, id: \.self) { index in
-                let angle = Double(index) / 12 * Double.pi * 2
-                Circle()
-                    .fill(Color.accentColor.opacity(0.6))
-                    .frame(width: 8, height: 8)
-                    .offset(
-                        x: CGFloat(cos(angle)) * (animateBurst ? 64 : 8),
-                        y: CGFloat(sin(angle)) * (animateBurst ? 64 : 8)
-                    )
-                    .opacity(animateBurst ? 0 : 1)
-                    .scaleEffect(animateBurst ? 1 : 0.4)
-                    .animation(.easeOut(duration: 0.9).delay(Double(index) * 0.01), value: animateBurst)
-            }
-        }
-    }
-}
-
-struct ArcProgressRow: View {
-    @EnvironmentObject var model: AppModel
-    let arc: Arc
-
-    var body: some View {
-        let accent = Color(hex: arc.accentColorHex, default: .accentColor)
-        let progress = model.arcProgress(arc)
-        let totalQuests = arc.questCount
-        let completed = arc.chapters.flatMap { $0.quests }.filter { model.isCompleted($0) }.count
-
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Image(systemName: arc.iconSystemName)
-                    .foregroundColor(accent)
-                VStack(alignment: .leading, spacing: 2) {
                     Text(arc.title)
-                        .font(.subheadline.weight(.semibold))
-                    Text(arc.subtitle)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
+                        .font(DesignSystem.text.labelMedium)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    if progress >= 1 {
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(BrandTheme.success)
+                    }
+                    
+                    Spacer()
+                    
                     Text("\(Int(progress * 100))%")
                         .font(.caption.weight(.semibold))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Capsule().fill(accent.opacity(0.18)))
-                    Text("\(completed)/\(totalQuests) quests")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(accent)
                 }
+                
+                AnimatedProgressBar(progress: progress, height: 6, color: accent)
+                
+                Text("\(completedQuests)/\(arc.questCount) quests")
+                    .font(.caption2)
+                    .foregroundColor(BrandTheme.mutedText)
             }
-
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(.systemGray5))
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(accent)
-                        .frame(width: max(8, geo.size.width * CGFloat(min(1, max(0, progress)))))
-                }
-            }
-            .frame(height: 10)
         }
-        .padding(.vertical, 4)
+        .padding(DesignSystem.spacing.sm)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.sm, style: .continuous)
+                .fill(BrandTheme.cardBackgroundElevated.opacity(0.5))
+        )
     }
 }
 
-struct ProgressSnapshotCard: View {
-    let completed: Int
-    let remaining: Int
-    let balanceScore: Int
-    let streak: Int
+// MARK: - Badges Preview Card
 
+struct BadgesPreviewCard: View {
+    @EnvironmentObject var model: AppModel
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
             HStack {
-                Text("Momentum snapshot")
-                    .font(.headline)
+                Text("Badges")
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
                 Spacer()
-                if balanceScore > 0 {
-                    Label("Balance \(balanceScore)%", systemImage: "circle.grid.cross")
+                
+                NavigationLink(destination: BadgesView()) {
+                    Text("View all")
                         .font(.caption.weight(.medium))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(Capsule().fill(Color.accentColor.opacity(0.12)))
+                        .foregroundColor(BrandTheme.accent)
                 }
             }
-
-            HStack(spacing: 14) {
-                SnapshotTile(title: "Completed", value: "\(completed)", subtitle: "quests done", icon: "checkmark.circle.fill", tint: .green)
-                SnapshotTile(title: "Remaining", value: "\(remaining)", subtitle: "nog te gaan", icon: "target", tint: .orange)
-                SnapshotTile(title: "Streak", value: "\(streak)d", subtitle: "lopende reeks", icon: "flame.fill", tint: .red)
+            
+            ForEach(model.unlockedBadges.prefix(3)) { badge in
+                BadgeRow2(badge: badge, unlocked: true)
             }
         }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .brandCard()
     }
 }
 
-struct ArcSnapshotCard: View {
-    let arc: Arc
-    let progress: Double
-    let day: Int?
-    let nextQuests: [Quest]
-
+struct BadgeRow2: View {
+    let badge: Badge
+    var unlocked: Bool = true
+    
     var body: some View {
-        let accent = Color(hex: arc.accentColorHex, default: .accentColor)
-
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("Arc focus")
-                    .font(.headline)
-                Spacer()
-                if let day = day {
-                    Text("Dag \(day)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
+        HStack(spacing: DesignSystem.spacing.md) {
+            IconContainer(
+                systemName: badge.iconSystemName,
+                color: unlocked ? BrandTheme.accent : BrandTheme.mutedText,
+                size: .medium,
+                style: unlocked ? .soft : .outlined
+            )
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(badge.name)
+                    .font(DesignSystem.text.labelMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Text(badge.description)
+                    .font(.caption)
+                    .foregroundColor(BrandTheme.mutedText)
+                    .lineLimit(2)
             }
-
-            HStack(spacing: 12) {
-                Image(systemName: arc.iconSystemName)
-                    .foregroundColor(accent)
-                    .padding(10)
-                    .background(Circle().fill(accent.opacity(0.12)))
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(arc.title)
-                        .font(.subheadline.weight(.semibold))
-                    Text(arc.subtitle)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-
-                    ProgressView(value: progress) {
-                        Text("\(Int(progress * 100))% • \(arc.questCount) quests")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                    .tint(accent)
-                }
-            }
-
-            if !nextQuests.isEmpty {
-                Divider()
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Volgende quests")
-                        .font(.caption.weight(.semibold))
-                        .foregroundColor(.secondary)
-                    ForEach(nextQuests) { quest in
-                        HStack(spacing: 8) {
-                            Image(systemName: quest.kind.systemImage)
-                                .foregroundColor(accent)
-                            Text(quest.title)
-                                .font(.subheadline)
-                                .lineLimit(1)
-                            Spacer()
-                            Text("\(quest.xp) XP")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
+            
+            Spacer()
+            
+            if unlocked {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(BrandTheme.success)
+            } else {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 16))
+                    .foregroundColor(BrandTheme.mutedText)
             }
         }
-        .padding()
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .shadow(radius: 6, y: 3)
+        .padding(DesignSystem.spacing.sm)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.sm, style: .continuous)
+                .fill(unlocked ? BrandTheme.success.opacity(0.08) : BrandTheme.cardBackgroundElevated.opacity(0.5))
+        )
     }
 }
 
-private struct SnapshotTile: View {
-    let title: String
-    let value: String
-    let subtitle: String
-    let icon: String
-    let tint: Color
+// MARK: - Share Entry Card 2.0
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Label(title, systemImage: icon)
-                .font(.caption.weight(.semibold))
-                .foregroundColor(tint)
-
-            Text(value)
-                .font(.title3.bold())
-
-            Text(subtitle)
-                .font(.caption2)
-                .foregroundColor(.secondary)
-        }
-        .padding()
-        .frame(maxWidth: .infinity)
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .shadow(color: Color.black.opacity(0.04), radius: 5, y: 2)
-    }
-}
-
-// MARK: - Share Views
-
-struct ShareCardImage: Transferable {
-    let image: UIImage
-
-    var preview: Image { Image(uiImage: image) }
-
-    static var transferRepresentation: some TransferRepresentation {
-        DataRepresentation(exportedContentType: .png) { item in
-            item.image.pngData() ?? Data()
-        }
-    }
-}
-
-struct SharePreviewView: View {
+struct ShareEntryCard2: View {
     @EnvironmentObject var model: AppModel
     @State private var shareCard: ShareCardImage?
     @State private var isRendering = false
 
     var body: some View {
-        ZStack {
-            BrandBackground()
-
-            VStack(spacing: 16) {
-                ShareCardView()
-                    .frame(maxWidth: 360)
-
-                if let card = shareCard {
-                    ShareLink(item: card, preview: SharePreview("Life XP-kaart", image: card.preview)) {
-                        shareButtonLabel(title: "Deel deze kaart")
-                    }
-                    .accessibilityLabel("Deel een afbeelding van je kaart")
-                } else {
-                    Button(action: prepareShareCard) {
-                        shareButtonLabel(title: isRendering ? "Kaart wordt geladen…" : "Genereer kaart")
-                    }
-                    .disabled(isRendering)
-                    .accessibilityLabel("Genereer share-kaart")
-                }
-
-                if isRendering {
-                    ProgressView("Bezig met renderen…")
-                        .font(.caption)
-                        .tint(.white)
-                } else {
-                    Text("Deel je Life XP-kaart direct als afbeelding, zonder screenshots.")
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            HStack(spacing: DesignSystem.spacing.md) {
+                IconContainer(systemName: "square.and.arrow.up", color: BrandTheme.accent, size: .medium, style: .soft)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Share Your Progress")
+                        .font(DesignSystem.text.labelLarge)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    Text("Generate a beautiful card to share your stats")
                         .font(.caption)
                         .foregroundColor(BrandTheme.mutedText)
-                        .multilineTextAlignment(.center)
+                }
+                
+                Spacer()
+            }
+            
+            if let card = shareCard {
+                ShareLink(item: card, preview: SharePreview("Life XP Card", image: card.preview)) {
+                    HStack {
+                        Spacer()
+                        Label("Share Now", systemImage: "arrow.up.right.square")
+                            .font(DesignSystem.text.labelMedium)
+                        Spacer()
+                    }
+                }
+                .buttonStyle(GlowButtonStyle(size: .medium))
+            } else {
+                Button(action: prepareShareCard) {
+                    HStack {
+                        Spacer()
+                        Label(isRendering ? "Preparing..." : "Generate Card", systemImage: "wand.and.rays")
+                            .font(DesignSystem.text.labelMedium)
+                        Spacer()
+                    }
+                }
+                .buttonStyle(SoftButtonStyle())
+                .disabled(isRendering)
+            }
+            
+            NavigationLink(destination: SharePreviewView()) {
+                Text("Preview card first")
+                    .font(.caption)
+                    .foregroundColor(BrandTheme.accent)
+            }
+            
+            if isRendering {
+                HStack {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                    Text("Rendering...")
+                        .font(.caption)
+                        .foregroundColor(BrandTheme.mutedText)
                 }
             }
-            .padding()
         }
-        .navigationTitle("Share card")
-        .navigationBarTitleDisplayMode(.inline)
+        .brandCard()
         .task { await ensureShareCardPrepared() }
-    }
-
-    private func shareButtonLabel(title: String) -> some View {
-        HStack {
-            Spacer()
-            Label(title, systemImage: "arrow.up.right.square")
-                .font(.callout.bold())
-            Spacer()
-        }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.white.opacity(0.12)))
     }
 
     private func prepareShareCard() {
@@ -644,74 +755,54 @@ struct SharePreviewView: View {
     }
 }
 
-struct ShareEntryCard: View {
+// MARK: - Share Views
+
+struct ShareCardImage: Transferable {
+    let image: UIImage
+
+    var preview: Image { Image(uiImage: image) }
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .png) { item in
+            item.image.pngData() ?? Data()
+        }
+    }
+}
+
+struct SharePreviewView: View {
     @EnvironmentObject var model: AppModel
     @State private var shareCard: ShareCardImage?
     @State private var isRendering = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .center, spacing: 12) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(BrandTheme.accent.opacity(0.14))
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(BrandTheme.accent)
-                }
-                .frame(width: 54, height: 54)
+        ZStack {
+            BrandBackground(animated: false)
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Deel je progress")
-                        .font(.subheadline.weight(.semibold))
-                    Text("Kaart met streak, XP en arc-progress als afbeelding.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
+            VStack(spacing: DesignSystem.spacing.lg) {
+                ShareCardView()
+                    .frame(maxWidth: 360)
 
-            if let card = shareCard {
-                ShareLink(item: card, preview: SharePreview("Life XP-kaart", image: card.preview)) {
-                    HStack {
-                        Spacer()
-                        Label("Deel nu", systemImage: "arrow.up.right.square")
-                            .font(.footnote.bold())
-                        Spacer()
+                if let card = shareCard {
+                    ShareLink(item: card, preview: SharePreview("Life XP Card", image: card.preview)) {
+                        Text("Share Card")
                     }
-                    .padding(.vertical, 10)
-                    .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(BrandTheme.accent.opacity(0.12)))
-                }
-                .accessibilityLabel("Deel een afbeelding van je kaart")
-            } else {
-                Button(action: prepareShareCard) {
-                    HStack {
-                        Spacer()
-                        Label(isRendering ? "Kaart voorbereiden…" : "Maak share-card", systemImage: "wand.and.rays")
-                            .font(.footnote.bold())
-                        Spacer()
+                    .buttonStyle(GlowButtonStyle(size: .large))
+                } else {
+                    Button(action: prepareShareCard) {
+                        Text(isRendering ? "Loading..." : "Generate")
                     }
-                    .padding(.vertical, 10)
-                    .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(BrandTheme.accent.opacity(0.12)))
+                    .buttonStyle(SoftButtonStyle())
+                    .disabled(isRendering)
                 }
-                .disabled(isRendering)
-                .accessibilityLabel("Bereid de share-kaart voor")
-            }
 
-            NavigationLink(destination: SharePreviewView()) {
-                Text("Bekijk de kaart eerst")
+                Text("Share your Life XP card as an image")
                     .font(.caption)
-                    .foregroundColor(.primary)
+                    .foregroundColor(BrandTheme.mutedText)
             }
-
-            if isRendering {
-                ProgressView("Bezig met renderen…")
-                    .font(.caption)
-            }
+            .padding()
         }
-        .padding()
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(radius: 6, y: 3)
+        .navigationTitle("Share Card")
+        .navigationBarTitleDisplayMode(.inline)
         .task { await ensureShareCardPrepared() }
     }
 
@@ -751,125 +842,138 @@ struct ShareCardView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
+                // Background gradient
                 LinearGradient(
                     colors: [BrandTheme.waveSky, BrandTheme.waveMist, BrandTheme.waveDeep],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
-                .ignoresSafeArea()
 
+                // Decorative orbs
                 Circle()
                     .fill(BrandTheme.accent.opacity(0.2))
-                    .blur(radius: 80)
-                    .scaleEffect(1.4)
-                    .offset(x: -100, y: -160)
+                    .blur(radius: 60)
+                    .scaleEffect(1.3)
+                    .offset(x: -80, y: -120)
 
                 Circle()
-                    .fill(BrandTheme.accentSoft.opacity(0.18))
-                    .blur(radius: 80)
-                    .scaleEffect(1.3)
-                    .offset(x: 120, y: 180)
+                    .fill(BrandTheme.accentSoft.opacity(0.15))
+                    .blur(radius: 60)
+                    .scaleEffect(1.2)
+                    .offset(x: 100, y: 150)
 
+                // Border
                 RoundedRectangle(cornerRadius: 32, style: .continuous)
-                    .strokeBorder(BrandTheme.accent.opacity(0.18), lineWidth: 1)
-                    .padding(10)
+                    .strokeBorder(BrandTheme.accent.opacity(0.2), lineWidth: 1)
+                    .padding(8)
 
-                VStack(spacing: 18) {
-                    VStack(spacing: 6) {
+                // Content
+                VStack(spacing: DesignSystem.spacing.lg) {
+                    // Logo
+                    VStack(spacing: DesignSystem.spacing.sm) {
                         ZStack {
                             Circle()
-                                .fill(BrandTheme.accent.opacity(0.22))
-                                .frame(width: 86, height: 86)
+                                .fill(BrandTheme.accent.opacity(0.2))
+                                .frame(width: 72, height: 72)
+                            
                             Circle()
                                 .fill(BrandTheme.accent)
-                                .frame(width: 64, height: 64)
+                                .frame(width: 56, height: 56)
+                            
                             Image(systemName: "checkmark")
-                                .font(.system(size: 26, weight: .heavy))
+                                .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(.white)
                         }
 
-                        Text("My Life Checklist")
+                        Text("Life XP")
                             .font(.headline)
                             .foregroundColor(BrandTheme.accent)
-                        Text("Soft waves, steady wins")
-                            .font(.caption)
-                            .foregroundColor(BrandTheme.mutedText)
                     }
 
-                    ProgressRing(progress: model.globalProgress)
-                        .frame(width: 150, height: 150)
-                        .padding(.top, 4)
+                    // Progress ring
+                    AnimatedProgressRing(
+                        progress: model.globalProgress,
+                        lineWidth: 12,
+                        showPercentage: true
+                    )
+                    .frame(width: 130, height: 130)
 
-                    Text("\(model.totalXP) XP collected")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundColor(BrandTheme.accent)
+                    // Stats
+                    VStack(spacing: DesignSystem.spacing.xs) {
+                        Text("\(model.totalXP) XP")
+                            .font(DesignSystem.text.headlineMedium)
+                            .foregroundColor(BrandTheme.textPrimary)
 
-                    if model.showStreaks && model.currentStreak > 0 {
-                        Text("Streak: \(model.currentStreak) days")
+                        if model.showStreaks && model.currentStreak > 0 {
+                            HStack(spacing: 4) {
+                                Image(systemName: "flame.fill")
+                                    .foregroundColor(BrandTheme.error)
+                                Text("\(model.currentStreak) day streak")
+                            }
                             .font(.caption.weight(.semibold))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(Capsule().fill(BrandTheme.accent.opacity(0.12)))
-                            .foregroundColor(BrandTheme.accent)
+                            .foregroundColor(BrandTheme.textSecondary)
+                        }
                     }
 
+                    // Arc progress
                     if model.showArcProgressOnShare, let arc = model.highlightedArc {
-                        VStack(spacing: 4) {
-                            Text("Arc: \(arc.title) • \(Int(model.arcProgress(arc) * 100))%")
+                        VStack(spacing: 2) {
+                            Text("\(arc.title) • \(Int(model.arcProgress(arc) * 100))%")
                                 .font(.caption)
-                                .foregroundColor(BrandTheme.mutedText)
-                            Text("\(arc.questCount) quests • \(arc.totalXP) XP")
-                                .font(.caption2)
                                 .foregroundColor(BrandTheme.mutedText)
                         }
                     }
 
-                    VStack(spacing: 12) {
+                    // Dimension bars
+                    VStack(spacing: DesignSystem.spacing.sm) {
                         ForEach(LifeDimension.allCases) { dim in
-                            HStack(spacing: 10) {
+                            HStack(spacing: DesignSystem.spacing.sm) {
                                 Image(systemName: dim.systemImage)
-                                    .foregroundColor(BrandTheme.accent)
+                                    .font(.system(size: 12))
+                                    .foregroundColor(BrandTheme.dimensionColor(dim))
+                                    .frame(width: 16)
+                                
                                 Text(dim.label)
-                                    .font(.footnote.weight(.medium))
-                                    .foregroundColor(.primary)
+                                    .font(.caption2)
+                                    .foregroundColor(BrandTheme.textSecondary)
+                                    .frame(width: 60, alignment: .leading)
 
                                 GeometryReader { geo in
                                     ZStack(alignment: .leading) {
                                         Capsule()
-                                            .fill(BrandTheme.waveDeep.opacity(0.35))
+                                            .fill(BrandTheme.borderSubtle.opacity(0.3))
                                         Capsule()
-                                            .fill(BrandTheme.accent)
-                                            .frame(width: max(8, geo.size.width * CGFloat(min(1, max(0, ratio(for: dim))))))
+                                            .fill(BrandTheme.dimensionColor(dim))
+                                            .frame(width: max(4, geo.size.width * ratio(for: dim)))
                                     }
                                 }
-                                .frame(height: 8)
+                                .frame(height: 6)
 
                                 Text("\(model.xp(for: dim))")
                                     .font(.caption2)
                                     .foregroundColor(BrandTheme.mutedText)
+                                    .frame(width: 30, alignment: .trailing)
                             }
                         }
                     }
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, DesignSystem.spacing.lg)
 
-                    VStack(spacing: 4) {
+                    // Footer
+                    VStack(spacing: 2) {
                         Text("Soft steps, bold wins")
                             .font(.caption)
                             .foregroundColor(BrandTheme.mutedText)
-
-                        Text("Search: Life XP")
+                        Text("Life XP App")
                             .font(.caption2.weight(.semibold))
                             .foregroundColor(BrandTheme.accent)
                     }
-                    .padding(.bottom, 8)
                 }
-                .padding(.horizontal, 22)
-                .padding(.vertical, 24)
+                .padding(DesignSystem.spacing.xl)
             }
         }
         .aspectRatio(9/16, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
-        .shadow(radius: 24, y: 10)
+        .shadow(color: Color.black.opacity(0.2), radius: 20, y: 10)
     }
 }
 
@@ -884,4 +988,79 @@ private func renderShareCard(for model: AppModel, size: CGSize = CGSize(width: 3
 
     guard let uiImage = renderer.uiImage else { return nil }
     return ShareCardImage(image: uiImage)
+}
+
+// MARK: - Legacy Support
+
+struct StatsDimensionCard: View {
+    @EnvironmentObject var model: AppModel
+    let dimension: LifeDimension
+    
+    var body: some View {
+        DimensionStatRow(dimension: dimension)
+            .environmentObject(model)
+    }
+}
+
+struct InsightsCard: View {
+    let balanceScore: Int
+    let focusHeadline: String
+    let ritual: String
+    let heroQuests: [ChecklistItem]
+    
+    var body: some View {
+        EmptyView() // Replaced by InsightsCard2
+    }
+}
+
+struct LevelSummaryCard: View {
+    let level: Int
+    let progress: Double
+    let xpToNext: Int
+    let nextUnlock: String
+    
+    var body: some View {
+        EmptyView() // Replaced by LevelHeroCard
+    }
+}
+
+struct ArcProgressRow: View {
+    @EnvironmentObject var model: AppModel
+    let arc: Arc
+    
+    var body: some View {
+        ArcProgressRow2(arc: arc)
+            .environmentObject(model)
+    }
+}
+
+struct ProgressSnapshotCard: View {
+    let completed: Int
+    let remaining: Int
+    let balanceScore: Int
+    let streak: Int
+    
+    var body: some View {
+        EmptyView() // Replaced by ProgressSnapshotCard2
+    }
+}
+
+struct ArcSnapshotCard: View {
+    let arc: Arc
+    let progress: Double
+    let day: Int?
+    let nextQuests: [Quest]
+    
+    var body: some View {
+        EmptyView() // Replaced by ArcFocusCard
+    }
+}
+
+struct ShareEntryCard: View {
+    @EnvironmentObject var model: AppModel
+    
+    var body: some View {
+        ShareEntryCard2()
+            .environmentObject(model)
+    }
 }

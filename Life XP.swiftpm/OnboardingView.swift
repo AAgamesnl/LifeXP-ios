@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - Onboarding View
+
 struct OnboardingView: View {
     @EnvironmentObject var model: AppModel
     var onDone: () -> Void
@@ -10,343 +12,106 @@ struct OnboardingView: View {
     @State private var step: Int = 0
     @State private var hasSyncedFromModel = false
     @State private var isAdvancing: Bool = false
+    @State private var showConfetti = false
+    
+    private let totalSteps = 4
     
     var body: some View {
         ZStack {
-            BrandBackground()
+            // Animated background
+            BrandBackground(animated: true, intensity: 1.2)
                 .ignoresSafeArea()
-
-            VStack(spacing: 20) {
+            
+            // Confetti on completion
+            ConfettiView(isActive: $showConfetti, particleCount: 100)
+            
+            VStack(spacing: 0) {
+                // Progress indicator
+                OnboardingProgress(currentStep: step, totalSteps: totalSteps)
+                    .padding(.top, DesignSystem.spacing.xl)
+                    .padding(.horizontal, DesignSystem.spacing.xl)
+                
+                // Content pages
                 TabView(selection: $step) {
-                    onboardingPage(index: 0) { pageWelcome }
-                    onboardingPage(index: 1) { pageFocus }
-                    onboardingPage(index: 2) { pageOverwhelm }
-                    onboardingPage(index: 3) { pageTone }
+                    WelcomePage()
+                        .tag(0)
+                    
+                    FocusPage(selectedFocuses: $selectedFocuses)
+                        .tag(1)
+                    
+                    EnergyPage(overwhelmed: $overwhelmed)
+                        .tag(2)
+                    
+                    TonePage(selectedTone: $selectedTone)
+                        .tag(3)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
-                .animation(.easeInOut(duration: 0.35), value: step)
-
-                controlBar
-                    .padding(.horizontal)
-                    .padding(.bottom, DesignSystem.spacing.lg)
+                .animation(.spring(response: 0.5, dampingFraction: 0.85), value: step)
+                
+                // Navigation controls
+                OnboardingControls(
+                    step: $step,
+                    totalSteps: totalSteps,
+                    isAdvancing: isAdvancing,
+                    canProceed: canProceed,
+                    onNext: handleNext,
+                    onBack: handleBack
+                )
+                .padding(.horizontal, DesignSystem.spacing.xl)
+                .padding(.bottom, DesignSystem.spacing.xxl)
             }
-            .frame(maxWidth: 700)
-            .padding(.top, DesignSystem.spacing.xl)
-            .tint(BrandTheme.accent)
-            .onAppear {
-                guard !hasSyncedFromModel else { return }
-                selectedFocuses = model.settings.enabledDimensions
-                if selectedFocuses.isEmpty, let primary = model.primaryFocus {
-                    selectedFocuses.insert(primary)
-                }
-                overwhelmed = Double(model.overwhelmedLevel)
-                selectedTone = model.toneMode
-                hasSyncedFromModel = true
+        }
+        .onAppear {
+            guard !hasSyncedFromModel else { return }
+            selectedFocuses = model.settings.enabledDimensions
+            if selectedFocuses.isEmpty, let primary = model.primaryFocus {
+                selectedFocuses.insert(primary)
             }
+            overwhelmed = Double(model.overwhelmedLevel)
+            selectedTone = model.toneMode
+            hasSyncedFromModel = true
         }
     }
     
-    private var pageWelcome: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            Text("Welkom bij Life XP")
-                .font(.largeTitle.bold())
-                .foregroundStyle(BrandTheme.textPrimary)
-                .multilineTextAlignment(.leading)
-                .accessibilityAddTraits(.isHeader)
-
-            Text("Je leven hoeft niet perfect te worden ingepland. Met kleine stappen, heldere prioriteiten en een frisse mindset maak je ruimte voor wat ertoe doet.")
-                .font(.body)
-                .foregroundStyle(BrandTheme.mutedText)
-                .multilineTextAlignment(.leading)
-
-            VStack(alignment: .leading, spacing: 12) {
-                Label("Focus op de thema's die nu belangrijk zijn", systemImage: "target")
-                Label("Check in met je hoofd en verlaag de ruis", systemImage: "waveform.path")
-                Label("Kies een toon die bij jou past", systemImage: "sparkles")
-            }
-            .font(.callout.weight(.semibold))
-            .foregroundStyle(BrandTheme.textPrimary)
-            .labelStyle(.titleAndIcon)
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
-                    .fill(BrandTheme.cardBackground.opacity(0.9))
-                    .shadow(color: .black.opacity(0.08), radius: 18, x: 0, y: 8)
-            )
-
-            Text("Veeg of tik op Volgende om te starten.")
-                .font(.footnote)
-                .foregroundStyle(BrandTheme.mutedText)
-                .padding(.top, DesignSystem.spacing.md)
+    private var canProceed: Bool {
+        switch step {
+        case 1: return !selectedFocuses.isEmpty
+        default: return true
         }
-        .padding(.vertical, DesignSystem.spacing.xl)
     }
     
-    private var pageFocus: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Waar wil je nu vooral op focussen?")
-                .font(.title2.bold())
-                .foregroundStyle(BrandTheme.textPrimary)
-                .multilineTextAlignment(.leading)
-
-            Text("Dit verandert niets aan hoe de app werkt, maar helpt om je suggesties en statistieken persoonlijker te maken.")
-                .font(.callout)
-                .foregroundStyle(BrandTheme.mutedText)
-
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 12)], spacing: 12) {
-                ForEach(LifeDimension.allCases) { dim in
-                    focusChip(for: dim)
-                }
-            }
-            .accessibilityElement(children: .contain)
-            .padding(.top, 4)
-
-            Text("Je kunt meerdere thema's kiezen. We gebruiken de eerste selectie als hoofd-focusthema.")
-                .font(.footnote)
-                .foregroundStyle(BrandTheme.mutedText)
-                .padding(.top, DesignSystem.spacing.sm)
-        }
-        .padding(.vertical, DesignSystem.spacing.xl)
-    }
-    
-    private var pageOverwhelm: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Hoe druk voelt je leven nu aan?")
-                .font(.title2.bold())
-                .foregroundStyle(BrandTheme.textPrimary)
-                .multilineTextAlignment(.leading)
-
-            Text("Dit is puur voor jezelf. Life XP wil je niet extra belasten, maar juist helpen met heldere, haalbare stappen.")
-                .font(.callout)
-                .foregroundStyle(BrandTheme.mutedText)
-
-            VStack(alignment: .leading, spacing: 12) {
-                Text("\(Int(overwhelmed)) / 5")
-                    .font(.title3.bold())
-                    .foregroundStyle(BrandTheme.textPrimary)
-                    .accessibilityLabel("Huidige drukte")
-                    .accessibilityValue("\(Int(overwhelmed)) van de 5")
-
-                Slider(value: $overwhelmed, in: 1...5, step: 1)
-                    .tint(BrandTheme.accent)
-                    .accessibilityLabel("Hoe druk je leven nu aanvoelt")
-                    .accessibilityValue("\(Int(overwhelmed)) van de 5")
-
-                HStack {
-                    Text("Heel rustig")
-                        .font(.footnote)
-                        .foregroundStyle(BrandTheme.mutedText)
-                    Spacer()
-                    Text("Heel druk")
-                        .font(.footnote)
-                        .foregroundStyle(BrandTheme.mutedText)
-                }
-            }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
-                    .fill(BrandTheme.cardBackground.opacity(0.92))
-            )
-        }
-        .padding(.vertical, DesignSystem.spacing.xl)
-    }
-    
-    private var pageTone: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Welke vibe wil je?")
-                .font(.title2.bold())
-                .foregroundStyle(BrandTheme.textPrimary)
-                .multilineTextAlignment(.leading)
-
-            Text("Je kunt dit altijd later nog veranderen in Settings.")
-                .font(.callout)
-                .foregroundStyle(BrandTheme.mutedText)
-
-            VStack(spacing: 14) {
-                toneOption(tone: .soft, title: "Soft & gentle", description: "Lief, zacht en ondersteunend. Perfect als je al genoeg stress hebt.")
-                toneOption(tone: .realTalk, title: "Real talk", description: "Eerlijk, direct en een beetje savage. Respectvol, maar geen suikerlaag.")
-            }
-            .padding(.top, DesignSystem.spacing.sm)
-        }
-        .padding(.vertical, DesignSystem.spacing.xl)
-    }
-
-    private var controlBar: some View {
-        HStack(spacing: 12) {
-            if step > 0 {
-                Button {
-                    withAnimation(.easeInOut) {
-                        step -= 1
-                    }
-                } label: {
-                    Label("Vorige", systemImage: "chevron.left")
-                        .labelStyle(.titleAndIcon)
-                }
-                .buttonStyle(.bordered)
-                .tint(BrandTheme.mutedText)
-            }
-
-            Spacer()
-
-            VStack(spacing: 6) {
-                Text("Stap \(step + 1) van 4")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(BrandTheme.textPrimary)
-
-                HStack(spacing: 6) {
-                    ForEach(0..<4) { index in
-                        Capsule()
-                            .fill(index == step ? BrandTheme.accent : BrandTheme.mutedText.opacity(0.4))
-                            .frame(width: index == step ? 22 : 12, height: 6)
-                            .animation(.easeInOut(duration: 0.25), value: step)
-                    }
-                }
-                .accessibilityHidden(true)
-            }
-
-            Spacer()
-
-            Button(action: handleNext) {
-                Text(step == 3 ? "Start Life XP" : "Volgende")
-                    .font(.headline)
-                    .padding(.horizontal, DesignSystem.spacing.lg)
-                    .padding(.vertical, DesignSystem.spacing.md)
-                    .frame(maxWidth: 200)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .scaleEffect(isAdvancing ? 0.97 : 1)
-            .animation(.spring(response: 0.35, dampingFraction: 0.72), value: isAdvancing)
-            .accessibilityLabel(step == 3 ? "Start Life XP" : "Volgende stap")
-            .accessibilityHint("Ga naar de volgende onboarding stap")
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: DesignSystem.radius.xl, style: .continuous)
-                .fill(BrandTheme.cardBackground.opacity(0.82))
-                .shadow(color: .black.opacity(0.12), radius: 14, x: 0, y: 8)
-        )
-    }
-
-    @ViewBuilder
-    private func onboardingPage<Content: View>(index: Int, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: DesignSystem.spacing.lg) {
-            content()
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .padding(.horizontal, DesignSystem.spacing.xl)
-        .padding(.bottom, DesignSystem.spacing.xl)
-        .tag(index)
-        .transition(.asymmetric(insertion: .opacity.combined(with: .scale(scale: 0.98)), removal: .opacity))
-    }
-
-    private func focusChip(for dimension: LifeDimension) -> some View {
-        let isSelected = selectedFocuses.contains(dimension)
-
-        return Button {
-            withAnimation(.easeInOut) {
-                if isSelected {
-                    selectedFocuses.remove(dimension)
-                } else {
-                    selectedFocuses.insert(dimension)
-                }
-            }
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: dimension.systemImage)
-                    .font(.headline)
-                Text(dimension.label)
-                    .font(.callout.weight(.semibold))
-                    .lineLimit(2)
-                Spacer(minLength: 4)
-                if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .transition(.scale.combined(with: .opacity))
-                }
-            }
-            .padding(.vertical, DesignSystem.spacing.sm)
-            .padding(.horizontal, DesignSystem.spacing.md)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                Capsule(style: .continuous)
-                    .fill(isSelected ? BrandTheme.accent.opacity(0.15) : BrandTheme.cardBackground.opacity(0.9))
-            )
-            .overlay(
-                Capsule(style: .continuous)
-                    .stroke(isSelected ? BrandTheme.accent : BrandTheme.cardBackground.opacity(0.6), lineWidth: 1)
-            )
-            .foregroundStyle(isSelected ? BrandTheme.textPrimary : BrandTheme.textPrimary)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(dimension.label)
-        .accessibilityValue(isSelected ? "Geselecteerd" : "Niet geselecteerd")
-    }
-    
-    private func toneOption(tone: ToneMode, title: String, description: String) -> some View {
-        let isSelected = selectedTone == tone
-
-        return Button {
-            selectedTone = tone
-        } label: {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: tone == .soft ? "sparkles" : "bolt.fill")
-                    .font(.title3)
-                    .symbolVariant(isSelected ? .fill : .none)
-                    .foregroundStyle(isSelected ? BrandTheme.accent : BrandTheme.mutedText)
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(title)
-                        .font(.headline)
-                        .foregroundStyle(BrandTheme.textPrimary)
-                    Text(description)
-                        .font(.subheadline)
-                        .foregroundStyle(BrandTheme.mutedText)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 8)
-                if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(BrandTheme.accent)
-                        .transition(.scale.combined(with: .opacity))
-                }
-            }
-            .padding(DesignSystem.spacing.lg)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
-                    .fill(isSelected ? BrandTheme.cardBackground.opacity(0.96) : BrandTheme.cardBackground.opacity(0.9))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
-                            .stroke(isSelected ? BrandTheme.accent : BrandTheme.cardBackground.opacity(0.6), lineWidth: 1)
-                    )
-                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
-            )
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(title)
-        .accessibilityHint("Kies de \(title) toon")
-        .accessibilityValue(isSelected ? "Geselecteerd" : "Niet geselecteerd")
-    }
-
     private func handleNext() {
         HapticsEngine.lightImpact()
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.72)) {
+        
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
             isAdvancing = true
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.72)) {
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
                 isAdvancing = false
             }
         }
 
-        if step < 3 {
-            withAnimation(.easeInOut) {
+        if step < totalSteps - 1 {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
                 step += 1
             }
             return
         }
 
+        // Final step - save and complete
+        completeOnboarding()
+    }
+    
+    private func handleBack() {
+        HapticsEngine.lightImpact()
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+            step = max(0, step - 1)
+        }
+    }
+    
+    private func completeOnboarding() {
         let chosenDimensions = selectedFocuses.isEmpty ? Set(LifeDimension.allCases) : selectedFocuses
         let primary = LifeDimension.allCases.first(where: { chosenDimensions.contains($0) })
 
@@ -354,6 +119,629 @@ struct OnboardingView: View {
         model.primaryFocus = primary
         model.overwhelmedLevel = Int(overwhelmed)
         model.toneMode = selectedTone
-        onDone()
+        
+        HapticsEngine.success()
+        showConfetti = true
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            onDone()
+        }
+    }
+}
+
+// MARK: - Onboarding Progress
+
+struct OnboardingProgress: View {
+    let currentStep: Int
+    let totalSteps: Int
+    
+    var body: some View {
+        VStack(spacing: DesignSystem.spacing.sm) {
+            Text("Step \(currentStep + 1) of \(totalSteps)")
+                .font(DesignSystem.text.labelSmall)
+                .foregroundColor(BrandTheme.mutedText)
+            
+            HStack(spacing: DesignSystem.spacing.sm) {
+                ForEach(0..<totalSteps, id: \.self) { index in
+                    Capsule()
+                        .fill(index <= currentStep ? BrandTheme.accent : BrandTheme.borderSubtle)
+                        .frame(width: index == currentStep ? 32 : 16, height: 6)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: currentStep)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Onboarding Controls
+
+struct OnboardingControls: View {
+    @Binding var step: Int
+    let totalSteps: Int
+    let isAdvancing: Bool
+    let canProceed: Bool
+    let onNext: () -> Void
+    let onBack: () -> Void
+    
+    var body: some View {
+        HStack(spacing: DesignSystem.spacing.lg) {
+            // Back button
+            if step > 0 {
+                Button(action: onBack) {
+                    HStack(spacing: DesignSystem.spacing.xs) {
+                        Image(systemName: "chevron.left")
+                        Text("Back")
+                    }
+                }
+                .buttonStyle(GhostButtonStyle())
+            } else {
+                Spacer()
+            }
+            
+            Spacer()
+            
+            // Next/Finish button
+            Button(action: onNext) {
+                HStack(spacing: DesignSystem.spacing.sm) {
+                    Text(step == totalSteps - 1 ? "Start Life XP" : "Continue")
+                    Image(systemName: step == totalSteps - 1 ? "sparkles" : "arrow.right")
+                }
+            }
+            .buttonStyle(GlowButtonStyle(size: .large))
+            .disabled(!canProceed)
+            .opacity(canProceed ? 1 : 0.6)
+            .scaleEffect(isAdvancing ? 0.95 : 1)
+        }
+        .padding(DesignSystem.spacing.lg)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.xl, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: DesignSystem.radius.xl, style: .continuous)
+                        .strokeBorder(BrandTheme.borderSubtle.opacity(0.3), lineWidth: 1)
+                )
+        )
+    }
+}
+
+// MARK: - Welcome Page
+
+struct WelcomePage: View {
+    @State private var showContent = false
+    @State private var showFeatures = false
+    @State private var iconScale: CGFloat = 0.5
+    
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: DesignSystem.spacing.xxl) {
+                Spacer().frame(height: DesignSystem.spacing.xxl)
+                
+                // Hero icon
+                ZStack {
+                    // Glow rings
+                    ForEach(0..<3) { i in
+                        Circle()
+                            .stroke(BrandTheme.accent.opacity(0.2 - Double(i) * 0.05), lineWidth: 2)
+                            .frame(width: 140 + CGFloat(i) * 30, height: 140 + CGFloat(i) * 30)
+                    }
+                    
+                    // Main icon
+                    ZStack {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [BrandTheme.accent, BrandTheme.primaryDark],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 120, height: 120)
+                            .shadow(color: BrandTheme.accent.opacity(0.5), radius: 20)
+                        
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 48, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
+                .scaleEffect(iconScale)
+                .opacity(showContent ? 1 : 0)
+                
+                // Title
+                VStack(spacing: DesignSystem.spacing.md) {
+                    Text("Welcome to")
+                        .font(DesignSystem.text.bodyLarge)
+                        .foregroundColor(BrandTheme.mutedText)
+                    
+                    Text("Life XP")
+                        .font(DesignSystem.text.displayLarge)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    Text("Your life checklist, gamified")
+                        .font(DesignSystem.text.bodyMedium)
+                        .foregroundColor(BrandTheme.textSecondary)
+                }
+                .opacity(showContent ? 1 : 0)
+                .offset(y: showContent ? 0 : 20)
+                
+                // Feature list
+                VStack(spacing: DesignSystem.spacing.md) {
+                    FeatureRow(
+                        icon: "target",
+                        title: "Track Life Dimensions",
+                        description: "Love, Money, Mind & Adventure",
+                        color: BrandTheme.love
+                    )
+                    
+                    FeatureRow(
+                        icon: "map.fill",
+                        title: "Follow Story Arcs",
+                        description: "Guided journeys for real change",
+                        color: BrandTheme.accent
+                    )
+                    
+                    FeatureRow(
+                        icon: "flame.fill",
+                        title: "Build Streaks",
+                        description: "Consistency creates momentum",
+                        color: BrandTheme.warning
+                    )
+                    
+                    FeatureRow(
+                        icon: "star.fill",
+                        title: "Earn XP & Level Up",
+                        description: "Progress you can feel",
+                        color: BrandTheme.success
+                    )
+                }
+                .opacity(showFeatures ? 1 : 0)
+                .offset(y: showFeatures ? 0 : 30)
+                .padding(.horizontal, DesignSystem.spacing.lg)
+                
+                Spacer().frame(height: DesignSystem.spacing.huge)
+            }
+            .padding(.horizontal, DesignSystem.spacing.xl)
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
+                iconScale = 1
+                showContent = true
+            }
+            
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.3)) {
+                showFeatures = true
+            }
+        }
+    }
+}
+
+struct FeatureRow: View {
+    let icon: String
+    let title: String
+    let description: String
+    let color: Color
+    
+    var body: some View {
+        HStack(spacing: DesignSystem.spacing.md) {
+            IconContainer(systemName: icon, color: color, size: .medium, style: .soft)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(DesignSystem.text.labelLarge)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Text(description)
+                    .font(DesignSystem.text.bodySmall)
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+            
+            Spacer()
+        }
+        .padding(DesignSystem.spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                .fill(BrandTheme.cardBackground.opacity(0.8))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                .strokeBorder(color.opacity(0.2), lineWidth: 1)
+        )
+    }
+}
+
+// MARK: - Focus Page
+
+struct FocusPage: View {
+    @Binding var selectedFocuses: Set<LifeDimension>
+    @State private var showContent = false
+    
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: DesignSystem.spacing.xxl) {
+                Spacer().frame(height: DesignSystem.spacing.xl)
+                
+                // Header
+                VStack(spacing: DesignSystem.spacing.md) {
+                    Text("What matters most?")
+                        .font(DesignSystem.text.displaySmall)
+                        .foregroundColor(BrandTheme.textPrimary)
+                        .multilineTextAlignment(.center)
+                    
+                    Text("Select the life dimensions you want to focus on. We'll personalize your suggestions.")
+                        .font(DesignSystem.text.bodyMedium)
+                        .foregroundColor(BrandTheme.mutedText)
+                        .multilineTextAlignment(.center)
+                }
+                .opacity(showContent ? 1 : 0)
+                .offset(y: showContent ? 0 : 20)
+                
+                // Dimension cards
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: DesignSystem.spacing.md) {
+                    ForEach(LifeDimension.allCases) { dimension in
+                        DimensionCard(
+                            dimension: dimension,
+                            isSelected: selectedFocuses.contains(dimension)
+                        ) {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                if selectedFocuses.contains(dimension) {
+                                    selectedFocuses.remove(dimension)
+                                } else {
+                                    selectedFocuses.insert(dimension)
+                                }
+                            }
+                            HapticsEngine.lightImpact()
+                        }
+                    }
+                }
+                .opacity(showContent ? 1 : 0)
+                .offset(y: showContent ? 0 : 30)
+                
+                // Hint
+                Text("Select at least one. You can change this later.")
+                    .font(DesignSystem.text.bodySmall)
+                    .foregroundColor(BrandTheme.mutedText)
+                    .opacity(showContent ? 1 : 0)
+                
+                Spacer().frame(height: DesignSystem.spacing.huge)
+            }
+            .padding(.horizontal, DesignSystem.spacing.xl)
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.1)) {
+                showContent = true
+            }
+        }
+    }
+}
+
+struct DimensionCard: View {
+    let dimension: LifeDimension
+    let isSelected: Bool
+    let action: () -> Void
+    
+    private var color: Color {
+        BrandTheme.dimensionColor(dimension)
+    }
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: DesignSystem.spacing.md) {
+                ZStack {
+                    Circle()
+                        .fill(isSelected ? color : color.opacity(0.15))
+                        .frame(width: 64, height: 64)
+                    
+                    Image(systemName: dimension.systemImage)
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundColor(isSelected ? .white : color)
+                }
+                
+                Text(dimension.label)
+                    .font(DesignSystem.text.labelLarge)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(color)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, DesignSystem.spacing.xl)
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
+                    .fill(isSelected ? color.opacity(0.15) : BrandTheme.cardBackground.opacity(0.8))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
+                    .strokeBorder(isSelected ? color : BrandTheme.borderSubtle, lineWidth: isSelected ? 2 : 1)
+            )
+            .shadow(color: isSelected ? color.opacity(0.3) : .clear, radius: 10, y: 4)
+            .scaleEffect(isSelected ? 1.02 : 1)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(dimension.label)
+        .accessibilityValue(isSelected ? "Selected" : "Not selected")
+    }
+}
+
+// MARK: - Energy Page
+
+struct EnergyPage: View {
+    @Binding var overwhelmed: Double
+    @State private var showContent = false
+    
+    private var energyLevel: String {
+        switch Int(overwhelmed) {
+        case 1: return "Very calm 😌"
+        case 2: return "Pretty relaxed 🙂"
+        case 3: return "Balanced ⚖️"
+        case 4: return "Quite busy 😅"
+        case 5: return "Very overwhelmed 🫠"
+        default: return "Balanced"
+        }
+    }
+    
+    private var energyColor: Color {
+        switch Int(overwhelmed) {
+        case 1, 2: return BrandTheme.success
+        case 3: return BrandTheme.warning
+        case 4, 5: return BrandTheme.error
+        default: return BrandTheme.warning
+        }
+    }
+    
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: DesignSystem.spacing.xxl) {
+                Spacer().frame(height: DesignSystem.spacing.xl)
+                
+                // Header
+                VStack(spacing: DesignSystem.spacing.md) {
+                    Text("How's your energy?")
+                        .font(DesignSystem.text.displaySmall)
+                        .foregroundColor(BrandTheme.textPrimary)
+                        .multilineTextAlignment(.center)
+                    
+                    Text("Be honest - this helps us suggest the right pace for you.")
+                        .font(DesignSystem.text.bodyMedium)
+                        .foregroundColor(BrandTheme.mutedText)
+                        .multilineTextAlignment(.center)
+                }
+                .opacity(showContent ? 1 : 0)
+                .offset(y: showContent ? 0 : 20)
+                
+                // Energy indicator
+                VStack(spacing: DesignSystem.spacing.xl) {
+                    // Big number
+                    ZStack {
+                        Circle()
+                            .fill(energyColor.opacity(0.15))
+                            .frame(width: 140, height: 140)
+                        
+                        VStack(spacing: 0) {
+                            Text("\(Int(overwhelmed))")
+                                .font(.system(size: 64, weight: .black, design: .rounded))
+                                .foregroundColor(energyColor)
+                            
+                            Text("/ 5")
+                                .font(DesignSystem.text.labelMedium)
+                                .foregroundColor(BrandTheme.mutedText)
+                        }
+                    }
+                    
+                    Text(energyLevel)
+                        .font(DesignSystem.text.headlineMedium)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    // Slider
+                    VStack(spacing: DesignSystem.spacing.md) {
+                        Slider(value: $overwhelmed, in: 1...5, step: 1)
+                            .tint(energyColor)
+                        
+                        HStack {
+                            Text("Very calm")
+                                .font(.caption)
+                                .foregroundColor(BrandTheme.mutedText)
+                            Spacer()
+                            Text("Very busy")
+                                .font(.caption)
+                                .foregroundColor(BrandTheme.mutedText)
+                        }
+                    }
+                    .padding(DesignSystem.spacing.lg)
+                    .background(
+                        RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
+                            .fill(BrandTheme.cardBackground.opacity(0.9))
+                    )
+                }
+                .opacity(showContent ? 1 : 0)
+                .offset(y: showContent ? 0 : 30)
+                
+                // Info
+                HStack(spacing: DesignSystem.spacing.md) {
+                    Image(systemName: "info.circle.fill")
+                        .foregroundColor(BrandTheme.info)
+                    
+                    Text("We'll adjust suggestions based on your energy. Low energy = gentle tasks. High energy = bigger challenges.")
+                        .font(DesignSystem.text.bodySmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                }
+                .padding(DesignSystem.spacing.md)
+                .background(
+                    RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                        .fill(BrandTheme.info.opacity(0.1))
+                )
+                .opacity(showContent ? 1 : 0)
+                
+                Spacer().frame(height: DesignSystem.spacing.huge)
+            }
+            .padding(.horizontal, DesignSystem.spacing.xl)
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.1)) {
+                showContent = true
+            }
+        }
+    }
+}
+
+// MARK: - Tone Page
+
+struct TonePage: View {
+    @Binding var selectedTone: ToneMode
+    @State private var showContent = false
+    
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: DesignSystem.spacing.xxl) {
+                Spacer().frame(height: DesignSystem.spacing.xl)
+                
+                // Header
+                VStack(spacing: DesignSystem.spacing.md) {
+                    Text("Pick your vibe")
+                        .font(DesignSystem.text.displaySmall)
+                        .foregroundColor(BrandTheme.textPrimary)
+                        .multilineTextAlignment(.center)
+                    
+                    Text("How should Life XP talk to you?")
+                        .font(DesignSystem.text.bodyMedium)
+                        .foregroundColor(BrandTheme.mutedText)
+                        .multilineTextAlignment(.center)
+                }
+                .opacity(showContent ? 1 : 0)
+                .offset(y: showContent ? 0 : 20)
+                
+                // Tone options
+                VStack(spacing: DesignSystem.spacing.md) {
+                    ToneOptionCard(
+                        tone: .soft,
+                        title: "Soft & Gentle",
+                        description: "Kind, supportive, and understanding. Perfect if you need encouragement without pressure.",
+                        icon: "heart.fill",
+                        isSelected: selectedTone == .soft
+                    ) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            selectedTone = .soft
+                        }
+                        HapticsEngine.lightImpact()
+                    }
+                    
+                    ToneOptionCard(
+                        tone: .realTalk,
+                        title: "Real Talk",
+                        description: "Honest, direct, and a bit spicy. For when you need someone to call you out (respectfully).",
+                        icon: "bolt.fill",
+                        isSelected: selectedTone == .realTalk
+                    ) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            selectedTone = .realTalk
+                        }
+                        HapticsEngine.lightImpact()
+                    }
+                }
+                .opacity(showContent ? 1 : 0)
+                .offset(y: showContent ? 0 : 30)
+                
+                // Preview
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+                    Text("Preview:")
+                        .font(DesignSystem.text.labelSmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                    
+                    Text(selectedTone == .soft
+                        ? "\"You've got this. One small step at a time is still progress.\" 💫"
+                        : "\"Stop scrolling, start doing. Your future self is waiting.\" 🔥")
+                        .font(DesignSystem.text.bodyMedium)
+                        .foregroundColor(BrandTheme.textSecondary)
+                        .padding(DesignSystem.spacing.md)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(
+                            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                                .fill(BrandTheme.accentMuted.opacity(0.5))
+                        )
+                }
+                .opacity(showContent ? 1 : 0)
+                
+                // Note
+                Text("You can change this anytime in Settings.")
+                    .font(DesignSystem.text.bodySmall)
+                    .foregroundColor(BrandTheme.mutedText)
+                    .opacity(showContent ? 1 : 0)
+                
+                Spacer().frame(height: DesignSystem.spacing.huge)
+            }
+            .padding(.horizontal, DesignSystem.spacing.xl)
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.1)) {
+                showContent = true
+            }
+        }
+    }
+}
+
+struct ToneOptionCard: View {
+    let tone: ToneMode
+    let title: String
+    let description: String
+    let icon: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    private var color: Color {
+        tone == .soft ? BrandTheme.love : BrandTheme.warning
+    }
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(alignment: .top, spacing: DesignSystem.spacing.md) {
+                // Icon
+                ZStack {
+                    Circle()
+                        .fill(isSelected ? color : color.opacity(0.15))
+                        .frame(width: 56, height: 56)
+                    
+                    Image(systemName: icon)
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundColor(isSelected ? .white : color)
+                }
+                
+                // Content
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                    HStack {
+                        Text(title)
+                            .font(DesignSystem.text.headlineMedium)
+                            .foregroundColor(BrandTheme.textPrimary)
+                        
+                        Spacer()
+                        
+                        if isSelected {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 24, weight: .semibold))
+                                .foregroundColor(color)
+                        }
+                    }
+                    
+                    Text(description)
+                        .font(DesignSystem.text.bodySmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(DesignSystem.spacing.lg)
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
+                    .fill(isSelected ? color.opacity(0.1) : BrandTheme.cardBackground.opacity(0.9))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
+                    .strokeBorder(isSelected ? color : BrandTheme.borderSubtle, lineWidth: isSelected ? 2 : 1)
+            )
+            .shadow(color: isSelected ? color.opacity(0.3) : .clear, radius: 12, y: 6)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+        .accessibilityHint(description)
+        .accessibilityValue(isSelected ? "Selected" : "Not selected")
     }
 }

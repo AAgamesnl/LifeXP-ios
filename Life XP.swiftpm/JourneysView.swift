@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - Arcs View
+
 struct ArcsView: View {
     @EnvironmentObject var model: AppModel
     @State private var showHero = false
@@ -32,335 +34,426 @@ struct ArcsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                BrandBackground()
+                BrandBackgroundStatic()
 
                 ScrollView {
-                    VStack(spacing: 16) {
+                    VStack(spacing: DesignSystem.spacing.xl) {
+                        // Current Arc Hero
                         if let arc = currentArc {
-                            ArcHeroCard(
+                            ArcHeroCard2(
                                 arc: arc,
                                 startAction: attemptStartArc,
                                 stopAction: { model.resetArcStart($0) }
                             )
-                                .opacity(showHero ? 1 : 0)
-                                .scaleEffect(showHero ? 1 : 0.96)
-                                .animation(.easeOut(duration: 0.55), value: showHero)
+                            .opacity(showHero ? 1 : 0)
+                            .offset(y: showHero ? 0 : 20)
+                            .animation(.spring(response: 0.6, dampingFraction: 0.8), value: showHero)
                         } else {
-                            ArcEmptyState(suggestions: suggestions, startAction: attemptStartArc)
+                            ArcEmptyState2(suggestions: suggestions, startAction: attemptStartArc)
                         }
 
-                        if !activeArcs.isEmpty {
-                            ActiveArcsSection(arcs: activeArcs, startAction: attemptStartArc)
+                        // Active Arcs
+                        if !activeArcs.isEmpty && activeArcs.count > 1 {
+                            ActiveArcsSection2(arcs: activeArcs.filter { $0.id != currentArc?.id }, startAction: attemptStartArc)
                         }
 
-                        SuggestedArcsGrid(suggestions: suggestions, startAction: attemptStartArc)
+                        // Quest Board
+                        QuestBoardSection(arc: questBoard.arc, quests: questBoard.quests)
 
-                        QuestBoardView(arc: questBoard.arc, quests: questBoard.quests)
+                        // Suggested Arcs
+                        SuggestedArcsSection(suggestions: suggestions.filter { $0.id != currentArc?.id }, startAction: attemptStartArc)
 
-                        ToolsPanel()
+                        // All Arcs
+                        AllArcsSection(startAction: attemptStartArc)
+
+                        // Tools
+                        ToolsSection()
+
+                        Color.clear.frame(height: DesignSystem.spacing.xxl)
                     }
-                    .padding()
+                    .padding(.horizontal, DesignSystem.spacing.lg)
                 }
             }
             .navigationTitle("Arcs")
             .onAppear {
-                withAnimation(.easeOut(duration: 0.55)) {
+                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                     showHero = true
                 }
             }
             .confirmationDialog(
-                "Kies een arc om te pauzeren",
+                "Choose an arc to pause",
                 isPresented: $showArcLimitDialog,
                 presenting: pendingArcToStart
             ) { pending in
-                Button("Annuleer", role: .cancel) { pendingArcToStart = nil }
+                Button("Cancel", role: .cancel) { pendingArcToStart = nil }
                 ForEach(activeArcs) { active in
                     Button(role: .destructive) {
                         swapArc(active, with: pending)
                     } label: {
-                        Text("Stop \(active.title) en start \(pending.title)")
+                        Text("Stop \(active.title) and start \(pending.title)")
                     }
                 }
             } message: { pending in
-                if model.settings.maxConcurrentArcs > 1 {
-                    Text("Je hebt al \(model.settings.maxConcurrentArcs) arcs live. Kies welke je stopt om \(pending.title) te starten.")
-                } else {
-                    Text("Je hebt al een arc live. Kies welke je stopt om \(pending.title) te starten.")
-                }
+                Text("You have \(model.settings.maxConcurrentArcs) active arcs. Choose which one to pause to start \(pending.title).")
             }
         }
     }
 }
 
-// MARK: - Arc hero
+// MARK: - Arc Hero Card 2.0
 
-struct ArcHeroCard: View {
+struct ArcHeroCard2: View {
     @EnvironmentObject var model: AppModel
     let arc: Arc
     var startAction: ((Arc) -> Void)?
     var stopAction: ((Arc) -> Void)?
 
-    private var accent: Color { Color(hex: arc.accentColorHex, default: .accentColor) }
+    private var accent: Color { Color(hex: arc.accentColorHex, default: BrandTheme.accent) }
+    private var progress: Double { model.arcProgress(arc) }
+    private var isActive: Bool { model.arcStartDates[arc.id] != nil && progress < 1 }
 
     var body: some View {
-        let progress = model.arcProgress(arc)
-        let next = model.nextQuests(in: arc, limit: 2)
-        let day = model.arcDay(for: arc)
-        let isActive = model.arcStartDates[arc.id] != nil && progress < 1
         VStack(alignment: .leading, spacing: DesignSystem.spacing.lg) {
+            // Header
             HStack(alignment: .top, spacing: DesignSystem.spacing.lg) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
-                        .fill(accent.opacity(0.16))
-                    Image(systemName: arc.iconSystemName)
-                        .font(.system(size: 30, weight: .bold))
-                        .foregroundColor(accent)
-                }
-                .frame(width: 76, height: 76)
+                IconContainer(systemName: arc.iconSystemName, color: accent, size: .hero, style: progress >= 1 ? .gradient : .soft)
 
                 VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
-                    Text(arc.title)
-                        .font(DesignSystem.text.heroTitle)
-                        .foregroundColor(BrandTheme.textPrimary)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text(arc.subtitle)
-                        .font(.subheadline)
-                        .foregroundColor(BrandTheme.mutedText)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    if isActive, let day = day {
-                        Label("Live dag \(day)", systemImage: "dot.radiowaves.left.and.right")
-                            .font(.caption.weight(.semibold))
-                            .padding(.horizontal, DesignSystem.spacing.sm)
-                            .padding(.vertical, 6)
-                            .background(Capsule().fill(accent.opacity(0.14)))
-                            .foregroundColor(accent)
-                            .accessibilityLabel("Live dag \(day)")
+                    // Status chips
+                    HStack(spacing: DesignSystem.spacing.sm) {
+                        if isActive {
+                            ChipView(text: "Active", icon: "dot.radiowaves.left.and.right", color: BrandTheme.success, size: .small)
+                        } else if progress >= 1 {
+                            ChipView(text: "Completed", icon: "checkmark.seal.fill", color: accent, size: .small)
+                        }
+                        
+                        if let day = model.arcDay(for: arc) {
+                            ChipView(text: "Day \(day)", icon: "calendar", color: BrandTheme.mutedText, size: .small)
+                        }
                     }
+                    
+                    Text(arc.title)
+                        .font(DesignSystem.text.headlineLarge)
+                        .foregroundColor(BrandTheme.textPrimary)
 
-                    FlexibleLabelRow(items: arc.focusDimensions.map { ($0.label, $0.systemImage) }, accent: accent.opacity(0.14))
+                    Text(arc.subtitle)
+                        .font(DesignSystem.text.bodySmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                        .lineLimit(2)
+                    
+                    // Dimension tags
+                    if !arc.focusDimensions.isEmpty {
+                        HStack(spacing: DesignSystem.spacing.xs) {
+                            ForEach(arc.focusDimensions) { dim in
+                                ChipView(text: dim.label, icon: dim.systemImage, color: BrandTheme.dimensionColor(dim), size: .small)
+                            }
+                        }
+                    }
                 }
 
-                Spacer(minLength: DesignSystem.spacing.sm)
+                Spacer()
             }
 
-            VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+            // Progress section
+            VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
                 HStack {
-                    Text("\(Int(progress * 100))% • \(arc.chapters.count) chapters")
+                    Text("\(Int(progress * 100))% complete")
+                        .font(DesignSystem.text.labelMedium)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    Spacer()
+                    
+                    Text("\(arc.chapters.count) chapters • \(arc.questCount) quests")
                         .font(.caption)
                         .foregroundColor(BrandTheme.mutedText)
-                        .fixedSize()
-                    Spacer()
-                    if let day = day {
-                        Label("Dag \(day)", systemImage: "clock.arrow.circlepath")
-                            .font(.caption.weight(.semibold))
-                            .foregroundColor(accent)
-                            .accessibilityLabel("Dag \(day) sinds start")
-                    }
                 }
-                ProgressView(value: progress)
-                    .tint(accent)
-                    .animation(.easeInOut(duration: 0.45), value: progress)
+                
+                AnimatedProgressBar(progress: progress, height: 10, cornerRadius: 5, color: accent, showGlow: true)
             }
 
-            if !next.isEmpty {
-                VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
-                    Text("Volgende quests")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundColor(BrandTheme.mutedText)
-                    VStack(spacing: DesignSystem.spacing.sm) {
-                        ForEach(next) { quest in
-                            QuestRow(quest: quest, accent: accent)
-                        }
-                    }
-                }
-            }
-
-            VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+            // Chapter progress
+            VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
                 Text("Chapters")
-                    .font(.footnote.weight(.semibold))
+                    .font(DesignSystem.text.labelMedium)
                     .foregroundColor(BrandTheme.mutedText)
 
-                VStack(spacing: DesignSystem.spacing.sm) {
-                    ForEach(arc.chapters) { chapter in
-                        ChapterProgressRow(
-                            title: chapter.title,
-                            summary: chapter.summary,
-                            progress: model.chapterProgress(chapter),
-                            accent: accent
-                        )
-                        .accessibilityElement(children: .combine)
-                        .accessibilityLabel("Chapter \(chapter.title), \(Int(model.chapterProgress(chapter) * 100)) procent voltooid")
+                ForEach(arc.chapters) { chapter in
+                    ChapterRow(chapter: chapter, accent: accent)
+                }
+            }
+
+            // Next quests
+            let nextQuests = model.nextQuests(in: arc, limit: 3)
+            if !nextQuests.isEmpty {
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+                    Text("Next Quests")
+                        .font(DesignSystem.text.labelMedium)
+                        .foregroundColor(BrandTheme.mutedText)
+
+                    ForEach(nextQuests) { quest in
+                        QuestRowCompact(quest: quest, accent: accent)
                     }
                 }
             }
 
-            let canStart = model.canStartArc(arc)
+            // Action buttons
             HStack(spacing: DesignSystem.spacing.md) {
-                if model.arcStartDates[arc.id] == nil && model.remainingArcSlots == 0 {
-                    Label("Max \(model.settings.maxConcurrentArcs) arcs actief", systemImage: "exclamationmark.triangle")
-                        .font(.caption2)
-                        .foregroundColor(.orange)
-                        .fixedSize()
-                }
-
                 NavigationLink(destination: ArcDetailView(arc: arc)) {
-                    Text("Open arc")
-                        .font(.footnote.weight(.bold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(accent.opacity(0.16))
-                        .foregroundColor(accent)
-                        .clipShape(Capsule())
+                    Text("View Details")
                 }
-                .accessibilityLabel("Open arc \(arc.title)")
-
-                Button {
-                    if let startAction {
-                        startAction(arc)
-                    } else {
-                        _ = model.startArcIfNeeded(arc)
-                    }
-                } label: {
-                    Text(isActive ? "Live" : "Start")
-                        .font(.footnote.weight(.bold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(Capsule().fill(accent.opacity(0.1)))
-                }
-                .buttonStyle(.plain)
-                .disabled(!canStart && !isActive)
-                .accessibilityLabel(isActive ? "Ga verder in arc" : "Start arc")
-                .accessibilityHint(canStart || isActive ? "Start of hervat arc" : "Maximum actieve arcs bereikt")
-
-                if model.arcStartDates[arc.id] != nil || progress >= 1 {
+                .buttonStyle(SoftButtonStyle(color: accent))
+                
+                if !isActive && progress < 1 {
                     Button {
-                        if let stopAction {
-                            stopAction(arc)
-                        } else {
-                            model.resetArcStart(arc)
-                        }
+                        startAction?(arc)
                     } label: {
-                        Text(progress >= 1 ? "Markeer als afgerond" : "Stop deze arc")
-                            .font(.footnote.weight(.bold))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(Capsule().stroke(accent.opacity(0.4)))
+                        HStack {
+                            Image(systemName: "play.fill")
+                            Text("Start Arc")
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(progress >= 1 ? "Markeer arc als afgerond" : "Stop arc")
+                    .buttonStyle(GlowButtonStyle(color: accent, size: .medium))
+                    .disabled(!model.canStartArc(arc))
+                }
+                
+                if isActive || progress >= 1 {
+                    Button {
+                        stopAction?(arc)
+                    } label: {
+                        Text(progress >= 1 ? "Reset" : "Stop")
+                    }
+                    .buttonStyle(GhostButtonStyle(color: BrandTheme.error))
                 }
             }
         }
-        .brandCard(cornerRadius: DesignSystem.radius.lg)
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("Arc \(arc.title)")
-        .accessibilityHint("\(Int(progress * 100)) percent complete. Tap to view arc details or start it.")
+        .elevatedCard(accentColor: accent)
     }
 }
 
-struct ChapterProgressRow: View {
-    let title: String
-    let summary: String
-    let progress: Double
-    let accent: Color
+// MARK: - Chapter Row
 
+struct ChapterRow: View {
+    @EnvironmentObject var model: AppModel
+    let chapter: Chapter
+    let accent: Color
+    
+    private var progress: Double { model.chapterProgress(chapter) }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-                    .fixedSize(horizontal: false, vertical: true)
-                Spacer(minLength: DesignSystem.spacing.sm)
+            HStack {
+                if progress >= 1 {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(BrandTheme.success)
+                } else {
+                    Circle()
+                        .strokeBorder(BrandTheme.borderSubtle, lineWidth: 2)
+                        .frame(width: 14, height: 14)
+                }
+                
+                Text(chapter.title)
+                    .font(DesignSystem.text.labelSmall)
+                    .foregroundColor(progress >= 1 ? BrandTheme.mutedText : BrandTheme.textPrimary)
+                
+                Spacer()
+                
                 Text("\(Int(progress * 100))%")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .fixedSize()
+                    .font(.caption2)
+                    .foregroundColor(BrandTheme.mutedText)
             }
-            Text(summary)
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            ProgressView(value: progress)
-                .tint(accent)
-                .animation(.easeInOut(duration: 0.45), value: progress)
+            
+            AnimatedProgressBar(progress: progress, height: 4, color: accent)
         }
+        .padding(DesignSystem.spacing.sm)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.sm, style: .continuous)
+                .fill(BrandTheme.cardBackgroundElevated.opacity(0.5))
+        )
     }
 }
 
-struct ArcEmptyState: View {
+// MARK: - Quest Row Compact
+
+struct QuestRowCompact: View {
+    @EnvironmentObject var model: AppModel
+    let quest: Quest
+    let accent: Color
+    
+    private var isCompleted: Bool { model.isCompleted(quest) }
+    
+    var body: some View {
+        Button {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                model.toggle(quest)
+            }
+            if !isCompleted {
+                HapticsEngine.lightImpact()
+            }
+        } label: {
+            HStack(spacing: DesignSystem.spacing.md) {
+                // Checkbox
+                ZStack {
+                    Circle()
+                        .stroke(isCompleted ? accent : BrandTheme.borderSubtle, lineWidth: 2)
+                        .frame(width: 24, height: 24)
+                    
+                    if isCompleted {
+                        Circle()
+                            .fill(accent)
+                            .frame(width: 24, height: 24)
+                        
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
+                
+                // Content
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(quest.title)
+                        .font(DesignSystem.text.labelSmall)
+                        .foregroundColor(isCompleted ? BrandTheme.mutedText : BrandTheme.textPrimary)
+                        .strikethrough(isCompleted)
+                        .lineLimit(1)
+                    
+                    HStack(spacing: DesignSystem.spacing.sm) {
+                        Label(quest.kind.label, systemImage: quest.kind.systemImage)
+                            .font(.caption2)
+                            .foregroundColor(accent)
+                        
+                        if let minutes = quest.estimatedMinutes {
+                            Text("~\(minutes) min")
+                                .font(.caption2)
+                                .foregroundColor(BrandTheme.mutedText)
+                        }
+                    }
+                }
+                
+                Spacer()
+                
+                XPChip(xp: quest.xp, size: .small)
+            }
+            .padding(DesignSystem.spacing.sm)
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.sm, style: .continuous)
+                    .fill(isCompleted ? BrandTheme.cardBackgroundElevated.opacity(0.3) : BrandTheme.cardBackgroundElevated.opacity(0.5))
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Arc Empty State 2.0
+
+struct ArcEmptyState2: View {
     @EnvironmentObject var model: AppModel
     let suggestions: [Arc]
     var startAction: ((Arc) -> Void)?
 
     var body: some View {
-        let accent = Color.accentColor
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Geen arc actief")
-                .font(.headline)
-            Text("Kies een arc die past bij je zwakste dimensie, of start met de suggesties hieronder.")
-                .font(.footnote)
-                .foregroundColor(.secondary)
+        VStack(spacing: DesignSystem.spacing.lg) {
+            IconContainer(systemName: "map", color: BrandTheme.mutedText, size: .hero, style: .soft)
+            
+            VStack(spacing: DesignSystem.spacing.sm) {
+                Text("No Arc Active")
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Text("Start an arc to begin a guided journey. Pick one that matches your weakest dimension.")
+                    .font(DesignSystem.text.bodySmall)
+                    .foregroundColor(BrandTheme.mutedText)
+                    .multilineTextAlignment(.center)
+            }
+            
             if let first = suggestions.first {
                 Button {
-                    if let startAction {
-                        startAction(first)
-                    } else {
-                        _ = model.startArcIfNeeded(first)
-                    }
+                    startAction?(first)
                 } label: {
                     HStack {
                         Image(systemName: "play.fill")
                         Text("Start \(first.title)")
-                            .font(.subheadline.weight(.semibold))
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 10)
-                    .frame(maxWidth: .infinity)
-                    .background(Capsule().fill(accent.opacity(0.14)))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(GlowButtonStyle(size: .medium))
                 .disabled(model.remainingArcSlots == 0)
-            } else {
-                Text("Geen suggesties gevonden. Voltooi eerst een paar checklist items zodat we kunnen adviseren.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
         }
-        .padding()
-        .frame(maxWidth: .infinity)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .brandCard()
     }
 }
 
-struct ActiveArcsSection: View {
+// MARK: - Active Arcs Section 2.0
+
+struct ActiveArcsSection2: View {
     let arcs: [Arc]
     var startAction: ((Arc) -> Void)?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
             HStack {
-                Text("Actieve arcs")
-                    .font(.headline)
+                Text("Other Active Arcs")
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
                 Spacer()
-                Text("Live")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                
+                ChipView(text: "Live", icon: "dot.radiowaves.left.and.right", color: BrandTheme.success, size: .small)
             }
 
-            if arcs.isEmpty {
-                Text("Start een arc om live voortgang te zien.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            ForEach(arcs) { arc in
+                NavigationLink(destination: ArcDetailView(arc: arc)) {
+                    ArcTile2(arc: arc, startAction: startAction)
+                }
+                .buttonStyle(CardButtonStyle())
+            }
+        }
+    }
+}
+
+// MARK: - Quest Board Section
+
+struct QuestBoardSection: View {
+    @EnvironmentObject var model: AppModel
+    let arc: Arc?
+    let quests: [Quest]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            HStack {
+                IconContainer(systemName: "list.bullet.clipboard", color: BrandTheme.accent, size: .small, style: .soft)
+                
+                Text("Quest Board")
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Spacer()
+                
+                if let arc = arc {
+                    Text(arc.title)
+                        .font(.caption)
+                        .foregroundColor(BrandTheme.mutedText)
+                }
+            }
+
+            if quests.isEmpty {
+                HStack(spacing: DesignSystem.spacing.md) {
+                    Image(systemName: "info.circle")
+                        .foregroundColor(BrandTheme.info)
+                    
+                    Text("Start an arc to see your quests here. We'll show your next best actions.")
+                        .font(DesignSystem.text.bodySmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                }
+                .padding(DesignSystem.spacing.md)
+                .background(
+                    RoundedRectangle(cornerRadius: DesignSystem.radius.sm, style: .continuous)
+                        .fill(BrandTheme.info.opacity(0.1))
+                )
             } else {
-                VStack(spacing: DesignSystem.spacing.sm) {
-                    ForEach(arcs) { arc in
-                        NavigationLink(destination: ArcDetailView(arc: arc)) {
-                            ArcTile(arc: arc, startAction: startAction)
-                        }
-                        .buttonStyle(.plain)
-                    }
+                let accent = Color(hex: arc?.accentColorHex ?? "", default: BrandTheme.accent)
+                ForEach(quests) { quest in
+                    QuestRow2(quest: quest, accent: accent)
                 }
             }
         }
@@ -368,251 +461,296 @@ struct ActiveArcsSection: View {
     }
 }
 
-// MARK: - Suggested arcs
+// MARK: - Quest Row 2.0
 
-struct SuggestedArcsGrid: View {
+struct QuestRow2: View {
+    @EnvironmentObject var model: AppModel
+    let quest: Quest
+    let accent: Color
+    
+    @State private var isAnimating = false
+    
+    private var isCompleted: Bool { model.isCompleted(quest) }
+
+    var body: some View {
+        Button {
+            let willComplete = !isCompleted
+            
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                isAnimating = true
+            }
+            
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                model.toggle(quest)
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    isAnimating = false
+                }
+            }
+            
+            if willComplete {
+                HapticsEngine.lightImpact()
+            }
+        } label: {
+            HStack(alignment: .top, spacing: DesignSystem.spacing.md) {
+                // Checkbox
+                ZStack {
+                    Circle()
+                        .stroke(isCompleted ? accent : BrandTheme.borderSubtle, lineWidth: 2)
+                        .frame(width: 28, height: 28)
+                    
+                    if isCompleted {
+                        Circle()
+                            .fill(accent)
+                            .frame(width: 28, height: 28)
+                        
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
+                .scaleEffect(isAnimating ? 1.2 : 1)
+
+                // Content
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                    HStack(spacing: DesignSystem.spacing.sm) {
+                        Text(quest.title)
+                            .font(DesignSystem.text.labelLarge)
+                            .foregroundColor(isCompleted ? BrandTheme.mutedText : BrandTheme.textPrimary)
+                            .strikethrough(isCompleted)
+                        
+                        ChipView(text: quest.kind.label, icon: quest.kind.systemImage, color: accent, size: .small)
+                    }
+
+                    if let detail = quest.detail {
+                        Text(detail)
+                            .font(DesignSystem.text.bodySmall)
+                            .foregroundColor(BrandTheme.mutedText)
+                            .lineLimit(2)
+                    }
+
+                    HStack(spacing: DesignSystem.spacing.sm) {
+                        XPChip(xp: quest.xp, size: .small)
+                        
+                        if let minutes = quest.estimatedMinutes {
+                            ChipView(text: "~\(minutes) min", icon: "clock", color: BrandTheme.mutedText, size: .small)
+                        }
+                        
+                        ForEach(quest.dimensions.prefix(2)) { dim in
+                            ChipView(text: dim.label, icon: dim.systemImage, color: BrandTheme.dimensionColor(dim), size: .small)
+                        }
+                    }
+                    
+                    // Guidance
+                    Text(quest.kind.guidance)
+                        .font(.caption2)
+                        .foregroundColor(BrandTheme.textTertiary)
+                        .italic()
+                }
+
+                Spacer()
+            }
+            .padding(DesignSystem.spacing.md)
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                    .fill(isCompleted ? BrandTheme.cardBackgroundElevated.opacity(0.5) : BrandTheme.cardBackground.opacity(0.8))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                    .strokeBorder(isCompleted ? accent.opacity(0.3) : BrandTheme.borderSubtle.opacity(0.3), lineWidth: 1)
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Suggested Arcs Section
+
+struct SuggestedArcsSection: View {
     @EnvironmentObject var model: AppModel
     let suggestions: [Arc]
     var startAction: ((Arc) -> Void)?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("Suggested arcs")
-                    .font(.headline)
-                Spacer()
-                if let weak = model.lowestDimension {
-                    Text("\(weak.label) boost")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-
-            if suggestions.isEmpty {
-                Text("Geen suggesties beschikbaar. Probeer een paar quests of checklists te doen zodat we patronen zien.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            } else {
-                LazyVStack(spacing: 12) {
-                    ForEach(suggestions) { arc in
-                        NavigationLink(destination: ArcDetailView(arc: arc)) {
-                            ArcTile(arc: arc, startAction: startAction)
-                        }
-                        .buttonStyle(.plain)
+        if !suggestions.isEmpty {
+            VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+                HStack {
+                    Text("Suggested Arcs")
+                        .font(DesignSystem.text.headlineMedium)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    Spacer()
+                    
+                    if let weak = model.lowestDimension {
+                        ChipView(text: "\(weak.label) boost", icon: weak.systemImage, color: BrandTheme.dimensionColor(weak), size: .small)
                     }
+                }
+
+                ForEach(suggestions.prefix(3)) { arc in
+                    NavigationLink(destination: ArcDetailView(arc: arc)) {
+                        ArcTile2(arc: arc, startAction: startAction)
+                    }
+                    .buttonStyle(CardButtonStyle())
                 }
             }
         }
     }
 }
 
-struct ArcTile: View {
+// MARK: - Arc Tile 2.0
+
+struct ArcTile2: View {
     @EnvironmentObject var model: AppModel
     let arc: Arc
     var startAction: ((Arc) -> Void)?
 
+    private var accent: Color { Color(hex: arc.accentColorHex, default: BrandTheme.accent) }
+    private var progress: Double { model.arcProgress(arc) }
+    private var isActive: Bool { model.arcStartDates[arc.id] != nil && progress < 1 }
+
     var body: some View {
-        let accent = Color(hex: arc.accentColorHex, default: .accentColor)
-        let progress = model.arcProgress(arc)
-        let isActive = model.arcStartDates[arc.id] != nil && progress < 1
-        let day = model.arcDay(for: arc)
+        HStack(spacing: DesignSystem.spacing.md) {
+            IconContainer(systemName: arc.iconSystemName, color: accent, size: .medium, style: .soft)
 
-        HStack(spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(accent.opacity(0.14))
-                Image(systemName: arc.iconSystemName)
-                    .foregroundColor(accent)
-            }
-            .frame(width: 52, height: 52)
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text(arc.title)
-                    .font(.subheadline.weight(.semibold))
-                Text(arc.subtitle)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
-
-                if isActive, let day = day {
-                    Label("Live dag \(day)", systemImage: "dot.radiowaves.left.and.right")
-                        .font(.caption2.weight(.semibold))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Capsule().fill(accent.opacity(0.14)))
-                        .foregroundColor(accent)
-                }
-
+            VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
                 HStack {
-                    ProgressView(value: progress)
-                        .tint(accent)
+                    Text(arc.title)
+                        .font(DesignSystem.text.labelLarge)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    if isActive {
+                        ChipView(text: "Live", color: BrandTheme.success, size: .small)
+                    }
+                    
+                    if progress >= 1 {
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(BrandTheme.success)
+                    }
+                }
+                
+                Text(arc.subtitle)
+                    .font(DesignSystem.text.bodySmall)
+                    .foregroundColor(BrandTheme.mutedText)
+                    .lineLimit(1)
+
+                HStack(spacing: DesignSystem.spacing.sm) {
+                    AnimatedProgressBar(progress: progress, height: 4, color: accent)
+                        .frame(maxWidth: 100)
+                    
                     Text("\(Int(progress * 100))%")
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(BrandTheme.mutedText)
                 }
             }
 
             Spacer()
 
             Button {
-                if let startAction {
-                    startAction(arc)
-                } else {
-                    _ = model.startArcIfNeeded(arc)
-                }
+                startAction?(arc)
             } label: {
                 Text(isActive ? "Live" : "Start")
-                    .font(.caption.weight(.bold))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Capsule().fill(accent.opacity(0.16)))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SoftButtonStyle(color: accent))
+            .disabled(isActive || progress >= 1)
         }
-        .padding(12)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .subtleCard()
     }
 }
 
-// MARK: - Quest board
+// MARK: - All Arcs Section
 
-struct QuestBoardView: View {
+struct AllArcsSection: View {
     @EnvironmentObject var model: AppModel
-    let arc: Arc?
-    let quests: [Quest]
+    var startAction: ((Arc) -> Void)?
+    
+    @State private var isExpanded = false
 
     var body: some View {
-        let accent = Color.accentColor
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("Quest board")
-                    .font(.headline)
-                Spacer()
-                if let arc = arc {
-                    Text(arc.title)
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            Button {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    isExpanded.toggle()
+                }
+            } label: {
+                HStack {
+                    Text("All Arcs")
+                        .font(DesignSystem.text.headlineMedium)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    Spacer()
+                    
+                    Text("\(model.visibleArcs.count) arcs")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(BrandTheme.mutedText)
+                    
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(BrandTheme.mutedText)
                 }
             }
-
-            if quests.isEmpty {
-                Text("Start een arc of open een chapter om je eerstvolgende quests te zien. We tonen hier automatisch acties uit je huidige arc, of de beste volgende stap uit een suggestie.")
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
-            } else {
-                ForEach(quests) { quest in
-                    QuestRow(quest: quest, accent: accent)
+            .buttonStyle(.plain)
+            
+            if isExpanded {
+                ForEach(model.visibleArcs) { arc in
+                    NavigationLink(destination: ArcDetailView(arc: arc)) {
+                        ArcTile2(arc: arc, startAction: startAction)
+                    }
+                    .buttonStyle(CardButtonStyle())
                 }
             }
         }
         .brandCard()
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("Quest board")
-        .accessibilityHint(quests.isEmpty ? "Geen quests beschikbaar" : "\(quests.count) quests weergegeven")
     }
 }
 
-struct QuestRow: View {
-    @EnvironmentObject var model: AppModel
-    let quest: Quest
-    let accent: Color
-    @State private var isBouncing = false
+// MARK: - Tools Section
 
+struct ToolsSection: View {
     var body: some View {
-        Button {
-            let willComplete = !model.isCompleted(quest)
-            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                model.toggle(quest)
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            Text("Tools")
+                .font(DesignSystem.text.headlineMedium)
+                .foregroundColor(BrandTheme.textPrimary)
+
+            NavigationLink(destination: ChallengeView()) {
+                QuickActionRow2(
+                    icon: "flag.checkered",
+                    title: "Weekend Challenge",
+                    subtitle: "Get a curated challenge mix",
+                    color: BrandTheme.warning
+                )
             }
-            if willComplete {
-                HapticsEngine.lightImpact()
-                withAnimation(.spring(response: 0.32, dampingFraction: 0.7)) { isBouncing = true }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
-                    withAnimation(.easeOut(duration: 0.22)) { isBouncing = false }
-                }
+            .buttonStyle(CardButtonStyle())
+
+            NavigationLink(destination: BadgesView()) {
+                QuickActionRow2(
+                    icon: "rosette",
+                    title: "Badges",
+                    subtitle: "View your achievements",
+                    color: BrandTheme.accent
+                )
             }
-        } label: {
-            HStack(alignment: .top, spacing: DesignSystem.spacing.md) {
-                Image(systemName: model.isCompleted(quest) ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(model.isCompleted(quest) ? accent : Color(.systemGray4))
-                    .font(.system(size: 22, weight: .semibold))
-                    .padding(.top, 2)
-
-                VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
-                    HStack(alignment: .firstTextBaseline, spacing: DesignSystem.spacing.sm) {
-                        Text(quest.title)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundColor(.primary)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Label(quest.kind.label, systemImage: quest.kind.systemImage)
-                            .font(.caption2)
-                            .padding(.horizontal, DesignSystem.spacing.sm)
-                            .padding(.vertical, DesignSystem.spacing.xs)
-                            .background(Capsule().fill(accent.opacity(0.14)))
-                            .foregroundColor(accent)
-                            .accessibilityLabel("Type: \(quest.kind.label)")
-                    }
-
-                    if let detail = quest.detail {
-                        Text(detail)
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    HStack(spacing: DesignSystem.spacing.sm) {
-                        Text("\(quest.xp) XP")
-                            .font(.caption2)
-                            .padding(.horizontal, DesignSystem.spacing.sm)
-                            .padding(.vertical, 3)
-                            .background(Capsule().fill(accent.opacity(0.12)))
-                            .foregroundColor(accent)
-                            .accessibilityLabel("\(quest.xp) XP")
-
-                        if let minutes = quest.estimatedMinutes {
-                            Label("\(minutes) min", systemImage: "clock")
-                                .font(.caption2)
-                                .padding(.horizontal, DesignSystem.spacing.sm)
-                                .padding(.vertical, 3)
-                                .background(Capsule().fill(Color(.systemGray6)))
-                                .accessibilityLabel("Tijd: \(minutes) minuten")
-                        }
-
-                        ForEach(quest.dimensions) { dim in
-                            Label(dim.label, systemImage: dim.systemImage)
-                                .font(.caption2)
-                                .padding(.horizontal, DesignSystem.spacing.sm)
-                                .padding(.vertical, 3)
-                                .background(Capsule().fill(Color(.systemGray6)))
-                                .accessibilityLabel("Dimensie: \(dim.label)")
-                        }
-                    }
-
-                    Text(quest.kind.guidance)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                Spacer()
-            }
-            .contentShape(Rectangle())
-            .scaleEffect(isBouncing ? 1.03 : 1.0)
+            .buttonStyle(CardButtonStyle())
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("Quest: \(quest.title), \(quest.xp) XP")
-        .accessibilityHint("Dubbel tik om te voltooien of markeer als openstaand")
     }
 }
 
-// MARK: - Arc detail
+// MARK: - Arc Detail View
 
 struct ArcDetailView: View {
     @EnvironmentObject var model: AppModel
     let arc: Arc
+    
     @State private var pendingArcToStart: Arc?
     @State private var showArcLimitDialog = false
+
+    private var accent: Color { Color(hex: arc.accentColorHex, default: BrandTheme.accent) }
+    private var progress: Double { model.arcProgress(arc) }
+    private var isActive: Bool { model.arcStartDates[arc.id] != nil && progress < 1 }
 
     private func attemptStartArc() {
         let wasActive = model.arcStartDates[arc.id] != nil
@@ -633,129 +771,275 @@ struct ArcDetailView: View {
     }
 
     var body: some View {
-        let accent = Color(hex: arc.accentColorHex, default: .accentColor)
-        let progress = model.arcProgress(arc)
-        let isActive = model.arcStartDates[arc.id] != nil && progress < 1
-
-        List {
-            Section {
-                VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
-                    HStack(alignment: .top, spacing: DesignSystem.spacing.md) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
-                                .fill(accent.opacity(0.18))
-                            Image(systemName: arc.iconSystemName)
-                                .font(.system(size: 34, weight: .bold))
-                                .foregroundColor(accent)
-                        }
-                        .frame(width: 82, height: 82)
-
-                        VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
-                            Text(arc.title)
-                                .font(DesignSystem.text.heroTitle)
-                                .foregroundColor(BrandTheme.textPrimary)
-                                .fixedSize(horizontal: false, vertical: true)
-                            Text(arc.subtitle)
-                                .font(.subheadline)
-                                .foregroundColor(BrandTheme.mutedText)
-                                .fixedSize(horizontal: false, vertical: true)
-
-                            VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
-                                HStack(alignment: .firstTextBaseline) {
-                                    Text("\(Int(progress * 100))% voltooid • \(arc.questCount) quests")
-                                        .font(.caption)
-                                        .foregroundColor(BrandTheme.mutedText)
-                                        .fixedSize()
-                                    Spacer(minLength: DesignSystem.spacing.sm)
-                                    if let day = model.arcDay(for: arc) {
-                                        Label("Dag \(day)", systemImage: "clock")
-                                            .font(.caption.weight(.semibold))
-                                            .foregroundColor(accent)
-                                            .accessibilityLabel("Live dag \(day)")
-                                    }
-                                }
-                                ProgressView(value: progress)
-                                    .tint(accent)
-                                    .animation(.easeInOut(duration: 0.45), value: progress)
-                            }
-                        }
-                        .accessibilityElement(children: .combine)
-                        .accessibilityLabel("\(arc.title), \(Int(progress * 100)) procent, \(arc.questCount) quests")
+        ZStack {
+            BrandBackgroundStatic()
+            
+            ScrollView {
+                VStack(spacing: DesignSystem.spacing.lg) {
+                    // Header
+                    ArcDetailHeader(arc: arc)
+                    
+                    // Chapters
+                    ForEach(arc.chapters) { chapter in
+                        ChapterSection(chapter: chapter, accent: accent)
                     }
-
-                    if !arc.focusDimensions.isEmpty {
-                        FlexibleLabelRow(items: arc.focusDimensions.map { ($0.label, $0.systemImage) }, accent: Color(.systemGray6))
-                    }
-
-                    HStack(spacing: DesignSystem.spacing.md) {
-                        Button {
-                            attemptStartArc()
-                        } label: {
-                            Label(isActive ? "Live" : "Start arc", systemImage: "play.fill")
-                                .font(.footnote.weight(.semibold))
-                                .padding(.horizontal, DesignSystem.spacing.md)
-                                .padding(.vertical, DesignSystem.spacing.sm)
-                                .background(Capsule().fill(accent.opacity(0.18)))
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityHint(model.arcStartDates[arc.id] == nil ? "Start deze arc" : "Ga verder in actieve arc")
-
-                        if let day = model.arcDay(for: arc) {
-                            Text("Live dag \(day)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .accessibilityLabel("Live dag \(day)")
-                        }
-                    }
-
-                    if model.arcStartDates[arc.id] != nil || progress >= 1 {
-                        Button(role: progress >= 1 ? .none : .destructive) {
-                            model.resetArcStart(arc)
-                        } label: {
-                            Label(progress >= 1 ? "Markeer als afgerond" : "Stop deze arc", systemImage: "stop.circle")
-                                .font(.footnote.weight(.semibold))
-                                .padding(.horizontal, DesignSystem.spacing.md)
-                                .padding(.vertical, DesignSystem.spacing.sm)
-                                .frame(maxWidth: .infinity)
-                                .background(Capsule().stroke(accent.opacity(0.4)))
-                        }
-                        .buttonStyle(.plain)
-                    }
+                    
+                    Color.clear.frame(height: DesignSystem.spacing.xxl)
                 }
-                .brandCard(cornerRadius: DesignSystem.radius.lg)
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
-                .accessibilityElement(children: .contain)
-                .accessibilityLabel("Arc overzicht voor \(arc.title)")
-                .accessibilityHint("\(Int(progress * 100)) procent voltooid, \(arc.questCount) quests")
-            }
-
-            ForEach(arc.chapters) { chapter in
-                Section(header: ChapterHeader(chapter: chapter, accent: accent, progress: model.chapterProgress(chapter))) {
-                    ForEach(chapter.quests) { quest in
-                        QuestRow(quest: quest, accent: accent)
-                    }
-                }
+                .padding(.horizontal, DesignSystem.spacing.lg)
             }
         }
         .navigationTitle(arc.title)
         .navigationBarTitleDisplayMode(.inline)
         .confirmationDialog(
-            "Max actieve arcs bereikt",
+            "Max active arcs reached",
             isPresented: $showArcLimitDialog,
             presenting: pendingArcToStart
         ) { _ in
-            Button("Annuleer", role: .cancel) { pendingArcToStart = nil }
+            Button("Cancel", role: .cancel) { pendingArcToStart = nil }
             ForEach(model.activeArcs) { active in
                 Button(role: .destructive) {
                     swapArc(active)
                 } label: {
-                    Text("Stop \(active.title) en start \(arc.title)")
+                    Text("Stop \(active.title) and start \(arc.title)")
                 }
             }
         } message: { _ in
-            Text("Je zit aan je limiet van \(model.settings.maxConcurrentArcs) actieve arcs. Kies welke je pauzeert.")
+            Text("You're at your limit of \(model.settings.maxConcurrentArcs) active arcs. Choose which one to pause.")
         }
+    }
+}
+
+// MARK: - Arc Detail Header
+
+struct ArcDetailHeader: View {
+    @EnvironmentObject var model: AppModel
+    let arc: Arc
+    
+    private var accent: Color { Color(hex: arc.accentColorHex, default: BrandTheme.accent) }
+    private var progress: Double { model.arcProgress(arc) }
+    private var isActive: Bool { model.arcStartDates[arc.id] != nil && progress < 1 }
+    
+    var body: some View {
+        VStack(spacing: DesignSystem.spacing.lg) {
+            HStack(alignment: .top, spacing: DesignSystem.spacing.lg) {
+                IconContainer(systemName: arc.iconSystemName, color: accent, size: .hero, style: progress >= 1 ? .gradient : .soft)
+                
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+                    HStack(spacing: DesignSystem.spacing.sm) {
+                        if isActive {
+                            ChipView(text: "Active", icon: "dot.radiowaves.left.and.right", color: BrandTheme.success, size: .small)
+                        }
+                        if let day = model.arcDay(for: arc) {
+                            ChipView(text: "Day \(day)", icon: "calendar", color: BrandTheme.mutedText, size: .small)
+                        }
+                    }
+                    
+                    Text(arc.title)
+                        .font(DesignSystem.text.headlineLarge)
+                        .foregroundColor(BrandTheme.textPrimary)
+                    
+                    Text(arc.subtitle)
+                        .font(DesignSystem.text.bodySmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                }
+                
+                Spacer()
+            }
+            
+            // Progress
+            VStack(spacing: DesignSystem.spacing.sm) {
+                AnimatedProgressBar(progress: progress, height: 10, cornerRadius: 5, color: accent, showGlow: true)
+                
+                HStack {
+                    Text("\(Int(progress * 100))% complete")
+                        .font(DesignSystem.text.labelMedium)
+                        .foregroundColor(accent)
+                    
+                    Spacer()
+                    
+                    Text("\(arc.questCount) quests • \(arc.totalXP) XP")
+                        .font(.caption)
+                        .foregroundColor(BrandTheme.mutedText)
+                }
+            }
+            
+            // Dimensions
+            if !arc.focusDimensions.isEmpty {
+                HStack(spacing: DesignSystem.spacing.sm) {
+                    ForEach(arc.focusDimensions) { dim in
+                        ChipView(text: dim.label, icon: dim.systemImage, color: BrandTheme.dimensionColor(dim), size: .medium)
+                    }
+                    Spacer()
+                }
+            }
+            
+            // Actions
+            HStack(spacing: DesignSystem.spacing.md) {
+                if !isActive && progress < 1 {
+                    Button {
+                        _ = model.startArcIfNeeded(arc)
+                        if model.arcStartDates[arc.id] != nil {
+                            HapticsEngine.lightImpact()
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "play.fill")
+                            Text("Start Arc")
+                        }
+                    }
+                    .buttonStyle(GlowButtonStyle(color: accent, size: .medium))
+                    .disabled(!model.canStartArc(arc))
+                }
+                
+                if isActive || progress >= 1 {
+                    Button {
+                        model.resetArcStart(arc)
+                    } label: {
+                        HStack {
+                            Image(systemName: "stop.circle")
+                            Text(progress >= 1 ? "Reset" : "Stop Arc")
+                        }
+                    }
+                    .buttonStyle(SoftButtonStyle(color: BrandTheme.error))
+                }
+            }
+        }
+        .elevatedCard(accentColor: accent)
+        .padding(.top, DesignSystem.spacing.md)
+    }
+}
+
+// MARK: - Chapter Section
+
+struct ChapterSection: View {
+    @EnvironmentObject var model: AppModel
+    let chapter: Chapter
+    let accent: Color
+    
+    private var progress: Double { model.chapterProgress(chapter) }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            // Header
+            HStack {
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+                    HStack {
+                        if progress >= 1 {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(BrandTheme.success)
+                        }
+                        
+                        Text(chapter.title)
+                            .font(DesignSystem.text.headlineMedium)
+                            .foregroundColor(BrandTheme.textPrimary)
+                    }
+                    
+                    Text(chapter.summary)
+                        .font(DesignSystem.text.bodySmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                }
+                
+                Spacer()
+                
+                Text("\(Int(progress * 100))%")
+                    .font(DesignSystem.text.labelMedium)
+                    .foregroundColor(accent)
+            }
+            
+            AnimatedProgressBar(progress: progress, height: 6, color: accent)
+            
+            // Quests
+            ForEach(chapter.quests) { quest in
+                QuestRow2(quest: quest, accent: accent)
+            }
+        }
+        .brandCard()
+    }
+}
+
+// MARK: - Legacy Support
+
+struct QuestRow: View {
+    @EnvironmentObject var model: AppModel
+    let quest: Quest
+    let accent: Color
+    
+    var body: some View {
+        QuestRow2(quest: quest, accent: accent)
+            .environmentObject(model)
+    }
+}
+
+struct ArcHeroCard: View {
+    @EnvironmentObject var model: AppModel
+    let arc: Arc
+    var startAction: ((Arc) -> Void)?
+    var stopAction: ((Arc) -> Void)?
+    
+    var body: some View {
+        ArcHeroCard2(arc: arc, startAction: startAction, stopAction: stopAction)
+            .environmentObject(model)
+    }
+}
+
+struct ArcEmptyState: View {
+    @EnvironmentObject var model: AppModel
+    let suggestions: [Arc]
+    var startAction: ((Arc) -> Void)?
+    
+    var body: some View {
+        ArcEmptyState2(suggestions: suggestions, startAction: startAction)
+            .environmentObject(model)
+    }
+}
+
+struct ActiveArcsSection: View {
+    let arcs: [Arc]
+    var startAction: ((Arc) -> Void)?
+    
+    var body: some View {
+        ActiveArcsSection2(arcs: arcs, startAction: startAction)
+    }
+}
+
+struct SuggestedArcsGrid: View {
+    @EnvironmentObject var model: AppModel
+    let suggestions: [Arc]
+    var startAction: ((Arc) -> Void)?
+    
+    var body: some View {
+        SuggestedArcsSection(suggestions: suggestions, startAction: startAction)
+            .environmentObject(model)
+    }
+}
+
+struct QuestBoardView: View {
+    @EnvironmentObject var model: AppModel
+    let arc: Arc?
+    let quests: [Quest]
+    
+    var body: some View {
+        QuestBoardSection(arc: arc, quests: quests)
+            .environmentObject(model)
+    }
+}
+
+struct ArcTile: View {
+    @EnvironmentObject var model: AppModel
+    let arc: Arc
+    var startAction: ((Arc) -> Void)?
+    
+    var body: some View {
+        ArcTile2(arc: arc, startAction: startAction)
+            .environmentObject(model)
+    }
+}
+
+struct ToolsPanel: View {
+    var body: some View {
+        ToolsSection()
     }
 }
 
@@ -763,101 +1047,47 @@ struct ChapterHeader: View {
     let chapter: Chapter
     let accent: Color
     let progress: Double
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
-            HStack(alignment: .firstTextBaseline) {
+            HStack {
                 Text(chapter.title)
-                    .font(.subheadline.weight(.semibold))
-                    .fixedSize(horizontal: false, vertical: true)
-                Spacer(minLength: DesignSystem.spacing.sm)
+                    .font(DesignSystem.text.labelLarge)
+                    .foregroundColor(BrandTheme.textPrimary)
+                Spacer()
                 Text("\(Int(progress * 100))%")
                     .font(.caption)
-                    .foregroundColor(.secondary)
-                    .fixedSize()
+                    .foregroundColor(BrandTheme.mutedText)
             }
             Text(chapter.summary)
                 .font(.caption)
-                .foregroundColor(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            ProgressView(value: progress)
-                .tint(accent)
-                .animation(.easeInOut(duration: 0.45), value: progress)
+                .foregroundColor(BrandTheme.mutedText)
+            AnimatedProgressBar(progress: progress, height: 4, color: accent)
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Chapter \(chapter.title) \(Int(progress * 100)) procent")
     }
 }
 
-// MARK: - Tools
-
-struct ToolsPanel: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
-            Text("Tools")
-                .font(DesignSystem.text.sectionTitle)
-                .foregroundColor(BrandTheme.textPrimary)
-
-            VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
-                NavigationLink(destination: ChallengeView()) {
-                    Label("Weekend Challenge", systemImage: "flag.checkered")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundColor(BrandTheme.textPrimary)
-                        .accessibilityHint("Open weekend challenge")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
-                                .fill(BrandTheme.cardBackground.opacity(0.7))
-                        )
-                }
-
-                NavigationLink(destination: BadgesView()) {
-                    Label("Badges", systemImage: "rosette")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundColor(BrandTheme.textPrimary)
-                        .accessibilityHint("Bekijk je badges")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
-                                .fill(BrandTheme.cardBackground.opacity(0.7))
-                        )
-                }
-            }
-        }
-        .brandCard()
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("Tools overzicht")
-    }
-}
-
-private struct FlexibleLabelRow: View {
-    let items: [(String, String)]
+struct ChapterProgressRow: View {
+    let title: String
+    let summary: String
+    let progress: Double
     let accent: Color
-
+    
     var body: some View {
-        FlexibleStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
-            ForEach(items, id: \.0) { item in
-                Label(item.0, systemImage: item.1)
-                    .font(.caption2.weight(.semibold))
-                    .padding(.horizontal, DesignSystem.spacing.sm)
-                    .padding(.vertical, DesignSystem.spacing.xs)
-                    .background(Capsule().fill(accent))
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
+            HStack {
+                Text(title)
+                    .font(DesignSystem.text.labelSmall)
+                    .foregroundColor(BrandTheme.textPrimary)
+                Spacer()
+                Text("\(Int(progress * 100))%")
+                    .font(.caption2)
                     .foregroundColor(BrandTheme.mutedText)
             }
-        }
-    }
-}
-
-private struct FlexibleStack<Content: View>: View {
-    let alignment: HorizontalAlignment
-    let spacing: CGFloat
-    @ViewBuilder let content: () -> Content
-
-    var body: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: spacing)], alignment: alignment, spacing: spacing) {
-            content()
+            Text(summary)
+                .font(.caption2)
+                .foregroundColor(BrandTheme.mutedText)
+            AnimatedProgressBar(progress: progress, height: 4, color: accent)
         }
     }
 }
