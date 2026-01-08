@@ -24,6 +24,9 @@ struct SettingsView: View {
                         // Experience Settings
                         ExperienceSettingsSection()
                         
+                        // Game Features Settings (NEW)
+                        GameFeaturesSettingsSection()
+                        
                         // Content Settings
                         ContentSettingsSection()
                         
@@ -168,6 +171,136 @@ struct ExperienceSettingsSection: View {
                     .pickerStyle(.segmented)
                 }
             }
+        }
+    }
+}
+
+// MARK: - Game Features Settings Section
+
+struct GameFeaturesSettingsSection: View {
+    @EnvironmentObject var model: AppModel
+    @State private var showTutorials = false
+    @State private var showSkillTree = false
+    @State private var showTrophyCase = false
+    
+    var body: some View {
+        SettingsSection(title: "Game Features", icon: "gamecontroller.fill", color: BrandTheme.warning) {
+            VStack(spacing: DesignSystem.spacing.md) {
+                // Sound Effects
+                SettingsToggle(
+                    title: "Sound Effects",
+                    subtitle: "Audio feedback for actions",
+                    isOn: $model.soundManager.soundEnabled
+                )
+                
+                Divider().background(BrandTheme.divider)
+                
+                // Daily Challenges
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Daily Challenges")
+                            .font(DesignSystem.text.labelMedium)
+                            .foregroundColor(BrandTheme.textPrimary)
+                        
+                        Text("\(model.dailyChallengeManager.todaysChallenges.count) active today")
+                            .font(.caption)
+                            .foregroundColor(BrandTheme.mutedText)
+                    }
+                    
+                    Spacer()
+                    
+                    ChipView(
+                        text: "\(model.dailyChallengeManager.earnedBonusXP)/\(model.dailyChallengeManager.totalBonusXPAvailable) XP",
+                        icon: "star.fill",
+                        color: BrandTheme.warning,
+                        size: .small
+                    )
+                }
+                
+                Divider().background(BrandTheme.divider)
+                
+                // Skill Tree
+                Button {
+                    showSkillTree = true
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Skill Tree")
+                                .font(DesignSystem.text.labelMedium)
+                                .foregroundColor(BrandTheme.textPrimary)
+                            
+                            Text("\(model.skillTreeManager.totalUnlocked) skills unlocked")
+                                .font(.caption)
+                                .foregroundColor(BrandTheme.mutedText)
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(BrandTheme.mutedText)
+                    }
+                }
+                
+                Divider().background(BrandTheme.divider)
+                
+                // Trophy Case
+                Button {
+                    showTrophyCase = true
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Trophy Case")
+                                .font(DesignSystem.text.labelMedium)
+                                .foregroundColor(BrandTheme.textPrimary)
+                            
+                            Text("\(model.unlockedBadges.count)/\(model.allBadges.count) trophies earned")
+                                .font(.caption)
+                                .foregroundColor(BrandTheme.mutedText)
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(BrandTheme.mutedText)
+                    }
+                }
+                
+                Divider().background(BrandTheme.divider)
+                
+                // Tutorials
+                Button {
+                    showTutorials = true
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Tutorials & Help")
+                                .font(DesignSystem.text.labelMedium)
+                                .foregroundColor(BrandTheme.textPrimary)
+                            
+                            Text("Learn how to use Life XP")
+                                .font(.caption)
+                                .foregroundColor(BrandTheme.mutedText)
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(BrandTheme.mutedText)
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showTutorials) {
+            TutorialListView()
+        }
+        .sheet(isPresented: $showSkillTree) {
+            SkillTreeView(manager: model.skillTreeManager)
+        }
+        .sheet(isPresented: $showTrophyCase) {
+            TrophyCaseView(badges: model.allBadges, unlockedBadgeIDs: model.unlockedBadgeIDs)
         }
     }
 }

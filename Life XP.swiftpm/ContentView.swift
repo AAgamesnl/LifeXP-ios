@@ -4,8 +4,10 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var model = AppModel()
+    @StateObject private var tutorialManager = TutorialManager()
     
     @AppStorage("lifeXP.hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
+    @AppStorage("lifeXP.hasSeenWelcomeTutorial") private var hasSeenWelcomeTutorial: Bool = false
     @State private var showOnboarding: Bool = false
     @State private var selectedTab: Tab = .home
     @State private var showCelebration: Bool = false
@@ -98,14 +100,26 @@ struct ContentView: View {
                 LevelUpCelebration(level: model.level, isPresented: $showCelebration)
                     .transition(.opacity.combined(with: .scale))
             }
+            
+            // Tutorial overlay
+            TutorialOverlay(manager: tutorialManager)
         }
         .environmentObject(model)
+        .environmentObject(tutorialManager)
         .tint(BrandTheme.accent)
         .preferredColorScheme(model.preferredColorScheme)
         .onAppear {
             previousLevel = model.level
             if !hasCompletedOnboarding {
                 showOnboarding = true
+            }
+            
+            // Show welcome tutorial for new users after onboarding
+            if hasCompletedOnboarding && !hasSeenWelcomeTutorial {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    tutorialManager.startTutorial(.welcome)
+                    hasSeenWelcomeTutorial = true
+                }
             }
         }
         .onChange(of: model.level) { oldValue, newValue in

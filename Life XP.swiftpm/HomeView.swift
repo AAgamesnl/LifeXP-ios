@@ -14,14 +14,38 @@ struct HomeView: View {
                 // Scroll content
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: model.compactHomeLayout ? DesignSystem.spacing.lg : DesignSystem.spacing.xl) {
-                        // Hero Section
+                        // Hero Section with Time-of-Day Greeting
                         HeroSection()
                             .opacity(showHeroCard ? 1 : 0)
                             .offset(y: showHeroCard ? 0 : 20)
                         
+                        // Active Seasonal Event Banner
+                        if let event = model.activeSeasonalEvent {
+                            SeasonalEventBanner(event: event)
+                                .bounceOnAppear(delay: 0.05)
+                        }
+                        
+                        // Combo Display (when active)
+                        if model.comboSystem.currentCombo > 1 {
+                            ComboDisplay(combo: model.comboSystem)
+                                .bounceOnAppear(delay: 0.08)
+                        }
+                        
+                        // Daily Challenges Card (NEW)
+                        DailyChallengesCard(manager: model.dailyChallengeManager)
+                            .bounceOnAppear(delay: 0.1)
+                        
+                        // Mood Tracker Card (NEW)
+                        MoodTrackerCard(tracker: model.moodTracker)
+                            .bounceOnAppear(delay: 0.12)
+                        
+                        // Smart Insights (NEW)
+                        SmartInsightsCard(engine: model.insightsEngine)
+                            .bounceOnAppear(delay: 0.14)
+                        
                         // Daily Briefing
                         DailyBriefingCard2()
-                            .bounceOnAppear(delay: 0.1)
+                            .bounceOnAppear(delay: 0.16)
                         
                         // Life Checklist Entry
                         if let lifeChecklist = model.packs.first(where: { $0.id == "life_checklist_classic" }) {
@@ -32,45 +56,53 @@ struct HomeView: View {
                                 )
                             }
                             .buttonStyle(CardButtonStyle())
-                            .bounceOnAppear(delay: 0.15)
+                            .bounceOnAppear(delay: 0.18)
                         }
                         
                         // Level Progress
                         LevelProgressCard()
                             .bounceOnAppear(delay: 0.2)
                         
+                        // Personal Goals (NEW)
+                        PersonalGoalsCard(manager: model.personalGoalsManager)
+                            .bounceOnAppear(delay: 0.22)
+                        
+                        // Weekly Review (NEW)
+                        WeeklyReviewCard(manager: model.weeklyReviewManager)
+                            .bounceOnAppear(delay: 0.24)
+                        
                         // Dimension Balance
                         DimensionBalanceCard()
-                            .bounceOnAppear(delay: 0.25)
+                            .bounceOnAppear(delay: 0.26)
                         
                         // Momentum Section
                         if model.showMomentumGrid {
                             MomentumSection()
-                                .bounceOnAppear(delay: 0.3)
+                                .bounceOnAppear(delay: 0.28)
                         }
                         
                         // Micro Wins
                         if !model.microWins.isEmpty {
                             MicroWinsSection()
-                                .bounceOnAppear(delay: 0.35)
+                                .bounceOnAppear(delay: 0.3)
                         }
                         
                         // Arc Preview
                         if let arcPreview = model.highlightedArc, model.showHeroCards {
                             ArcPreviewCard(arc: arcPreview)
-                                .bounceOnAppear(delay: 0.4)
+                                .bounceOnAppear(delay: 0.32)
                         }
                         
                         // Booster Packs
                         if !model.boosterPacks.isEmpty {
                             BoosterPacksSection()
-                                .bounceOnAppear(delay: 0.45)
+                                .bounceOnAppear(delay: 0.34)
                         }
                         
                         // Quick Actions
                         if model.showQuickActions {
                             QuickActionsSection()
-                                .bounceOnAppear(delay: 0.5)
+                                .bounceOnAppear(delay: 0.36)
                         }
                         
                         // Optional Cards
@@ -96,6 +128,9 @@ struct HomeView: View {
                 withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                     showHeroCard = true
                 }
+                // Initialize AAA game systems
+                model.initializeDailyChallenges()
+                model.updateInsights()
             }
         }
     }
@@ -214,14 +249,8 @@ struct HeroSection: View {
     }
     
     private var greeting: String {
-        let hour = Calendar.current.component(.hour, from: Date())
-        if hour < 12 {
-            return "Goedemorgen! Tijd voor wat wins."
-        } else if hour < 17 {
-            return "Goedemiddag! Keep the momentum."
-        } else {
-            return "Goedenavond! Nog even doorpakken?"
-        }
+        let timeOfDay = TimeOfDay.current
+        return "\(timeOfDay.greeting) \(timeOfDay.suggestion)"
     }
 }
 

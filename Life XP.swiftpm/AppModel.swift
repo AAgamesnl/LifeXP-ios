@@ -211,6 +211,19 @@ final class AppModel: ObservableObject {
     @Published var settings: UserSettings {
         didSet { persistState() }
     }
+    
+    // MARK: - AAA Game Systems
+    @Published var dailyChallengeManager = DailyChallengeManager()
+    @Published var moodTracker = MoodTracker()
+    @Published var personalGoalsManager = PersonalGoalsManager()
+    @Published var skillTreeManager = SkillTreeManager()
+    @Published var weeklyReviewManager = WeeklyReviewManager()
+    @Published var seasonalEventManager = SeasonalEventManager()
+    @Published var insightsEngine = InsightsEngine()
+    @Published var soundManager = SoundManager()
+    
+    // Combo system (value type, managed inline)
+    @Published var comboSystem = ComboSystem()
 
     var toneMode: ToneMode {
         get { settings.toneMode }
@@ -508,15 +521,32 @@ final class AppModel: ObservableObject {
 
         if wasCompleted {
             completedItemIDs.remove(item.id)
+            comboSystem.resetCombo()
         } else {
             completedItemIDs.insert(item.id)
             registerActivityToday()
+            
+            // AAA Systems integration
+            comboSystem.registerCompletion()
+            dailyChallengeManager.updateProgress(for: item.dimensions)
+            weeklyReviewManager.logCompletion(xp: item.xp, dimensions: item.dimensions, isQuest: false)
+            updateSkillTree()
+            updateInsights()
+            
+            // Sound effect
+            soundManager.play(.complete)
         }
         let levelAfter = level
         persistState()
 
-        if !wasCompleted && levelAfter > levelBefore {
-            HapticsEngine.softCelebrate()
+        if !wasCompleted {
+            if levelAfter > levelBefore {
+                HapticsEngine.levelUp()
+                soundManager.play(.levelUp)
+            } else if comboSystem.currentCombo >= 3 {
+                HapticsEngine.softCelebrate()
+                soundManager.play(.comboIncrease)
+            }
         }
     }
 
@@ -534,6 +564,7 @@ final class AppModel: ObservableObject {
 
         if wasCompleted {
             completedItemIDs.remove(quest.id)
+            comboSystem.resetCombo()
         } else {
             completedItemIDs.insert(quest.id)
             registerActivityToday()
@@ -541,6 +572,16 @@ final class AppModel: ObservableObject {
                 startArcIfNeeded(arc)
             }
             HapticsEngine.lightImpact()
+            
+            // AAA Systems integration
+            comboSystem.registerCompletion()
+            dailyChallengeManager.updateProgress(for: quest.dimensions)
+            weeklyReviewManager.logCompletion(xp: quest.xp, dimensions: quest.dimensions, isQuest: true)
+            updateSkillTree()
+            updateInsights()
+            
+            // Sound effect
+            soundManager.play(.complete)
         }
         let levelAfter = level
         persistState()
@@ -548,13 +589,15 @@ final class AppModel: ObservableObject {
         guard !wasCompleted else { return }
 
         if levelAfter > levelBefore {
-            HapticsEngine.softCelebrate()
+            HapticsEngine.levelUp()
+            soundManager.play(.levelUp)
         }
 
         if let arc = arc {
             let arcProgressAfter = arcProgress(arc)
             if arcProgressAfter >= 1 && arcProgressBefore < 1 {
-                HapticsEngine.success()
+                HapticsEngine.arcComplete()
+                soundManager.play(.celebration)
             }
         }
 
@@ -567,7 +610,8 @@ final class AppModel: ObservableObject {
 
         let unlockedAfter = unlockedBadges.count
         if unlockedAfter > unlockedBadgesBefore {
-            HapticsEngine.success()
+            HapticsEngine.badgeUnlock()
+            soundManager.play(.badgeUnlock)
         }
     }
 
@@ -1209,6 +1253,99 @@ final class AppModel: ObservableObject {
 
     // MARK: - Badges
 
+    // MARK: - AAA Systems Helpers
+    
+    /// Updates the skill tree based on current dimension XP
+    func updateSkillTree() {
+        let dimXP: [LifeDimension: Int] = Dictionary(
+            uniqueKeysWithValues: LifeDimension.allCases.map { ($0, xp(for: $0)) }
+        )
+        skillTreeManager.updateUnlocks(dimensionXP: dimXP)
+    }
+    
+    /// Updates smart insights based on current state
+    func updateInsights() {
+        let dimRatios = dimensionRankings.map { ($0.dimension, $0.ratio) }
+        let recentCompletions = getRecentCompletionDates()
+        
+        insightsEngine.generateInsights(
+            totalXP: totalXP,
+            streak: currentStreak,
+            dimensionRatios: dimRatios,
+            completedToday: completedToday,
+            recentCompletions: recentCompletions
+        )
+    }
+    
+    /// Initializes daily challenges if needed
+    func initializeDailyChallenges() {
+        dailyChallengeManager.generateChallengesIfNeeded(totalXP: totalXP, completedCount: completedCount)
+    }
+    
+    /// Records mood in the tracker and weekly review
+    func logMood(_ mood: MoodState) {
+        moodTracker.logMood(mood)
+        weeklyReviewManager.logMood(mood)
+    }
+    
+    /// Number of items completed today
+    var completedToday: Int {
+        // In a full implementation, we'd track completion dates
+        // For now, return a simplified count
+        min(completedCount, 10)
+    }
+    
+    /// Gets recent completion dates (simplified)
+    private func getRecentCompletionDates() -> [Date] {
+        // In a full implementation, we'd store timestamps
+        // For now, return empty array
+        return []
+    }
+    
+    /// Current XP multiplier from combo and events
+    var currentXPMultiplier: Double {
+        let comboMultiplier = comboSystem.multiplier
+        let eventMultiplier = seasonalEventManager.bonusMultiplier(for: nil)
+        return comboMultiplier * eventMultiplier
+    }
+    
+    /// Effective XP for an item considering multipliers
+    func effectiveXP(for baseXP: Int) -> Int {
+        Int(Double(baseXP) * currentXPMultiplier)
+    }
+    
+    /// Active seasonal event if any
+    var activeSeasonalEvent: SeasonalEvent? {
+        seasonalEventManager.currentEvent
+    }
+    
+    /// All available badges (locked and unlocked)
+    var allBadges: [Badge] {
+        let allPossible: [Badge] = [
+            Badge(id: "badge_getting_started", name: "Getting Started", description: "Je hebt de eerste stappen gezet en al 50+ XP verzameld.", iconSystemName: "sparkles"),
+            Badge(id: "badge_leveling_up", name: "Leveling Up", description: "Je hebt 200+ XP. Je bent officieel bezig met een glow-up.", iconSystemName: "arrow.up.circle.fill"),
+            Badge(id: "badge_architect", name: "Life Architect", description: "500+ XP: je leven is een designproject geworden.", iconSystemName: "rectangle.3.group.fill"),
+            Badge(id: "badge_legend", name: "Level 100 Vibes", description: "1000+ XP verzameld. Je speelt nu op Legendary.", iconSystemName: "star.circle.fill"),
+            Badge(id: "badge_soft_lover", name: "Soft Lover", description: "Je investeert serieus in relaties en verbinding.", iconSystemName: "heart.circle.fill"),
+            Badge(id: "badge_money_minded", name: "Money Minded", description: "Je bent eerlijk naar je geld aan het kijken en dat betaalt zich terug.", iconSystemName: "banknote.fill"),
+            Badge(id: "badge_explorer", name: "Explorer", description: "Je verzamelt actief nieuwe herinneringen en micro-avonturen.", iconSystemName: "safari.fill"),
+            Badge(id: "badge_inner_work", name: "Inner Work", description: "Mind-work is priority. Reflectie, therapie en routines zijn geland.", iconSystemName: "brain"),
+            Badge(id: "badge_streak_3", name: "On A Roll", description: "Minstens 3 dagen na elkaar iets voor je leven gedaan.", iconSystemName: "flame.fill"),
+            Badge(id: "badge_streak_7", name: "Consistency Era", description: "Je hebt een streak van 7+ dagen gehaald.", iconSystemName: "calendar.badge.checkmark"),
+            Badge(id: "badge_unstoppable", name: "Unstoppable", description: "21+ dagen streak. Dit is hoe momentum voelt.", iconSystemName: "bolt.fill"),
+            Badge(id: "badge_story_arc", name: "Story Arc", description: "Je hebt minstens één arc volledig uitgespeeld.", iconSystemName: "book.circle.fill"),
+            Badge(id: "badge_arc_collector", name: "Arc Collector", description: "Drie arcs gecompleteerd: je leeft in seizoenen.", iconSystemName: "rectangle.stack.fill"),
+            Badge(id: "badge_chapter_closer", name: "Chapter Closer", description: "Je hebt 3+ chapters afgerond. Jij sluit lusjes.", iconSystemName: "book.closed.fill"),
+            Badge(id: "badge_balanced", name: "Balanced", description: "Elke dimensie staat op 60%+ van zijn potentieel.", iconSystemName: "circle.grid.cross")
+        ]
+        return allPossible
+    }
+    
+    /// Set of unlocked badge IDs for trophy case
+    var unlockedBadgeIDs: Set<String> {
+        Set(unlockedBadges.map { $0.id })
+    }
+    
     /// Derived badges from XP and streak milestones.
     var unlockedBadges: [Badge] {
         var result: [Badge] = []
