@@ -1409,7 +1409,7 @@ private struct MascotMouth: View {
     var body: some View {
         switch mood {
         case .happy, .celebrating:
-            Arc(startAngle: .degrees(0), endAngle: .degrees(180), clockwise: false)
+            ArcShape(startAngle: .degrees(0), endAngle: .degrees(180), clockwise: false)
                 .stroke(.white, lineWidth: 3)
                 .frame(width: 20, height: 10)
         case .excited:
@@ -1421,14 +1421,14 @@ private struct MascotMouth: View {
                 .fill(.white)
                 .frame(width: 14, height: 4)
         case .thinking:
-            Arc(startAngle: .degrees(0), endAngle: .degrees(180), clockwise: true)
+            ArcShape(startAngle: .degrees(0), endAngle: .degrees(180), clockwise: true)
                 .stroke(.white, lineWidth: 3)
                 .frame(width: 16, height: 6)
         }
     }
 }
 
-private struct Arc: Shape {
+private struct ArcShape: Shape {
     let startAngle: Angle
     let endAngle: Angle
     let clockwise: Bool

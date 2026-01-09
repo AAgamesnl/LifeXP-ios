@@ -180,7 +180,7 @@ struct FireworkEffect: View {
                     )
                 }
                 
-                var burst = Burst(x: x, y: y, particles: particles)
+                let burst = Burst(x: x, y: y, particles: particles)
                 bursts.append(burst)
                 
                 // Animate expansion
@@ -274,7 +274,7 @@ struct AnimatedCounter: View {
         Text("\(displayValue)")
             .font(font)
             .foregroundColor(color)
-            .contentTransition(.numericText(value: displayValue))
+            .contentTransition(.numericText(value: Double(displayValue)))
             .onAppear {
                 withAnimation(.spring(response: 0.8, dampingFraction: 0.8)) {
                     displayValue = value
@@ -498,7 +498,7 @@ struct RippleEffect: ViewModifier {
     }
     
     private func createRipple(at position: CGPoint) {
-        var ripple = RippleData(position: position)
+        let ripple = RippleData(position: position)
         ripples.append(ripple)
         
         withAnimation(.easeOut(duration: 0.6)) {

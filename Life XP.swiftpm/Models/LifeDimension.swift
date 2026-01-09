@@ -28,6 +28,9 @@ enum LifeDimension: String, CaseIterable, Codable, Identifiable, Hashable {
         case .adventure: return "globe.europe.africa.fill"
         }
     }
+
+    /// Alias for systemImage to match naming in other parts of the codebase.
+    var iconSystemName: String { systemImage }
 }
 
 /// Coaching tone preference for in-app messaging.

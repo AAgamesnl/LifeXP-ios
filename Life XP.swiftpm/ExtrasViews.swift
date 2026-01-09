@@ -115,7 +115,7 @@ struct ArcChallengeSection: View {
                 
                 Spacer()
                 
-                if let arc = arc {
+                if arc != nil {
                     Text(model.arcProgressHeadline)
                         .font(.caption)
                         .foregroundColor(BrandTheme.mutedText)
