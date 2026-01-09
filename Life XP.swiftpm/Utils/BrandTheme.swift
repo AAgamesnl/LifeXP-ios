@@ -460,7 +460,7 @@ struct BrandBackground: View {
     
     var body: some View {
         if animated && !reduceMotion {
-            TimelineView(.animation(minimumInterval: 1.0/60, paused: false)) { timeline in
+            TimelineView(.animation(minimumInterval: 1.0/120, paused: false)) { timeline in
                 PremiumBackgroundCanvas(
                     time: timeline.date.timeIntervalSinceReferenceDate,
                     intensity: intensity,
@@ -1027,7 +1027,7 @@ private struct ShimmerModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         if isActive && !reduceMotion {
-            TimelineView(.animation(minimumInterval: 1.0/60, paused: false)) { timeline in
+            TimelineView(.animation(minimumInterval: 1.0/120, paused: false)) { timeline in
                 let phase = computePhase(for: timeline.date)
                 
                 content
@@ -1066,7 +1066,7 @@ private struct PulseModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         if isActive && !reduceMotion {
-            TimelineView(.animation(minimumInterval: 1.0/60, paused: false)) { timeline in
+            TimelineView(.animation(minimumInterval: 1.0/120, paused: false)) { timeline in
                 let scale = computeScale(for: timeline.date)
                 
                 content
@@ -1452,7 +1452,7 @@ struct LoadingView: View {
                         .frame(width: 48, height: 48)
                 }
             } else {
-                TimelineView(.animation(minimumInterval: 1.0/60, paused: false)) { timeline in
+                TimelineView(.animation(minimumInterval: 1.0/120, paused: false)) { timeline in
                     let rotation = computeRotation(for: timeline.date)
                     
                     ZStack {

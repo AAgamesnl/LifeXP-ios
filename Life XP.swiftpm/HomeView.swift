@@ -227,7 +227,7 @@ struct StreakBadge: View {
                 StaticStreakContent(days: days)
             } else {
                 // Animated version using TimelineView for smooth performance
-                TimelineView(.animation(minimumInterval: 1.0/20, paused: false)) { timeline in
+                TimelineView(.animation(minimumInterval: 1.0/120, paused: false)) { timeline in
                     let scale = computeGlowScale(for: timeline.date)
                     
                     ZStack {

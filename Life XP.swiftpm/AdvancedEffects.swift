@@ -566,7 +566,7 @@ struct SkeletonView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0/60, paused: reduceMotion)) { timeline in
+        TimelineView(.animation(minimumInterval: 1.0/120, paused: reduceMotion)) { timeline in
             let phase = computePhase(for: timeline.date)
             
             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
