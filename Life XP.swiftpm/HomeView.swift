@@ -77,6 +77,9 @@ struct HomeView: View {
             .navigationTitle("Life XP")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    QuickHelpButton()
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: BadgesView()) {
                         BadgeCountButton(count: model.unlockedBadges.count)

@@ -2,6 +2,7 @@ import SwiftUI
 
 // MARK: - Interactive Tutorial System
 // Provides guided walkthroughs and tooltips for new users
+// Now with AWESOME animations and polish!
 
 // MARK: - Tutorial Step Model
 
@@ -12,6 +13,8 @@ struct TutorialStep: Identifiable {
     let iconSystemName: String
     let highlightAnchor: HighlightAnchor?
     let action: TutorialAction?
+    let celebrationType: CelebrationType
+    let accentColor: Color
     
     enum HighlightAnchor {
         case tab(Tab)
@@ -27,6 +30,34 @@ struct TutorialStep: Identifiable {
     struct TutorialAction {
         let label: String
         let handler: () -> Void
+    }
+    
+    enum CelebrationType {
+        case none
+        case sparkle
+        case confetti
+        case pulse
+        case bounce
+    }
+    
+    init(
+        id: String,
+        title: String,
+        message: String,
+        iconSystemName: String,
+        highlightAnchor: HighlightAnchor? = nil,
+        action: TutorialAction? = nil,
+        celebrationType: CelebrationType = .none,
+        accentColor: Color = BrandTheme.accent
+    ) {
+        self.id = id
+        self.title = title
+        self.message = message
+        self.iconSystemName = iconSystemName
+        self.highlightAnchor = highlightAnchor
+        self.action = action
+        self.celebrationType = celebrationType
+        self.accentColor = accentColor
     }
 }
 
@@ -49,42 +80,52 @@ enum TutorialSequence: String, CaseIterable {
                 TutorialStep(
                     id: "welcome_1",
                     title: "Welcome to Life XP! 🎮",
-                    message: "Your life is about to become an adventure game. Let's show you around!",
+                    message: "Your life is about to become an epic adventure. Ready to level up in real life?",
                     iconSystemName: "sparkles",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .confetti,
+                    accentColor: BrandTheme.accent
                 ),
                 TutorialStep(
                     id: "welcome_2",
-                    title: "This is Your Home",
-                    message: "Here you'll see your progress, daily challenges, and quick wins. Everything starts here.",
+                    title: "Your Command Center",
+                    message: "This is Home base. See your progress, grab quick wins, and start each day with purpose.",
                     iconSystemName: "house.fill",
                     highlightAnchor: .tab(.home),
-                    action: nil
+                    action: nil,
+                    celebrationType: .pulse,
+                    accentColor: BrandTheme.accent
                 ),
                 TutorialStep(
                     id: "welcome_3",
                     title: "Four Life Dimensions",
-                    message: "We track your growth in Love ❤️, Money 💰, Mind 🧠, and Adventure ⚡. Balance is key!",
+                    message: "Love ❤️ • Money 💰 • Mind 🧠 • Adventure ⚡\n\nBalance these to become unstoppable.",
                     iconSystemName: "circle.grid.2x2.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .sparkle,
+                    accentColor: BrandTheme.mind
                 ),
                 TutorialStep(
                     id: "welcome_4",
                     title: "Earn XP & Level Up",
-                    message: "Complete items to earn XP. Level up to unlock badges and celebrate your progress!",
+                    message: "Every completed item = XP. Stack enough XP and you'll level up with epic celebrations!",
                     iconSystemName: "star.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .bounce,
+                    accentColor: BrandTheme.warning
                 ),
                 TutorialStep(
                     id: "welcome_5",
-                    title: "Ready to Start?",
-                    message: "Let's complete your first item together and see how it works!",
-                    iconSystemName: "play.fill",
+                    title: "Your Journey Begins Now",
+                    message: "You're all set! Start completing items and watch yourself transform. 🚀",
+                    iconSystemName: "rocket.fill",
                     highlightAnchor: nil,
-                    action: TutorialStep.TutorialAction(label: "Let's Go!", handler: {})
+                    action: TutorialStep.TutorialAction(label: "Let's Go!", handler: {}),
+                    celebrationType: .confetti,
+                    accentColor: BrandTheme.success
                 )
             ]
             
@@ -92,27 +133,33 @@ enum TutorialSequence: String, CaseIterable {
             return [
                 TutorialStep(
                     id: "item_1",
-                    title: "Completing Items",
-                    message: "Tap any item to mark it complete. You can also swipe right for a quick complete!",
+                    title: "Tap to Complete ✓",
+                    message: "Tap any item to mark it done. Each tap is a small victory!",
                     iconSystemName: "checkmark.circle.fill",
                     highlightAnchor: .card("item"),
-                    action: nil
+                    action: nil,
+                    celebrationType: .pulse,
+                    accentColor: BrandTheme.success
                 ),
                 TutorialStep(
                     id: "item_2",
-                    title: "XP Rewards",
-                    message: "Each item rewards XP based on difficulty. Harder items = more XP!",
+                    title: "XP = Progress",
+                    message: "Harder items reward more XP. Choose wisely based on your energy level!",
                     iconSystemName: "star.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .sparkle,
+                    accentColor: BrandTheme.warning
                 ),
                 TutorialStep(
                     id: "item_3",
-                    title: "Combos Multiply XP",
-                    message: "Complete items quickly to build combos. Higher combos = XP multipliers!",
+                    title: "Combo Power! ⚡",
+                    message: "Complete items within 5 minutes to build combos. 2x, 3x, even 4x XP multipliers!",
                     iconSystemName: "bolt.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .bounce,
+                    accentColor: BrandTheme.adventure
                 )
             ]
             
@@ -120,27 +167,33 @@ enum TutorialSequence: String, CaseIterable {
             return [
                 TutorialStep(
                     id: "arc_1",
-                    title: "Story Arcs",
-                    message: "Arcs are guided journeys with chapters and quests. They help you tackle big life goals step by step.",
+                    title: "Epic Story Arcs 📖",
+                    message: "Arcs are guided quests for real life change. Like chapters in your personal story.",
                     iconSystemName: "book.fill",
                     highlightAnchor: .tab(.journeys),
-                    action: nil
+                    action: nil,
+                    celebrationType: .sparkle,
+                    accentColor: BrandTheme.accent
                 ),
                 TutorialStep(
                     id: "arc_2",
-                    title: "Pick Your Adventure",
-                    message: "Choose an arc that resonates with where you are in life. You can have multiple arcs active!",
+                    title: "Choose Your Quest",
+                    message: "Heart Repair? Money Reset? Calm Mind? Pick what speaks to you right now.",
                     iconSystemName: "flag.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .pulse,
+                    accentColor: BrandTheme.love
                 ),
                 TutorialStep(
                     id: "arc_3",
-                    title: "Complete Chapters",
-                    message: "Work through quests to complete chapters. Finishing an arc unlocks special badges!",
+                    title: "Unlock Legendary Status",
+                    message: "Complete all chapters in an arc = legendary badge + massive XP boost! 🏆",
                     iconSystemName: "trophy.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .confetti,
+                    accentColor: BrandTheme.warning
                 )
             ]
             
@@ -148,51 +201,63 @@ enum TutorialSequence: String, CaseIterable {
             return [
                 TutorialStep(
                     id: "dim_1",
-                    title: "Life Dimensions",
-                    message: "Every item contributes to one or more dimensions. Let's break them down:",
+                    title: "The Four Pillars",
+                    message: "A balanced life means growing in all dimensions. Here's your roadmap:",
                     iconSystemName: "circle.grid.2x2.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .sparkle,
+                    accentColor: BrandTheme.accent
                 ),
                 TutorialStep(
                     id: "dim_2",
                     title: "❤️ Love",
-                    message: "Relationships, connections, self-love, and emotional well-being",
+                    message: "Deep connections, self-care, and emotional intelligence. The foundation of happiness.",
                     iconSystemName: "heart.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .pulse,
+                    accentColor: BrandTheme.love
                 ),
                 TutorialStep(
                     id: "dim_3",
                     title: "💰 Money",
-                    message: "Financial health, career growth, savings, and smart spending",
+                    message: "Financial freedom, smart decisions, and building the life you deserve.",
                     iconSystemName: "dollarsign.circle.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .pulse,
+                    accentColor: BrandTheme.money
                 ),
                 TutorialStep(
                     id: "dim_4",
                     title: "🧠 Mind",
-                    message: "Mental health, learning, mindfulness, and personal development",
+                    message: "Clarity, growth, and becoming the best version of yourself. Your greatest asset.",
                     iconSystemName: "brain.head.profile",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .pulse,
+                    accentColor: BrandTheme.mind
                 ),
                 TutorialStep(
                     id: "dim_5",
                     title: "⚡ Adventure",
-                    message: "New experiences, travel, trying new things, and stepping out of comfort zones",
+                    message: "New experiences, bold moves, and living without regrets. Make memories!",
                     iconSystemName: "safari.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .pulse,
+                    accentColor: BrandTheme.adventure
                 ),
                 TutorialStep(
                     id: "dim_6",
-                    title: "Balance Matters",
-                    message: "Aim for progress in all dimensions. The app will suggest items to help you balance!",
+                    title: "Perfect Balance = Unstoppable",
+                    message: "We'll show you which dimension needs attention. Trust the process!",
                     iconSystemName: "scale.3d",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .confetti,
+                    accentColor: BrandTheme.success
                 )
             ]
             
@@ -200,27 +265,33 @@ enum TutorialSequence: String, CaseIterable {
             return [
                 TutorialStep(
                     id: "streak_1",
-                    title: "Build Your Streak 🔥",
-                    message: "Complete at least one item per day to build your streak!",
+                    title: "Ignite Your Streak 🔥",
+                    message: "One item per day keeps the streak alive. Small wins compound into big results!",
                     iconSystemName: "flame.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .sparkle,
+                    accentColor: BrandTheme.warning
                 ),
                 TutorialStep(
                     id: "streak_2",
-                    title: "Streak Benefits",
-                    message: "Longer streaks unlock badges and prove your consistency. Your best streak is always saved!",
+                    title: "Streak = Power",
+                    message: "3 days = badge. 7 days = bigger badge. 21 days = UNSTOPPABLE badge! 🏆",
                     iconSystemName: "trophy.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .bounce,
+                    accentColor: BrandTheme.warning
                 ),
                 TutorialStep(
                     id: "streak_3",
-                    title: "Don't Break It!",
-                    message: "Missing a day resets your streak. But don't worry - just start again!",
+                    title: "Fall Down, Get Up",
+                    message: "Broke your streak? No shame. Champions restart. Your best streak is forever remembered.",
                     iconSystemName: "arrow.counterclockwise",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .pulse,
+                    accentColor: BrandTheme.success
                 )
             ]
             
@@ -228,27 +299,33 @@ enum TutorialSequence: String, CaseIterable {
             return [
                 TutorialStep(
                     id: "badge_1",
-                    title: "Earn Badges 🏆",
-                    message: "Badges celebrate your achievements. There are 15+ badges to unlock!",
+                    title: "Collect Badges 🏆",
+                    message: "Badges = proof of your progress. Bronze → Silver → Gold → Diamond tiers await!",
                     iconSystemName: "rosette",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .sparkle,
+                    accentColor: BrandTheme.warning
                 ),
                 TutorialStep(
                     id: "badge_2",
                     title: "How to Unlock",
-                    message: "Earn XP, maintain streaks, complete arcs, and balance your dimensions to unlock badges.",
+                    message: "XP milestones, streak achievements, arc completions, and dimension mastery all unlock badges.",
                     iconSystemName: "lock.open.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .pulse,
+                    accentColor: BrandTheme.success
                 ),
                 TutorialStep(
                     id: "badge_3",
-                    title: "Trophy Case",
-                    message: "View all your badges in the Trophy Case. See what you've earned and what's next!",
+                    title: "Your Trophy Case",
+                    message: "All your achievements in one place. Show off your collection and aim for 100%!",
                     iconSystemName: "trophy.fill",
                     highlightAnchor: .tab(.stats),
-                    action: nil
+                    action: nil,
+                    celebrationType: .confetti,
+                    accentColor: BrandTheme.warning
                 )
             ]
             
@@ -256,27 +333,33 @@ enum TutorialSequence: String, CaseIterable {
             return [
                 TutorialStep(
                     id: "settings_1",
-                    title: "Customize Your Experience",
-                    message: "Make Life XP work for you. Head to Settings to personalize everything.",
+                    title: "Make It Yours ⚙️",
+                    message: "Life XP adapts to YOU. Customize everything in Settings.",
                     iconSystemName: "gearshape.fill",
                     highlightAnchor: .tab(.settings),
-                    action: nil
+                    action: nil,
+                    celebrationType: .pulse,
+                    accentColor: BrandTheme.mind
                 ),
                 TutorialStep(
                     id: "settings_2",
-                    title: "Coaching Tone",
-                    message: "Choose between soft encouragement or real-talk motivation.",
+                    title: "Your Coaching Style",
+                    message: "Soft & gentle or Real talk? Pick how you want to be motivated.",
                     iconSystemName: "bubble.left.and.bubble.right.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .none,
+                    accentColor: BrandTheme.love
                 ),
                 TutorialStep(
                     id: "settings_3",
-                    title: "Focus Dimensions",
-                    message: "Enable only the dimensions you want to focus on right now.",
+                    title: "Focus Mode",
+                    message: "Overwhelmed? Enable only the dimensions that matter most right now.",
                     iconSystemName: "target",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .sparkle,
+                    accentColor: BrandTheme.success
                 )
             ]
             
@@ -284,51 +367,63 @@ enum TutorialSequence: String, CaseIterable {
             return [
                 TutorialStep(
                     id: "game_1",
-                    title: "Daily Challenges",
-                    message: "New challenges every day! Complete them for bonus XP.",
+                    title: "Daily Challenges 🎯",
+                    message: "Fresh challenges every 24 hours. Complete them for bonus XP!",
                     iconSystemName: "target",
                     highlightAnchor: .card("challenges"),
-                    action: nil
+                    action: nil,
+                    celebrationType: .pulse,
+                    accentColor: BrandTheme.warning
                 ),
                 TutorialStep(
                     id: "game_2",
-                    title: "Combos & Multipliers",
-                    message: "Complete items quickly to build combos. The higher your combo, the more XP you earn!",
+                    title: "Combo System ⚡",
+                    message: "Quick completions = combos. Combos = XP multipliers. Go fast, earn more!",
                     iconSystemName: "bolt.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .bounce,
+                    accentColor: BrandTheme.adventure
                 ),
                 TutorialStep(
                     id: "game_3",
-                    title: "Mood Tracking",
-                    message: "Log your mood to get personalized suggestions based on how you feel.",
+                    title: "Mood Check-ins",
+                    message: "Tell us how you feel. We'll suggest items that match your energy.",
                     iconSystemName: "face.smiling.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .sparkle,
+                    accentColor: BrandTheme.love
                 ),
                 TutorialStep(
                     id: "game_4",
-                    title: "Skill Trees",
-                    message: "Progress unlocks skills in each dimension. Watch your character grow!",
+                    title: "Skill Trees 🌳",
+                    message: "Each dimension has skills to unlock. Watch your character evolve!",
                     iconSystemName: "chart.bar.doc.horizontal.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .pulse,
+                    accentColor: BrandTheme.mind
                 ),
                 TutorialStep(
                     id: "game_5",
-                    title: "Personal Goals",
-                    message: "Create your own goals with milestones. Track anything that matters to you!",
+                    title: "Custom Goals 🚩",
+                    message: "Set your own goals with milestones. Your dreams, your rules!",
                     iconSystemName: "flag.fill",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .sparkle,
+                    accentColor: BrandTheme.success
                 ),
                 TutorialStep(
                     id: "game_6",
-                    title: "Seasonal Events",
-                    message: "Special events throughout the year offer bonus XP and exclusive badges!",
+                    title: "Seasonal Events 🎉",
+                    message: "Special limited-time events with exclusive rewards. Don't miss out!",
                     iconSystemName: "sparkles",
                     highlightAnchor: nil,
-                    action: nil
+                    action: nil,
+                    celebrationType: .confetti,
+                    accentColor: BrandTheme.accent
                 )
             ]
         }
@@ -449,19 +544,46 @@ final class TutorialManager: ObservableObject {
 
 struct TutorialOverlay: View {
     @ObservedObject var manager: TutorialManager
-    @State private var cardScale: CGFloat = 0.9
+    @State private var cardScale: CGFloat = 0.8
     @State private var cardOpacity: Double = 0
+    @State private var backdropOpacity: Double = 0
+    @State private var showSparkles: Bool = false
+    @State private var showConfetti: Bool = false
+    @State private var pulseScale: CGFloat = 1.0
     
     var body: some View {
         if manager.isShowingTutorial, let step = manager.currentStep {
             ZStack {
-                // Backdrop
-                Color.black.opacity(0.6)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        // Dismiss on background tap
-                        manager.skipTutorial()
-                    }
+                // Animated backdrop with gradient
+                ZStack {
+                    Color.black.opacity(0.7)
+                    
+                    // Subtle gradient overlay for depth
+                    LinearGradient(
+                        colors: [
+                            step.accentColor.opacity(0.1),
+                            Color.clear,
+                            step.accentColor.opacity(0.05)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
+                .ignoresSafeArea()
+                .opacity(backdropOpacity)
+                .onTapGesture {
+                    dismissWithAnimation()
+                }
+                
+                // Floating particles in background
+                if showSparkles {
+                    TutorialParticlesView(color: step.accentColor)
+                }
+                
+                // Confetti for special moments
+                if showConfetti {
+                    ConfettiView(isActive: .constant(true), particleCount: 40)
+                }
                 
                 // Tutorial card
                 VStack(spacing: 0) {
@@ -471,9 +593,17 @@ struct TutorialOverlay: View {
                         step: step,
                         stepIndex: manager.currentStepIndex,
                         totalSteps: manager.totalSteps,
-                        onNext: { manager.nextStep() },
-                        onPrevious: { manager.previousStep() },
-                        onSkip: { manager.skipTutorial() },
+                        onNext: { 
+                            HapticsEngine.lightImpact()
+                            manager.nextStep() 
+                        },
+                        onPrevious: { 
+                            HapticsEngine.lightImpact()
+                            manager.previousStep() 
+                        },
+                        onSkip: { 
+                            dismissWithAnimation()
+                        },
                         isLastStep: manager.isLastStep
                     )
                     .scaleEffect(cardScale)
@@ -483,22 +613,148 @@ struct TutorialOverlay: View {
                 }
             }
             .onAppear {
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                    cardScale = 1
-                    cardOpacity = 1
-                }
+                appearAnimation(for: step)
             }
             .onChange(of: manager.currentStepIndex) { _, _ in
-                // Animate step change
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                    cardScale = 0.95
-                    cardOpacity = 0.5
+                if let newStep = manager.currentStep {
+                    transitionAnimation(to: newStep)
                 }
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                        cardScale = 1
-                        cardOpacity = 1
+            }
+        }
+    }
+    
+    private func appearAnimation(for step: TutorialStep) {
+        withAnimation(.easeOut(duration: 0.3)) {
+            backdropOpacity = 1
+        }
+        
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.1)) {
+            cardScale = 1
+            cardOpacity = 1
+        }
+        
+        triggerCelebration(for: step)
+        HapticsEngine.softCelebrate()
+    }
+    
+    private func transitionAnimation(to step: TutorialStep) {
+        // Quick exit
+        withAnimation(.easeIn(duration: 0.15)) {
+            cardScale = 0.9
+            cardOpacity = 0
+        }
+        
+        // Reset celebrations
+        showSparkles = false
+        showConfetti = false
+        
+        // Entrance
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                cardScale = 1
+                cardOpacity = 1
+            }
+            
+            triggerCelebration(for: step)
+            HapticsEngine.lightImpact()
+        }
+    }
+    
+    private func triggerCelebration(for step: TutorialStep) {
+        switch step.celebrationType {
+        case .confetti:
+            showConfetti = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                showConfetti = false
+            }
+        case .sparkle:
+            showSparkles = true
+        case .pulse:
+            withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                pulseScale = 1.05
+            }
+        case .bounce:
+            // Handled in TutorialCard
+            break
+        case .none:
+            break
+        }
+    }
+    
+    private func dismissWithAnimation() {
+        withAnimation(.easeIn(duration: 0.2)) {
+            cardScale = 0.8
+            cardOpacity = 0
+            backdropOpacity = 0
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            manager.skipTutorial()
+        }
+    }
+}
+
+// MARK: - Tutorial Particles View
+
+struct TutorialParticlesView: View {
+    let color: Color
+    @State private var particles: [TutorialParticle] = []
+    
+    struct TutorialParticle: Identifiable {
+        let id = UUID()
+        var x: CGFloat
+        var y: CGFloat
+        var scale: CGFloat
+        var opacity: Double
+        var rotation: Double
+    }
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                ForEach(particles) { particle in
+                    Image(systemName: "sparkle")
+                        .font(.system(size: 12))
+                        .foregroundColor(color)
+                        .scaleEffect(particle.scale)
+                        .opacity(particle.opacity)
+                        .rotationEffect(.degrees(particle.rotation))
+                        .position(x: particle.x, y: particle.y)
+                }
+            }
+            .onAppear {
+                createParticles(in: geometry.size)
+                animateParticles(in: geometry.size)
+            }
+        }
+        .allowsHitTesting(false)
+    }
+    
+    private func createParticles(in size: CGSize) {
+        particles = (0..<20).map { _ in
+            TutorialParticle(
+                x: CGFloat.random(in: 0...size.width),
+                y: CGFloat.random(in: 0...size.height),
+                scale: CGFloat.random(in: 0.5...1.5),
+                opacity: Double.random(in: 0.3...0.7),
+                rotation: Double.random(in: 0...360)
+            )
+        }
+    }
+    
+    private func animateParticles(in size: CGSize) {
+        Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
+            withAnimation(.easeInOut(duration: 2.0)) {
+                for i in particles.indices {
+                    particles[i].y -= CGFloat.random(in: 20...50)
+                    particles[i].x += CGFloat.random(in: -20...20)
+                    particles[i].opacity = Double.random(in: 0.2...0.8)
+                    particles[i].rotation += Double.random(in: -45...45)
+                    
+                    // Reset particles that go off screen
+                    if particles[i].y < 0 {
+                        particles[i].y = size.height + 20
+                        particles[i].x = CGFloat.random(in: 0...size.width)
                     }
                 }
             }
@@ -515,39 +771,59 @@ struct TutorialCard: View {
     let onSkip: () -> Void
     let isLastStep: Bool
     
+    @State private var iconBounce: Bool = false
+    @State private var iconRotation: Double = 0
+    @State private var glowPulse: Bool = false
+    @State private var progressAnimated: Bool = false
+    
     var body: some View {
         VStack(spacing: DesignSystem.spacing.xl) {
-            // Progress dots
-            HStack(spacing: DesignSystem.spacing.sm) {
-                ForEach(0..<totalSteps, id: \.self) { index in
-                    Circle()
-                        .fill(index == stepIndex ? BrandTheme.accent : BrandTheme.borderSubtle)
-                        .frame(width: 8, height: 8)
-                }
-            }
+            // Animated progress bar
+            TutorialProgressBar(
+                currentStep: stepIndex,
+                totalSteps: totalSteps,
+                color: step.accentColor
+            )
             
-            // Icon
+            // Animated icon with glow
             ZStack {
+                // Outer glow ring (animated)
                 Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [BrandTheme.accent, BrandTheme.accentSoft],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 80, height: 80)
+                    .fill(step.accentColor.opacity(0.15))
+                    .frame(width: 110, height: 110)
+                    .scaleEffect(glowPulse ? 1.15 : 1.0)
+                    .opacity(glowPulse ? 0.5 : 0.8)
                 
-                Image(systemName: step.iconSystemName)
-                    .font(.system(size: 36, weight: .bold))
-                    .foregroundColor(.white)
+                // Middle ring
+                Circle()
+                    .fill(step.accentColor.opacity(0.25))
+                    .frame(width: 95, height: 95)
+                
+                // Main icon container
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [step.accentColor, step.accentColor.opacity(0.7)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 80, height: 80)
+                    
+                    Image(systemName: step.iconSystemName)
+                        .font(.system(size: 36, weight: .bold))
+                        .foregroundColor(.white)
+                        .rotationEffect(.degrees(iconRotation))
+                        .scaleEffect(iconBounce ? 1.15 : 1.0)
+                }
+                .shadow(color: step.accentColor.opacity(0.5), radius: 20, y: 8)
             }
-            .shadow(color: BrandTheme.accent.opacity(0.3), radius: 16, y: 8)
             
-            // Content
+            // Content with animation
             VStack(spacing: DesignSystem.spacing.md) {
                 Text(step.title)
-                    .font(DesignSystem.text.headlineLarge)
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
                     .foregroundColor(BrandTheme.textPrimary)
                     .multilineTextAlignment(.center)
                 
@@ -556,18 +832,24 @@ struct TutorialCard: View {
                     .foregroundColor(BrandTheme.textSecondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
+                    .lineSpacing(4)
             }
+            .padding(.horizontal, DesignSystem.spacing.sm)
             
-            // Actions
-            HStack(spacing: DesignSystem.spacing.lg) {
+            // Enhanced action buttons
+            HStack(spacing: DesignSystem.spacing.md) {
                 if stepIndex > 0 {
                     Button(action: onPrevious) {
-                        HStack(spacing: DesignSystem.spacing.sm) {
+                        HStack(spacing: 6) {
                             Image(systemName: "chevron.left")
+                                .font(.system(size: 14, weight: .semibold))
                             Text("Back")
                         }
+                        .foregroundColor(BrandTheme.textSecondary)
+                        .padding(.horizontal, DesignSystem.spacing.md)
+                        .padding(.vertical, DesignSystem.spacing.sm)
                     }
-                    .buttonStyle(GhostButtonStyle())
+                    .buttonStyle(.plain)
                 }
                 
                 Spacer()
@@ -576,95 +858,274 @@ struct TutorialCard: View {
                     Button("Skip") {
                         onSkip()
                     }
-                    .buttonStyle(GhostButtonStyle())
+                    .foregroundColor(BrandTheme.mutedText)
+                    .font(.system(size: 14, weight: .medium))
                 }
                 
+                // Main action button with glow
                 Button(action: {
-                    HapticsEngine.lightImpact()
                     if let action = step.action {
                         action.handler()
                     }
                     onNext()
                 }) {
-                    HStack(spacing: DesignSystem.spacing.sm) {
-                        Text(isLastStep ? (step.action?.label ?? "Done") : "Next")
-                        if !isLastStep {
-                            Image(systemName: "chevron.right")
-                        }
+                    HStack(spacing: 8) {
+                        Text(isLastStep ? (step.action?.label ?? "Let's Go!") : "Continue")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                        
+                        Image(systemName: isLastStep ? "sparkles" : "arrow.right")
+                            .font(.system(size: 14, weight: .bold))
                     }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, DesignSystem.spacing.xl)
+                    .padding(.vertical, DesignSystem.spacing.md)
+                    .background(
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    colors: [step.accentColor, step.accentColor.opacity(0.8)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                    )
+                    .shadow(color: step.accentColor.opacity(0.4), radius: 12, y: 6)
                 }
-                .buttonStyle(GlowButtonStyle(size: .medium))
+                .buttonStyle(TutorialButtonStyle())
             }
         }
         .padding(DesignSystem.spacing.xl)
+        .padding(.top, DesignSystem.spacing.sm)
         .background(
-            RoundedRectangle(cornerRadius: DesignSystem.radius.xxl, style: .continuous)
-                .fill(BrandTheme.cardBackground)
+            ZStack {
+                // Glass effect background
+                RoundedRectangle(cornerRadius: DesignSystem.radius.xxl, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                
+                // Gradient overlay
+                RoundedRectangle(cornerRadius: DesignSystem.radius.xxl, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                BrandTheme.cardBackground.opacity(0.9),
+                                BrandTheme.cardBackground.opacity(0.95)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                
+                // Accent glow at top
+                VStack {
+                    LinearGradient(
+                        colors: [step.accentColor.opacity(0.2), Color.clear],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: 100)
+                    .clipShape(
+                        RoundedRectangle(cornerRadius: DesignSystem.radius.xxl, style: .continuous)
+                    )
+                    Spacer()
+                }
+            }
         )
         .overlay(
             RoundedRectangle(cornerRadius: DesignSystem.radius.xxl, style: .continuous)
-                .strokeBorder(BrandTheme.borderSubtle.opacity(0.5), lineWidth: 1)
+                .strokeBorder(
+                    LinearGradient(
+                        colors: [step.accentColor.opacity(0.3), BrandTheme.borderSubtle.opacity(0.2)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1.5
+                )
         )
+        .shadow(color: step.accentColor.opacity(0.15), radius: 40, y: 20)
         .shadow(color: Color.black.opacity(0.2), radius: 30, y: 15)
+        .onAppear {
+            startAnimations()
+        }
+        .onChange(of: stepIndex) { _, _ in
+            startAnimations()
+        }
+    }
+    
+    private func startAnimations() {
+        // Reset states
+        iconBounce = false
+        iconRotation = -10
+        glowPulse = false
+        
+        // Animate icon entrance
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.6).delay(0.1)) {
+            iconRotation = 0
+        }
+        
+        // Bounce effect based on celebration type
+        if step.celebrationType == .bounce {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.5).delay(0.2)) {
+                iconBounce = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    iconBounce = false
+                }
+            }
+        }
+        
+        // Glow pulse
+        withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true).delay(0.3)) {
+            glowPulse = true
+        }
+    }
+}
+
+// MARK: - Tutorial Progress Bar
+
+struct TutorialProgressBar: View {
+    let currentStep: Int
+    let totalSteps: Int
+    let color: Color
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(0..<totalSteps, id: \.self) { index in
+                Capsule()
+                    .fill(index <= currentStep ? color : BrandTheme.borderSubtle.opacity(0.5))
+                    .frame(width: index == currentStep ? 24 : 8, height: 8)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: currentStep)
+            }
+        }
+    }
+}
+
+// MARK: - Tutorial Button Style
+
+struct TutorialButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.spring(response: 0.2, dampingFraction: 0.7), value: configuration.isPressed)
     }
 }
 
 // MARK: - Tutorial List View
 
 struct TutorialListView: View {
-    @StateObject var manager = TutorialManager()
+    @EnvironmentObject var manager: TutorialManager
     @Environment(\.dismiss) private var dismiss
+    @State private var selectedSequence: TutorialSequence?
+    @State private var showAnimation = false
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: DesignSystem.spacing.lg) {
-                    // Header
+                    // Animated Header
                     VStack(spacing: DesignSystem.spacing.md) {
-                        IconContainer(
-                            systemName: "book.fill",
-                            color: BrandTheme.accent,
-                            size: .hero,
-                            style: .gradient
-                        )
+                        ZStack {
+                            // Animated rings
+                            ForEach(0..<3) { i in
+                                Circle()
+                                    .stroke(BrandTheme.accent.opacity(0.2 - Double(i) * 0.05), lineWidth: 2)
+                                    .frame(width: CGFloat(100 + i * 25), height: CGFloat(100 + i * 25))
+                                    .scaleEffect(showAnimation ? 1.1 : 1.0)
+                                    .animation(
+                                        .easeInOut(duration: 2)
+                                        .repeatForever(autoreverses: true)
+                                        .delay(Double(i) * 0.2),
+                                        value: showAnimation
+                                    )
+                            }
+                            
+                            IconContainer(
+                                systemName: "book.fill",
+                                color: BrandTheme.accent,
+                                size: .hero,
+                                style: .gradient
+                            )
+                        }
                         
-                        Text("Learn Life XP")
-                            .font(DesignSystem.text.displaySmall)
+                        Text("Master Life XP")
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
                             .foregroundColor(BrandTheme.textPrimary)
                         
-                        Text("Choose a tutorial to learn about app features")
+                        Text("Interactive guides to unlock your full potential")
                             .font(DesignSystem.text.bodyMedium)
                             .foregroundColor(BrandTheme.mutedText)
                             .multilineTextAlignment(.center)
+                        
+                        // Progress indicator
+                        let completed = manager.completedSequences.count
+                        let total = TutorialSequence.allCases.count
+                        
+                        HStack(spacing: DesignSystem.spacing.sm) {
+                            ProgressView(value: Double(completed), total: Double(total))
+                                .tint(BrandTheme.accent)
+                            
+                            Text("\(completed)/\(total)")
+                                .font(.caption.bold())
+                                .foregroundColor(BrandTheme.accent)
+                        }
+                        .padding(.horizontal, DesignSystem.spacing.xl)
                     }
                     .padding(.top, DesignSystem.spacing.xl)
                     .padding(.bottom, DesignSystem.spacing.md)
                     
-                    // Tutorial list
-                    VStack(spacing: DesignSystem.spacing.md) {
-                        ForEach(TutorialSequence.allCases, id: \.rawValue) { sequence in
-                            TutorialListRow(
-                                sequence: sequence,
-                                isCompleted: manager.hasCompleted(sequence)
-                            ) {
-                                dismiss()
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                    manager.startTutorial(sequence)
-                                }
-                            }
-                        }
+                    // Tutorial list with categories
+                    VStack(spacing: DesignSystem.spacing.lg) {
+                        // Essential tutorials
+                        TutorialCategorySection(
+                            title: "Getting Started",
+                            icon: "star.fill",
+                            tutorials: [.welcome, .firstItem, .dimensionsExplained],
+                            manager: manager,
+                            onSelect: selectTutorial
+                        )
+                        
+                        // Advanced tutorials
+                        TutorialCategorySection(
+                            title: "Level Up Your Game",
+                            icon: "flame.fill",
+                            tutorials: [.arcsIntro, .streaksGuide, .badgesOverview],
+                            manager: manager,
+                            onSelect: selectTutorial
+                        )
+                        
+                        // Pro features
+                        TutorialCategorySection(
+                            title: "Pro Features",
+                            icon: "crown.fill",
+                            tutorials: [.gamificationFeatures, .settingsWalkthrough],
+                            manager: manager,
+                            onSelect: selectTutorial
+                        )
                     }
                     .padding(.horizontal, DesignSystem.spacing.lg)
                     
                     // Reset button
                     if !manager.completedSequences.isEmpty {
                         Button {
-                            manager.resetAllTutorials()
+                            withAnimation(.spring(response: 0.3)) {
+                                manager.resetAllTutorials()
+                            }
+                            HapticsEngine.lightImpact()
                         } label: {
-                            Label("Reset All Tutorials", systemImage: "arrow.counterclockwise")
-                                .font(DesignSystem.text.labelMedium)
+                            HStack(spacing: 8) {
+                                Image(systemName: "arrow.counterclockwise")
+                                Text("Reset Progress")
+                            }
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(BrandTheme.error)
+                            .padding(.horizontal, DesignSystem.spacing.lg)
+                            .padding(.vertical, DesignSystem.spacing.sm)
+                            .background(
+                                Capsule()
+                                    .fill(BrandTheme.error.opacity(0.1))
+                            )
                         }
-                        .buttonStyle(GhostButtonStyle(color: BrandTheme.error))
+                        .buttonStyle(.plain)
                         .padding(.top, DesignSystem.spacing.xl)
                     }
                 }
@@ -678,6 +1139,54 @@ struct TutorialListView: View {
                     Button("Done") { dismiss() }
                 }
             }
+            .onAppear {
+                showAnimation = true
+            }
+        }
+    }
+    
+    private func selectTutorial(_ sequence: TutorialSequence) {
+        dismiss()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            manager.startTutorial(sequence)
+        }
+    }
+}
+
+// MARK: - Tutorial Category Section
+
+struct TutorialCategorySection: View {
+    let title: String
+    let icon: String
+    let tutorials: [TutorialSequence]
+    let manager: TutorialManager
+    let onSelect: (TutorialSequence) -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            // Category header
+            HStack(spacing: DesignSystem.spacing.sm) {
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(BrandTheme.accent)
+                
+                Text(title)
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(BrandTheme.textSecondary)
+                    .textCase(.uppercase)
+            }
+            
+            // Tutorial cards
+            VStack(spacing: DesignSystem.spacing.sm) {
+                ForEach(tutorials, id: \.rawValue) { sequence in
+                    TutorialListRow(
+                        sequence: sequence,
+                        isCompleted: manager.hasCompleted(sequence)
+                    ) {
+                        onSelect(sequence)
+                    }
+                }
+            }
         }
     }
 }
@@ -687,52 +1196,104 @@ struct TutorialListRow: View {
     let isCompleted: Bool
     let onStart: () -> Void
     
+    @State private var isPressed = false
+    
+    private var accentColor: Color {
+        switch sequence {
+        case .welcome: return BrandTheme.accent
+        case .firstItem: return BrandTheme.success
+        case .arcsIntro: return BrandTheme.love
+        case .dimensionsExplained: return BrandTheme.mind
+        case .streaksGuide: return BrandTheme.warning
+        case .badgesOverview: return BrandTheme.warning
+        case .settingsWalkthrough: return BrandTheme.mind
+        case .gamificationFeatures: return BrandTheme.adventure
+        }
+    }
+    
     var body: some View {
-        Button(action: onStart) {
-            HStack(spacing: DesignSystem.spacing.lg) {
-                // Icon
-                IconContainer(
-                    systemName: sequence.iconSystemName,
-                    color: isCompleted ? BrandTheme.success : BrandTheme.accent,
-                    size: .medium,
-                    style: isCompleted ? .filled : .soft
-                )
+        Button(action: {
+            HapticsEngine.lightImpact()
+            onStart()
+        }) {
+            HStack(spacing: DesignSystem.spacing.md) {
+                // Animated Icon
+                ZStack {
+                    Circle()
+                        .fill(isCompleted ? BrandTheme.success.opacity(0.15) : accentColor.opacity(0.15))
+                        .frame(width: 48, height: 48)
+                    
+                    Image(systemName: sequence.iconSystemName)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(isCompleted ? BrandTheme.success : accentColor)
+                }
                 
                 // Content
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack {
+                    HStack(spacing: 8) {
                         Text(sequence.title)
-                            .font(DesignSystem.text.labelLarge)
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundColor(BrandTheme.textPrimary)
                         
                         if isCompleted {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 14))
-                                .foregroundColor(BrandTheme.success)
+                            HStack(spacing: 2) {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 10, weight: .bold))
+                                Text("Done")
+                                    .font(.system(size: 10, weight: .bold))
+                            }
+                            .foregroundColor(BrandTheme.success)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(
+                                Capsule()
+                                    .fill(BrandTheme.success.opacity(0.15))
+                            )
                         }
                     }
                     
-                    Text("\(sequence.steps.count) steps")
-                        .font(DesignSystem.text.labelSmall)
-                        .foregroundColor(BrandTheme.mutedText)
+                    HStack(spacing: 4) {
+                        Image(systemName: "play.circle")
+                            .font(.system(size: 12))
+                        Text("\(sequence.steps.count) interactive steps")
+                    }
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(BrandTheme.mutedText)
                 }
                 
                 Spacer()
                 
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(BrandTheme.mutedText)
+                // Play button
+                ZStack {
+                    Circle()
+                        .fill(isCompleted ? BrandTheme.success.opacity(0.1) : accentColor.opacity(0.1))
+                        .frame(width: 36, height: 36)
+                    
+                    Image(systemName: isCompleted ? "arrow.clockwise" : "play.fill")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(isCompleted ? BrandTheme.success : accentColor)
+                }
             }
-            .padding(DesignSystem.spacing.lg)
+            .padding(DesignSystem.spacing.md)
             .background(
                 RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
                     .fill(BrandTheme.cardBackground)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
-                    .strokeBorder(BrandTheme.borderSubtle.opacity(0.3), lineWidth: 1)
+                    .strokeBorder(
+                        isCompleted ? BrandTheme.success.opacity(0.2) : accentColor.opacity(0.15),
+                        lineWidth: 1
+                    )
             )
+            .scaleEffect(isPressed ? 0.98 : 1.0)
         }
+        .buttonStyle(.plain)
+        .onLongPressGesture(minimumDuration: .infinity, pressing: { pressing in
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) {
+                isPressed = pressing
+            }
+        }, perform: {})
     }
 }
 
@@ -873,18 +1434,46 @@ struct FeatureDiscoveryView: View {
 // MARK: - Quick Help Button
 
 struct QuickHelpButton: View {
+    @EnvironmentObject var tutorialManager: TutorialManager
     @State private var showTutorials = false
+    @State private var isAnimating = false
     
     var body: some View {
         Button {
+            HapticsEngine.lightImpact()
             showTutorials = true
         } label: {
-            Image(systemName: "questionmark.circle.fill")
-                .font(.system(size: 20))
-                .foregroundColor(BrandTheme.accent)
+            ZStack {
+                // Subtle pulse animation for first-time users
+                if !tutorialManager.hasCompleted(.welcome) {
+                    Circle()
+                        .fill(BrandTheme.accent.opacity(0.2))
+                        .frame(width: 36, height: 36)
+                        .scaleEffect(isAnimating ? 1.3 : 1.0)
+                        .opacity(isAnimating ? 0 : 0.5)
+                }
+                
+                Image(systemName: "questionmark.circle.fill")
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [BrandTheme.accent, BrandTheme.accent.opacity(0.8)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            }
         }
         .sheet(isPresented: $showTutorials) {
             TutorialListView()
+                .environmentObject(tutorialManager)
+        }
+        .onAppear {
+            if !tutorialManager.hasCompleted(.welcome) {
+                withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: false)) {
+                    isAnimating = true
+                }
+            }
         }
     }
 }

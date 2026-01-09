@@ -33,6 +33,9 @@ struct SettingsView: View {
                         // Home Customization
                         HomeCustomizationSection()
                         
+                        // Help & Tutorials
+                        HelpTutorialsSection()
+                        
                         // Data & Reset
                         DataResetSection(
                             showResetOptions: $showResetOptions,
@@ -534,6 +537,113 @@ struct ResetButton: View {
             .background(
                 RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
                     .fill(BrandTheme.cardBackgroundElevated.opacity(0.5))
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Help & Tutorials Section
+
+struct HelpTutorialsSection: View {
+    @State private var showTutorialList = false
+    @EnvironmentObject var tutorialManager: TutorialManager
+    
+    var body: some View {
+        SettingsSection(title: "Help & Tutorials", icon: "book.fill", color: BrandTheme.info) {
+            VStack(spacing: DesignSystem.spacing.md) {
+                // View all tutorials
+                Button {
+                    showTutorialList = true
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("App Tutorials")
+                                .font(DesignSystem.text.labelMedium)
+                                .foregroundColor(BrandTheme.textPrimary)
+                            Text("Learn how to use all features")
+                                .font(.caption)
+                                .foregroundColor(BrandTheme.mutedText)
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(BrandTheme.mutedText)
+                    }
+                }
+                .buttonStyle(.plain)
+                
+                Divider().background(BrandTheme.divider)
+                
+                // Quick start tutorials
+                VStack(spacing: DesignSystem.spacing.sm) {
+                    QuickTutorialButton(
+                        title: "Welcome Tour",
+                        icon: "hand.wave.fill",
+                        color: BrandTheme.accent
+                    ) {
+                        tutorialManager.startTutorial(.welcome)
+                    }
+                    
+                    QuickTutorialButton(
+                        title: "Life Dimensions",
+                        icon: "circle.grid.2x2.fill",
+                        color: BrandTheme.mind
+                    ) {
+                        tutorialManager.startTutorial(.dimensionsExplained)
+                    }
+                    
+                    QuickTutorialButton(
+                        title: "Game Features",
+                        icon: "gamecontroller.fill",
+                        color: BrandTheme.adventure
+                    ) {
+                        tutorialManager.startTutorial(.gamificationFeatures)
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showTutorialList) {
+            TutorialListView()
+                .environmentObject(tutorialManager)
+        }
+    }
+}
+
+struct QuickTutorialButton: View {
+    let title: String
+    let icon: String
+    let color: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: DesignSystem.spacing.md) {
+                Image(systemName: icon)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(color)
+                    .frame(width: 32, height: 32)
+                    .background(
+                        Circle()
+                            .fill(color.opacity(0.15))
+                    )
+                
+                Text(title)
+                    .font(DesignSystem.text.labelMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Spacer()
+                
+                Image(systemName: "play.circle.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(color)
+            }
+            .padding(DesignSystem.spacing.sm)
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                    .fill(color.opacity(0.05))
             )
         }
         .buttonStyle(.plain)

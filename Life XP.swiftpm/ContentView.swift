@@ -6,6 +6,7 @@ struct ContentView: View {
     @EnvironmentObject var model: AppModel
     
     @AppStorage("lifeXP.hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
+    @AppStorage("lifeXP.hasSeenWelcomeTutorial") private var hasSeenWelcomeTutorial: Bool = false
     @State private var showOnboarding: Bool = false
     @State private var selectedTab: Tab = .home
     @State private var showCelebration: Bool = false
@@ -13,6 +14,9 @@ struct ContentView: View {
     @State private var isReady: Bool = false
     @State private var showQuickAdd: Bool = false
     @State private var showMoreMenu: Bool = false
+    
+    // Tutorial system
+    @StateObject private var tutorialManager = TutorialManager()
     
     enum Tab: String, CaseIterable {
         case home, arcs, packs, stats, settings
@@ -144,6 +148,9 @@ struct ContentView: View {
                     LevelUpCelebration(level: model.level, isPresented: $showCelebration)
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
                 }
+                
+                // Tutorial overlay (above everything except celebrations)
+                TutorialOverlay(manager: tutorialManager)
             } else {
                 // Loading state - allows Playgrounds to render UI before heavy content
                 EnhancedLoadingView()
@@ -151,6 +158,7 @@ struct ContentView: View {
         }
         .tint(BrandTheme.accent)
         .preferredColorScheme(model.preferredColorScheme)
+        .environmentObject(tutorialManager)
         .task {
             // Defer heavy content loading to next run loop
             // This allows Swift Playgrounds to render the initial UI
@@ -175,6 +183,14 @@ struct ContentView: View {
             OnboardingView {
                 hasCompletedOnboarding = true
                 showOnboarding = false
+                
+                // Start the welcome tutorial after a short delay
+                if !hasSeenWelcomeTutorial {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                        tutorialManager.startTutorial(.welcome)
+                        hasSeenWelcomeTutorial = true
+                    }
+                }
             }
             .environmentObject(model)
         }
