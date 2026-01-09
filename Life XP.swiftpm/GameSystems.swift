@@ -310,8 +310,8 @@ enum MoodState: String, CaseIterable, Codable, Identifiable {
     }
 }
 
-/// Tracks mood history and patterns
-struct MoodEntry: Identifiable, Codable {
+/// Tracks mood history and patterns for the quick mood tracker
+struct QuickMoodEntry: Identifiable, Codable {
     let id: String
     let mood: MoodState
     let timestamp: Date
@@ -328,7 +328,7 @@ struct MoodEntry: Identifiable, Codable {
 @MainActor
 final class MoodTracker: ObservableObject {
     @Published var currentMood: MoodState?
-    @Published var moodHistory: [MoodEntry] = []
+    @Published var moodHistory: [QuickMoodEntry] = []
     @Published var lastCheckIn: Date?
     
     private let storageKey = "lifeXP.moodHistory"
@@ -342,12 +342,13 @@ final class MoodTracker: ObservableObject {
         currentMood = mood
         lastCheckIn = Date()
         
-        let entry = MoodEntry(mood: mood, note: note)
+        let entry = QuickMoodEntry(mood: mood, note: note)
         moodHistory.insert(entry, at: 0)
         
         // Keep last 30 days
-        let cutoff = calendar.date(byAdding: .day, value: -30, to: Date())!
-        moodHistory = moodHistory.filter { $0.timestamp > cutoff }
+        if let cutoff = calendar.date(byAdding: .day, value: -30, to: Date()) {
+            moodHistory = moodHistory.filter { $0.timestamp > cutoff }
+        }
         
         saveHistory()
     }
@@ -358,7 +359,7 @@ final class MoodTracker: ObservableObject {
         return hours >= 4
     }
     
-    var todaysMoods: [MoodEntry] {
+    var todaysMoods: [QuickMoodEntry] {
         let today = calendar.startOfDay(for: Date())
         return moodHistory.filter { calendar.startOfDay(for: $0.timestamp) == today }
     }
@@ -400,7 +401,7 @@ final class MoodTracker: ObservableObject {
     
     private func loadHistory() {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let decoded = try? JSONDecoder().decode([MoodEntry].self, from: data) {
+           let decoded = try? JSONDecoder().decode([QuickMoodEntry].self, from: data) {
             moodHistory = decoded
             currentMood = decoded.first?.mood
             lastCheckIn = decoded.first?.timestamp
@@ -756,10 +757,12 @@ final class WeeklyReviewManager: ObservableObject {
     
     private func checkForNewWeek() {
         let today = Date()
-        let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
+        guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)) else {
+            return
+        }
         
-        if let lastStart = currentWeekProgress.weekStartDate {
-            let lastWeekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: lastStart))!
+        if let lastStart = currentWeekProgress.weekStartDate,
+           let lastWeekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: lastStart)) {
             
             if lastWeekStart < startOfWeek {
                 // Generate review for last week
@@ -777,7 +780,9 @@ final class WeeklyReviewManager: ObservableObject {
     }
     
     private func generateReview(for weekStart: Date) {
-        let weekEnd = calendar.date(byAdding: .day, value: 6, to: weekStart)!
+        guard let weekEnd = calendar.date(byAdding: .day, value: 6, to: weekStart) else {
+            return
+        }
         
         let insight = generateInsight()
         
@@ -1086,6 +1091,8 @@ final class SoundManager: ObservableObject {
     @Published var volume: Float = 0.7
     
     private let storageKey = "lifeXP.soundSettings"
+    private let enabledKey = "lifeXP.soundSettings.enabled"
+    private let volumeKey = "lifeXP.soundSettings.volume"
     
     init() {
         loadSettings()
@@ -1101,14 +1108,20 @@ final class SoundManager: ObservableObject {
     }
     
     private func loadSettings() {
-        soundEnabled = UserDefaults.standard.bool(forKey: "\(storageKey).enabled")
-        volume = UserDefaults.standard.float(forKey: "\(storageKey).volume")
-        if volume == 0 { volume = 0.7 } // Default
+        // Check if the key exists before reading, otherwise use default (true)
+        if UserDefaults.standard.object(forKey: enabledKey) != nil {
+            soundEnabled = UserDefaults.standard.bool(forKey: enabledKey)
+        } else {
+            soundEnabled = true // Default to enabled
+        }
+        
+        let storedVolume = UserDefaults.standard.float(forKey: volumeKey)
+        volume = storedVolume > 0 ? storedVolume : 0.7 // Default to 0.7 if not set
     }
     
     func saveSettings() {
-        UserDefaults.standard.set(soundEnabled, forKey: "\(storageKey).enabled")
-        UserDefaults.standard.set(volume, forKey: "\(storageKey).volume")
+        UserDefaults.standard.set(soundEnabled, forKey: enabledKey)
+        UserDefaults.standard.set(volume, forKey: volumeKey)
     }
 }
 

@@ -426,11 +426,22 @@ final class JournalManager: ObservableObject {
     }
     
     func getMoodTrend(days: Int = 14) -> JournalStats.MoodTrend {
-        let halfPoint = days / 2
-        let recentAvg = moodAverageForPeriod(days: halfPoint)
-        let olderAvg = moodAverageForPeriod(days: days) - moodAverageForPeriod(days: halfPoint)
-        
         guard moodHistory.count >= 5 else { return .insufficient }
+        
+        let halfPoint = max(1, days / 2)
+        
+        // Get moods from recent half and older half
+        let now = Date()
+        let recentCutoff = calendar.date(byAdding: .day, value: -halfPoint, to: now) ?? now
+        let olderCutoff = calendar.date(byAdding: .day, value: -days, to: now) ?? now
+        
+        let recentMoods = moodHistory.filter { $0.timestamp >= recentCutoff }
+        let olderMoods = moodHistory.filter { $0.timestamp >= olderCutoff && $0.timestamp < recentCutoff }
+        
+        guard !recentMoods.isEmpty && !olderMoods.isEmpty else { return .insufficient }
+        
+        let recentAvg = recentMoods.reduce(0.0) { $0 + ($1.mood.positivity * $1.intensity) } / Double(recentMoods.count)
+        let olderAvg = olderMoods.reduce(0.0) { $0 + ($1.mood.positivity * $1.intensity) } / Double(olderMoods.count)
         
         let diff = recentAvg - olderAvg
         if diff > 0.1 { return .improving }

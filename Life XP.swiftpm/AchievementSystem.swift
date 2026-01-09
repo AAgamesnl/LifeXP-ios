@@ -89,7 +89,11 @@ enum TrophyTier: String, Codable, CaseIterable, Comparable {
     
     static func < (lhs: TrophyTier, rhs: TrophyTier) -> Bool {
         let order: [TrophyTier] = [.bronze, .silver, .gold, .platinum, .diamond]
-        return order.firstIndex(of: lhs)! < order.firstIndex(of: rhs)!
+        guard let lhsIndex = order.firstIndex(of: lhs),
+              let rhsIndex = order.firstIndex(of: rhs) else {
+            return false
+        }
+        return lhsIndex < rhsIndex
     }
 }
 
@@ -1048,7 +1052,7 @@ struct CategoryFilterRow: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                FilterChip(
+                CategoryFilterChip(
                     label: "All",
                     icon: "square.grid.2x2.fill",
                     isSelected: selectedCategory == nil,
@@ -1058,7 +1062,7 @@ struct CategoryFilterRow: View {
                 }
                 
                 ForEach(AchievementCategory.allCases) { category in
-                    FilterChip(
+                    CategoryFilterChip(
                         label: category.label,
                         icon: category.iconSystemName,
                         isSelected: selectedCategory == category,
@@ -1105,7 +1109,7 @@ struct TierFilterRow: View {
     }
 }
 
-struct FilterChip: View {
+struct CategoryFilterChip: View {
     let label: String
     let icon: String
     let isSelected: Bool

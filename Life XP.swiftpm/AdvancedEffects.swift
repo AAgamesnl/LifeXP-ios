@@ -635,11 +635,17 @@ struct TypewriterText: View {
     
     @State private var displayedText = ""
     @State private var currentIndex = 0
+    @State private var timer: Timer?
     
     var body: some View {
         Text(displayedText)
             .onAppear {
                 startTyping()
+            }
+            .onDisappear {
+                // Clean up timer when view disappears
+                timer?.invalidate()
+                timer = nil
             }
     }
     
@@ -647,13 +653,17 @@ struct TypewriterText: View {
         displayedText = ""
         currentIndex = 0
         
-        Timer.scheduledTimer(withTimeInterval: speed, repeats: true) { timer in
+        // Invalidate any existing timer
+        timer?.invalidate()
+        
+        timer = Timer.scheduledTimer(withTimeInterval: speed, repeats: true) { t in
             if currentIndex < text.count {
                 let index = text.index(text.startIndex, offsetBy: currentIndex)
                 displayedText += String(text[index])
                 currentIndex += 1
             } else {
-                timer.invalidate()
+                t.invalidate()
+                timer = nil
             }
         }
     }

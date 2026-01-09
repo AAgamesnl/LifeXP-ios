@@ -31,6 +31,16 @@ enum LifeDimension: String, CaseIterable, Codable, Identifiable, Hashable {
 
     /// Alias for systemImage to match naming in other parts of the codebase.
     var iconSystemName: String { systemImage }
+    
+    /// Hex color code for the dimension's accent color.
+    var accentColorHex: String {
+        switch self {
+        case .love: return "EC4899"      // Pink
+        case .money: return "10B981"     // Green
+        case .mind: return "8B5CF6"      // Purple
+        case .adventure: return "F59E0B" // Orange
+        }
+    }
 }
 
 /// Coaching tone preference for in-app messaging.

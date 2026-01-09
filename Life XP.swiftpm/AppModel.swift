@@ -552,6 +552,22 @@ final class AppModel: ObservableObject {
     func isCompleted(_ quest: Quest) -> Bool {
         completedItemIDs.contains(quest.id)
     }
+    
+    /// Whether an item with the given ID has been completed.
+    func isCompleted(itemID: String) -> Bool {
+        completedItemIDs.contains(itemID)
+    }
+    
+    /// Whether the user has done any activity today.
+    var hasDoneActivityToday: Bool {
+        guard let last = lastActiveDay else { return false }
+        return calendar.isDateInToday(last)
+    }
+    
+    /// Alias for toggle(_:) to support legacy call sites.
+    func toggleItem(_ item: ChecklistItem) {
+        toggle(item)
+    }
 
     /// Toggles completion and updates streaks + persistence.
     func toggle(_ item: ChecklistItem) {

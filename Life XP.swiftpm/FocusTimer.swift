@@ -286,7 +286,9 @@ final class FocusTimerManager: ObservableObject {
     }
     
     var thisWeekFocusTime: TimeInterval {
-        let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date()))!
+        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) else {
+            return 0
+        }
         return sessions
             .filter { $0.type == .focus && $0.startTime >= weekStart }
             .reduce(0) { $0 + $1.duration }

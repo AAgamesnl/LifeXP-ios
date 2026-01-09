@@ -1629,9 +1629,9 @@ struct SwipeableItemRow<Content: View>: View {
     }
 }
 
-// MARK: - Achievement Trophy Case
+// MARK: - Badge Trophy Case (simplified badge showcase)
 
-struct TrophyCaseView: View {
+struct BadgeTrophyCaseView: View {
     let badges: [Badge]
     let unlockedBadgeIDs: Set<String>
     

@@ -283,7 +283,19 @@ final class HabitManager: ObservableObject {
         let total = habitCompletions.reduce(0) { $0 + $1.count }
         
         // Calculate completion rate (last 30 days)
-        let thirtyDaysAgo = calendar.date(byAdding: .day, value: -30, to: Date())!
+        guard let thirtyDaysAgo = calendar.date(byAdding: .day, value: -30, to: Date()) else {
+            return HabitStats(
+                habit: habit,
+                currentStreak: 0,
+                bestStreak: 0,
+                totalCompletions: total,
+                completionRate: 0,
+                totalXPEarned: total * habit.xpReward,
+                thisWeekCompletions: 0,
+                lastCompletedDate: nil
+            )
+        }
+        
         var scheduledDays = 0
         var completedDays = 0
         var checkDate = thirtyDaysAgo
@@ -301,7 +313,7 @@ final class HabitManager: ObservableObject {
         let rate = scheduledDays > 0 ? Double(completedDays) / Double(scheduledDays) : 0
         
         // This week
-        let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date()))!
+        let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) ?? Date()
         let thisWeek = habitCompletions.filter { $0.date >= weekStart }.count
         
         let lastCompleted = habitCompletions.sorted { $0.date > $1.date }.first?.date
@@ -346,8 +358,10 @@ final class HabitManager: ObservableObject {
     // MARK: - Calendar Data
     
     func completionData(for month: Date) -> [Date: Int] {
-        let range = calendar.range(of: .day, in: .month, for: month)!
-        let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: month))!
+        guard let range = calendar.range(of: .day, in: .month, for: month),
+              let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: month)) else {
+            return [:]
+        }
         
         var data: [Date: Int] = [:]
         
@@ -374,8 +388,9 @@ final class HabitManager: ObservableObject {
     
     private func saveCompletions() {
         // Keep only last 90 days of completions to manage storage
-        let cutoff = calendar.date(byAdding: .day, value: -90, to: Date())!
-        completions = completions.filter { $0.date > cutoff }
+        if let cutoff = calendar.date(byAdding: .day, value: -90, to: Date()) {
+            completions = completions.filter { $0.date > cutoff }
+        }
         
         if let encoded = try? JSONEncoder().encode(completions) {
             UserDefaults.standard.set(encoded, forKey: completionsKey)
