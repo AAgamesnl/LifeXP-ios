@@ -966,7 +966,7 @@ struct AddGoalSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Create") {
-                        var goal = PersonalGoal(
+                        let goal = PersonalGoal(
                             title: title,
                             description: description,
                             targetDate: hasDeadline ? targetDate : nil,

@@ -1183,7 +1183,7 @@ final class InsightsEngine: ObservableObject {
         
         // Dimension balance insights
         if let (weakDim, ratio) = dimensionRatios.min(by: { $0.1 < $1.1 }),
-           let (strongDim, strongRatio) = dimensionRatios.max(by: { $0.1 < $1.1 }) {
+           let (_, strongRatio) = dimensionRatios.max(by: { $0.1 < $1.1 }) {
             
             if strongRatio > 0 && ratio < strongRatio * 0.5 {
                 newInsights.append(Insight(

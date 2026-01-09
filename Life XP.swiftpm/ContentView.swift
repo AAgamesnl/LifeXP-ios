@@ -11,6 +11,8 @@ struct ContentView: View {
     @State private var showCelebration: Bool = false
     @State private var previousLevel: Int = 1
     @State private var isReady: Bool = false
+    @State private var showQuickAdd: Bool = false
+    @State private var showMoreMenu: Bool = false
     
     enum Tab: String, CaseIterable {
         case home, arcs, packs, stats, settings
@@ -45,6 +47,45 @@ struct ContentView: View {
             }
         }
     }
+    
+    /// Additional features accessible from more menu
+    enum MoreFeature: String, CaseIterable, Identifiable {
+        case habits, journal, focus, analytics, trophies
+        
+        var id: String { rawValue }
+        
+        var title: String {
+            switch self {
+            case .habits: return "Habits"
+            case .journal: return "Journal"
+            case .focus: return "Focus Timer"
+            case .analytics: return "Analytics"
+            case .trophies: return "Trophies"
+            }
+        }
+        
+        var icon: String {
+            switch self {
+            case .habits: return "repeat.circle.fill"
+            case .journal: return "book.fill"
+            case .focus: return "timer"
+            case .analytics: return "chart.xyaxis.line"
+            case .trophies: return "trophy.fill"
+            }
+        }
+        
+        var color: Color {
+            switch self {
+            case .habits: return .purple
+            case .journal: return .orange
+            case .focus: return .blue
+            case .analytics: return .green
+            case .trophies: return .yellow
+            }
+        }
+    }
+    
+    @State private var selectedFeature: MoreFeature?
 
     var body: some View {
         ZStack {
@@ -77,10 +118,26 @@ struct ContentView: View {
                     // Smoother, more responsive tab animation
                     .animation(.spring(response: 0.35, dampingFraction: 0.9, blendDuration: 0.1), value: selectedTab)
                     
-                    // Custom Tab Bar
-                    CustomTabBar(selectedTab: $selectedTab, level: model.level, streak: model.currentStreak)
+                    // Custom Tab Bar with more options
+                    EnhancedTabBar(
+                        selectedTab: $selectedTab,
+                        level: model.level,
+                        streak: model.currentStreak,
+                        onMoreTap: { showMoreMenu = true }
+                    )
                 }
                 .transition(.opacity)
+                
+                // Quick Add Floating Button
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        QuickAddButton(showingQuickAdd: $showQuickAdd)
+                            .padding(.trailing, 20)
+                            .padding(.bottom, 100)
+                    }
+                }
                 
                 // Level up celebration
                 if showCelebration {
@@ -89,14 +146,7 @@ struct ContentView: View {
                 }
             } else {
                 // Loading state - allows Playgrounds to render UI before heavy content
-                VStack(spacing: 16) {
-                    ProgressView()
-                        .scaleEffect(1.2)
-                        .tint(BrandTheme.accent)
-                    Text("Life XP")
-                        .font(.headline)
-                        .foregroundColor(BrandTheme.textPrimary)
-                }
+                EnhancedLoadingView()
             }
         }
         .tint(BrandTheme.accent)
@@ -128,15 +178,171 @@ struct ContentView: View {
             }
             .environmentObject(model)
         }
+        .sheet(isPresented: $showQuickAdd) {
+            QuickAddSheet()
+                .environmentObject(model)
+        }
+        .sheet(isPresented: $showMoreMenu) {
+            MoreFeaturesSheet(selectedFeature: $selectedFeature)
+                .presentationDetents([.medium])
+        }
+        .fullScreenCover(item: $selectedFeature) { feature in
+            NavigationStack {
+                featureView(for: feature)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button("Done") {
+                                selectedFeature = nil
+                            }
+                        }
+                    }
+            }
+            .environmentObject(model)
+        }
+    }
+    
+    @ViewBuilder
+    private func featureView(for feature: MoreFeature) -> some View {
+        switch feature {
+        case .habits:
+            HabitsView()
+        case .journal:
+            JournalView()
+        case .focus:
+            FocusTimerView()
+        case .analytics:
+            AnalyticsDashboardView()
+        case .trophies:
+            TrophyCaseView()
+        }
     }
 }
 
-// MARK: - Custom Tab Bar
+// MARK: - Enhanced Loading View
 
-struct CustomTabBar: View {
+struct EnhancedLoadingView: View {
+    @State private var rotation: Double = 0
+    @State private var scale: CGFloat = 0.8
+    @State private var opacity: Double = 0.5
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            ZStack {
+                // Animated rings
+                ForEach(0..<3) { i in
+                    Circle()
+                        .stroke(
+                            BrandTheme.accent.opacity(0.3 - Double(i) * 0.1),
+                            lineWidth: 2
+                        )
+                        .frame(width: CGFloat(60 + i * 20), height: CGFloat(60 + i * 20))
+                        .rotationEffect(.degrees(rotation + Double(i * 30)))
+                }
+                
+                // Center icon
+                Image(systemName: "sparkles")
+                    .font(.system(size: 32))
+                    .foregroundStyle(BrandTheme.accent)
+                    .scaleEffect(scale)
+            }
+            
+            VStack(spacing: 8) {
+                Text("Life XP")
+                    .font(.title2.bold())
+                    .foregroundColor(BrandTheme.textPrimary)
+                
+                Text("Loading your journey...")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .opacity(opacity)
+            }
+        }
+        .onAppear {
+            withAnimation(.linear(duration: 3).repeatForever(autoreverses: false)) {
+                rotation = 360
+            }
+            withAnimation(.easeInOut(duration: 1).repeatForever()) {
+                scale = 1.0
+                opacity = 1.0
+            }
+        }
+    }
+}
+
+// MARK: - More Features Sheet
+
+struct MoreFeaturesSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var selectedFeature: ContentView.MoreFeature?
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: DesignSystem.Spacing.lg) {
+                // Feature grid
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                    ForEach(ContentView.MoreFeature.allCases) { feature in
+                        FeatureButton(feature: feature) {
+                            dismiss()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                selectedFeature = feature
+                            }
+                        }
+                    }
+                }
+                .padding()
+                
+                Spacer()
+            }
+            .background(BrandBackgroundStatic())
+            .navigationTitle("More Features")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct FeatureButton: View {
+    let feature: ContentView.MoreFeature
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(feature.color.opacity(0.15))
+                        .frame(width: 60, height: 60)
+                    
+                    Image(systemName: feature.icon)
+                        .font(.title2)
+                        .foregroundStyle(feature.color)
+                }
+                
+                Text(feature.title)
+                    .font(.subheadline.bold())
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
+            .background(Color.secondary.opacity(0.05))
+            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radii.lg))
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Enhanced Tab Bar with More Button
+
+struct EnhancedTabBar: View {
     @Binding var selectedTab: ContentView.Tab
     let level: Int
     let streak: Int
+    let onMoreTap: () -> Void
     
     @Namespace private var tabAnimation
     
@@ -155,15 +361,49 @@ struct CustomTabBar: View {
                     HapticsEngine.lightImpact()
                 }
             }
+            
+            // More button
+            MoreTabButton(action: onMoreTap)
         }
-        .padding(.horizontal, DesignSystem.spacing.md)
-        .padding(.top, DesignSystem.spacing.md)
-        .padding(.bottom, DesignSystem.spacing.lg)
+        .padding(.horizontal, DesignSystem.Spacing.md)
+        .padding(.top, DesignSystem.Spacing.md)
+        .padding(.bottom, DesignSystem.Spacing.lg)
         .background(
             TabBarBackground()
         )
     }
 }
+
+struct MoreTabButton: View {
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: {
+            action()
+            HapticsEngine.lightImpact()
+        }) {
+            VStack(spacing: 4) {
+                ZStack {
+                    Image(systemName: "ellipsis.circle.fill")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(BrandTheme.mutedText)
+                }
+                .frame(height: 36)
+                
+                Text("More")
+                    .font(.caption2)
+                    .fontWeight(.medium)
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("More features")
+    }
+}
+
+// MARK: - Custom Tab Bar (Legacy - kept for compatibility)
 
 private struct TabBarItem: View {
     let tab: ContentView.Tab
