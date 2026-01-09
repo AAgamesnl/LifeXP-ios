@@ -164,7 +164,7 @@ struct FilterChipsRow: View {
                         title: filter.rawValue,
                         isSelected: selectedFilter == filter
                     ) {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.85, blendDuration: 0.08)) {
                             selectedFilter = filter
                         }
                         HapticsEngine.lightImpact()
@@ -195,8 +195,10 @@ struct FilterChip: View {
                     Capsule()
                         .strokeBorder(isSelected ? Color.clear : BrandTheme.borderSubtle, lineWidth: 1)
                 )
+                .scaleEffect(isSelected ? 1.02 : 1)
         }
         .buttonStyle(.plain)
+        .animation(.spring(response: 0.25, dampingFraction: 0.85), value: isSelected)
     }
 }
 
@@ -622,16 +624,17 @@ struct ChecklistItemRow: View {
         
         let willComplete = !isCompleted
         
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+        // Snappy checkbox animation
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.75, blendDuration: 0.05)) {
             isAnimating = true
         }
         
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85, blendDuration: 0.1)) {
             model.toggle(item)
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.85)) {
                 isAnimating = false
             }
         }

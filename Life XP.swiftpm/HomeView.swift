@@ -97,8 +97,10 @@ struct HomeView: View {
 struct CardButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .animation(.spring(response: 0.3, dampingFraction: 0.8), value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? 0.975 : 1)
+            .opacity(configuration.isPressed ? 0.95 : 1)
+            // Faster, more responsive animation
+            .animation(.spring(response: 0.25, dampingFraction: 0.85, blendDuration: 0.05), value: configuration.isPressed)
     }
 }
 
@@ -216,58 +218,109 @@ struct StreakBadge: View {
     let days: Int
     let bestStreak: Int
     
-    @State private var isAnimating = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     var body: some View {
         VStack(spacing: 2) {
-            ZStack {
-                // Glow
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [BrandTheme.warning.opacity(0.4), .clear],
-                            center: .center,
-                            startRadius: 10,
-                            endRadius: 40
-                        )
-                    )
-                    .frame(width: 80, height: 80)
-                    .scaleEffect(isAnimating ? 1.1 : 1)
-                
-                // Badge
-                VStack(spacing: 0) {
-                    Image(systemName: "flame.fill")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.white)
-                    Text("\(days)")
-                        .font(.system(size: 16, weight: .black, design: .rounded))
-                        .foregroundColor(.white)
-                }
-                .frame(width: 52, height: 52)
-                .background(
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [BrandTheme.warning, BrandTheme.error],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
+            if reduceMotion {
+                // Static version for reduced motion
+                StaticStreakContent(days: days)
+            } else {
+                // Animated version using TimelineView for smooth performance
+                TimelineView(.animation(minimumInterval: 1.0/20, paused: false)) { timeline in
+                    let scale = computeGlowScale(for: timeline.date)
+                    
+                    ZStack {
+                        // Glow - animated smoothly
+                        Circle()
+                            .fill(
+                                RadialGradient(
+                                    colors: [BrandTheme.warning.opacity(0.35), .clear],
+                                    center: .center,
+                                    startRadius: 12,
+                                    endRadius: 38
+                                )
                             )
+                            .frame(width: 75, height: 75)
+                            .scaleEffect(scale)
+                        
+                        // Badge - static
+                        VStack(spacing: 0) {
+                            Image(systemName: "flame.fill")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.white)
+                            Text("\(days)")
+                                .font(.system(size: 16, weight: .black, design: .rounded))
+                                .foregroundColor(.white)
+                        }
+                        .frame(width: 52, height: 52)
+                        .background(
+                            Circle()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [BrandTheme.warning, BrandTheme.error],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
                         )
-                )
-                .shadow(color: BrandTheme.warning.opacity(0.5), radius: 8, y: 4)
+                        .shadow(color: BrandTheme.warning.opacity(0.4), radius: 6, y: 3)
+                    }
+                }
             }
             
             Text("day streak")
                 .font(.caption2.weight(.medium))
                 .foregroundColor(BrandTheme.mutedText)
         }
-        .onAppear {
-            withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
-                isAnimating = true
-            }
-        }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(days) day streak")
+    }
+    
+    private func computeGlowScale(for date: Date) -> CGFloat {
+        let seconds = date.timeIntervalSinceReferenceDate
+        let cycle = sin(seconds * 1.5) // Gentle 1.5 second cycle
+        return 1.0 + CGFloat(cycle) * 0.08 // 8% scale variation
+    }
+}
+
+private struct StaticStreakContent: View {
+    let days: Int
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [BrandTheme.warning.opacity(0.3), .clear],
+                        center: .center,
+                        startRadius: 12,
+                        endRadius: 35
+                    )
+                )
+                .frame(width: 70, height: 70)
+            
+            VStack(spacing: 0) {
+                Image(systemName: "flame.fill")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.white)
+                Text("\(days)")
+                    .font(.system(size: 16, weight: .black, design: .rounded))
+                    .foregroundColor(.white)
+            }
+            .frame(width: 52, height: 52)
+            .background(
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [BrandTheme.warning, BrandTheme.error],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            )
+            .shadow(color: BrandTheme.warning.opacity(0.4), radius: 6, y: 3)
+        }
     }
 }
 
@@ -322,15 +375,18 @@ struct DailyBriefingCard2: View {
                 Spacer()
                 
                 Button {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                    // Smooth, responsive expand/collapse
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85, blendDuration: 0.1)) {
                         isExpanded.toggle()
                     }
+                    HapticsEngine.lightImpact()
                 } label: {
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(BrandTheme.mutedText)
                         .frame(width: 32, height: 32)
                         .background(Circle().fill(BrandTheme.borderSubtle.opacity(0.5)))
+                        .rotationEffect(.degrees(isExpanded ? 0 : 180))
                 }
                 .buttonStyle(.plain)
             }
@@ -1078,15 +1134,17 @@ struct EnergyCheckCard2: View {
                 Spacer()
                 
                 Button {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85, blendDuration: 0.1)) {
                         isExpanded.toggle()
                     }
+                    HapticsEngine.lightImpact()
                 } label: {
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(BrandTheme.mutedText)
                         .frame(width: 32, height: 32)
                         .background(Circle().fill(BrandTheme.borderSubtle.opacity(0.5)))
+                        .rotationEffect(.degrees(isExpanded ? 0 : 180))
                 }
                 .buttonStyle(.plain)
             }

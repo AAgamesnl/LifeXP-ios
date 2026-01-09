@@ -135,29 +135,37 @@ struct DailyChallengeRow: View {
 
 struct ComboDisplay: View {
     let combo: ComboSystem
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showCombo = false
-    @State private var comboScale: CGFloat = 1
     
     var body: some View {
         if combo.currentCombo > 1 {
             HStack(spacing: DesignSystem.spacing.sm) {
-                // Combo counter
-                ZStack {
-                    Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [BrandTheme.warning, BrandTheme.error],
-                                center: .center,
-                                startRadius: 0,
-                                endRadius: 30
-                            )
-                        )
-                        .frame(width: 50, height: 50)
-                        .scaleEffect(comboScale)
-                    
-                    Text("\(combo.currentCombo)x")
-                        .font(.system(size: 18, weight: .black, design: .rounded))
-                        .foregroundColor(.white)
+                // Combo counter with optimized animation
+                if reduceMotion {
+                    StaticComboCounter(combo: combo.currentCombo)
+                } else {
+                    TimelineView(.animation(minimumInterval: 1.0/20, paused: false)) { timeline in
+                        let scale = computeScale(for: timeline.date)
+                        
+                        ZStack {
+                            Circle()
+                                .fill(
+                                    RadialGradient(
+                                        colors: [BrandTheme.warning, BrandTheme.error],
+                                        center: .center,
+                                        startRadius: 0,
+                                        endRadius: 28
+                                    )
+                                )
+                                .frame(width: 50, height: 50)
+                                .scaleEffect(scale)
+                            
+                            Text("\(combo.currentCombo)x")
+                                .font(.system(size: 18, weight: .black, design: .rounded))
+                                .foregroundColor(.white)
+                        }
+                    }
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
@@ -207,17 +215,43 @@ struct ComboDisplay: View {
                             )
                     )
             )
-            .shadow(color: BrandTheme.warning.opacity(0.3), radius: 12, y: 4)
-            .scaleEffect(showCombo ? 1 : 0.8)
+            .shadow(color: BrandTheme.warning.opacity(0.25), radius: 10, y: 4)
+            .scaleEffect(showCombo ? 1 : 0.85)
             .opacity(showCombo ? 1 : 0)
             .onAppear {
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.75, blendDuration: 0.1)) {
                     showCombo = true
                 }
-                withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
-                    comboScale = 1.1
-                }
             }
+        }
+    }
+    
+    private func computeScale(for date: Date) -> CGFloat {
+        let seconds = date.timeIntervalSinceReferenceDate
+        let cycle = sin(seconds * 4) // Faster pulse for urgency
+        return 1.0 + CGFloat(cycle) * 0.06
+    }
+}
+
+private struct StaticComboCounter: View {
+    let combo: Int
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [BrandTheme.warning, BrandTheme.error],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 28
+                    )
+                )
+                .frame(width: 50, height: 50)
+            
+            Text("\(combo)x")
+                .font(.system(size: 18, weight: .black, design: .rounded))
+                .foregroundColor(.white)
         }
     }
 }
@@ -1299,10 +1333,8 @@ struct TimeOfDayGreeting: View {
 // MARK: - Animated Mascot
 
 struct AnimatedMascot: View {
-    @State private var isAnimating = false
-    @State private var eyeBlink = false
-    @State private var bounce = false
     let mood: MascotMood
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     enum MascotMood {
         case happy, excited, encouraging, celebrating, thinking
@@ -1319,74 +1351,120 @@ struct AnimatedMascot: View {
     }
     
     var body: some View {
+        if reduceMotion {
+            StaticMascotContent(mood: mood)
+        } else {
+            TimelineView(.animation(minimumInterval: 1.0/15, paused: false)) { timeline in
+                let (bounce, blink) = computeAnimationState(for: timeline.date)
+                
+                ZStack {
+                    // Body with gentle bounce
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [mood.mainColor, mood.mainColor.opacity(0.8)],
+                                center: .center,
+                                startRadius: 0,
+                                endRadius: 48
+                            )
+                        )
+                        .frame(width: 80, height: 80)
+                        .scaleEffect(bounce)
+                    
+                    // Face
+                    VStack(spacing: 8) {
+                        // Eyes
+                        HStack(spacing: 16) {
+                            MascotEye(isBlinking: blink)
+                            MascotEye(isBlinking: blink)
+                        }
+                        
+                        // Mouth
+                        MascotMouth(mood: mood)
+                    }
+                    .offset(y: -4)
+                    
+                    // Sparkles for celebrating mood (static positioned)
+                    if mood == .celebrating {
+                        CelebrationSparkles(date: timeline.date)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func computeAnimationState(for date: Date) -> (bounce: CGFloat, blink: Bool) {
+        let seconds = date.timeIntervalSinceReferenceDate
+        
+        // Gentle bounce
+        let bounceCycle = sin(seconds * 2.5)
+        let bounce = 1.0 + CGFloat(bounceCycle) * 0.05
+        
+        // Periodic blink (every ~3 seconds for 0.15 seconds)
+        let blinkCycle = seconds.truncatingRemainder(dividingBy: 3.0)
+        let blink = blinkCycle < 0.15
+        
+        return (bounce, blink)
+    }
+}
+
+private struct StaticMascotContent: View {
+    let mood: AnimatedMascot.MascotMood
+    
+    var body: some View {
         ZStack {
-            // Body
             Circle()
                 .fill(
                     RadialGradient(
                         colors: [mood.mainColor, mood.mainColor.opacity(0.8)],
                         center: .center,
                         startRadius: 0,
-                        endRadius: 50
+                        endRadius: 48
                     )
                 )
                 .frame(width: 80, height: 80)
-                .scaleEffect(bounce ? 1.1 : 1)
-                .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true), value: bounce)
             
-            // Face
             VStack(spacing: 8) {
-                // Eyes
                 HStack(spacing: 16) {
-                    Eye(isBlinking: eyeBlink)
-                    Eye(isBlinking: eyeBlink)
+                    MascotEye(isBlinking: false)
+                    MascotEye(isBlinking: false)
                 }
-                
-                // Mouth
                 MascotMouth(mood: mood)
             }
             .offset(y: -4)
-            
-            // Sparkles for celebrating mood
-            if mood == .celebrating {
-                ForEach(0..<6) { i in
-                    Image(systemName: "sparkle")
-                        .font(.system(size: 10))
-                        .foregroundColor(.white)
-                        .offset(
-                            x: CGFloat.random(in: -50...50),
-                            y: CGFloat.random(in: -50...50)
-                        )
-                        .opacity(isAnimating ? 1 : 0)
-                        .animation(
-                            .easeInOut(duration: 0.5)
-                            .repeatForever(autoreverses: true)
-                            .delay(Double(i) * 0.1),
-                            value: isAnimating
-                        )
-                }
-            }
-        }
-        .onAppear {
-            isAnimating = true
-            bounce = true
-            
-            // Blink periodically
-            Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { _ in
-                withAnimation(.easeInOut(duration: 0.1)) {
-                    eyeBlink = true
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    withAnimation(.easeInOut(duration: 0.1)) {
-                        eyeBlink = false
-                    }
-                }
-            }
         }
     }
 }
 
-private struct Eye: View {
+private struct CelebrationSparkles: View {
+    let date: Date
+    
+    // Pre-computed sparkle positions
+    private let sparklePositions: [(x: CGFloat, y: CGFloat)] = [
+        (-35, -35), (35, -30), (-40, 10), (40, 15), (-25, 40), (30, 38)
+    ]
+    
+    var body: some View {
+        ForEach(0..<6) { i in
+            let opacity = computeSparkleOpacity(index: i)
+            
+            Image(systemName: "sparkle")
+                .font(.system(size: 10))
+                .foregroundColor(.white)
+                .opacity(opacity)
+                .offset(x: sparklePositions[i].x, y: sparklePositions[i].y)
+        }
+    }
+    
+    private func computeSparkleOpacity(index: Int) -> Double {
+        let seconds = date.timeIntervalSinceReferenceDate
+        let offset = Double(index) * 0.5
+        let cycle = sin((seconds + offset) * 3)
+        return 0.5 + cycle * 0.5
+    }
+}
+
+private struct MascotEye: View {
     let isBlinking: Bool
     
     var body: some View {
@@ -1409,7 +1487,7 @@ private struct MascotMouth: View {
     var body: some View {
         switch mood {
         case .happy, .celebrating:
-            ArcShape(startAngle: .degrees(0), endAngle: .degrees(180), clockwise: false)
+            MascotArcShape(startAngle: .degrees(0), endAngle: .degrees(180), clockwise: false)
                 .stroke(.white, lineWidth: 3)
                 .frame(width: 20, height: 10)
         case .excited:
@@ -1421,14 +1499,14 @@ private struct MascotMouth: View {
                 .fill(.white)
                 .frame(width: 14, height: 4)
         case .thinking:
-            ArcShape(startAngle: .degrees(0), endAngle: .degrees(180), clockwise: true)
+            MascotArcShape(startAngle: .degrees(0), endAngle: .degrees(180), clockwise: true)
                 .stroke(.white, lineWidth: 3)
                 .frame(width: 16, height: 6)
         }
     }
 }
 
-private struct ArcShape: Shape {
+private struct MascotArcShape: Shape {
     let startAngle: Angle
     let endAngle: Angle
     let clockwise: Bool

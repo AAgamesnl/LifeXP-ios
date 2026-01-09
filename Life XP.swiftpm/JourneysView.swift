@@ -476,16 +476,17 @@ struct QuestRow2: View {
         Button {
             let willComplete = !isCompleted
             
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            // Snappy checkbox bounce
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.75, blendDuration: 0.05)) {
                 isAnimating = true
             }
             
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.85, blendDuration: 0.1)) {
                 model.toggle(quest)
             }
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                withAnimation(.spring(response: 0.2, dampingFraction: 0.85)) {
                     isAnimating = false
                 }
             }
@@ -672,9 +673,10 @@ struct AllArcsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
             Button {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.85, blendDuration: 0.1)) {
                     isExpanded.toggle()
                 }
+                HapticsEngine.lightImpact()
             } label: {
                 HStack {
                     Text("All Arcs")
@@ -687,9 +689,10 @@ struct AllArcsSection: View {
                         .font(.caption)
                         .foregroundColor(BrandTheme.mutedText)
                     
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                    Image(systemName: "chevron.down")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(BrandTheme.mutedText)
+                        .rotationEffect(.degrees(isExpanded ? -180 : 0))
                 }
             }
             .buttonStyle(.plain)

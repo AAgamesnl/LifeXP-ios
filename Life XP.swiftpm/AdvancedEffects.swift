@@ -2,14 +2,51 @@ import SwiftUI
 
 // MARK: - Advanced Visual Effects & Animations
 // Premium-quality visual effects that elevate the app experience
+// Optimized for smooth 60fps performance
+
+// MARK: - Animation Performance Utilities
+
+/// Environment key for reduced motion preference
+private struct ReduceMotionKey: EnvironmentKey {
+    static let defaultValue: Bool = false
+}
+
+extension EnvironmentValues {
+    var reduceMotionEnabled: Bool {
+        get { self[ReduceMotionKey.self] }
+        set { self[ReduceMotionKey.self] = newValue }
+    }
+}
+
+/// Optimized spring animation with smoother curves
+struct OptimizedAnimation {
+    /// Ultra-smooth spring for micro-interactions
+    static let microInteraction = Animation.spring(response: 0.35, dampingFraction: 0.85, blendDuration: 0.1)
+    
+    /// Smooth spring for state changes
+    static let smooth = Animation.spring(response: 0.45, dampingFraction: 0.9, blendDuration: 0.15)
+    
+    /// Bouncy spring for celebrations
+    static let bouncy = Animation.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0.1)
+    
+    /// Quick response for tap feedback
+    static let quick = Animation.spring(response: 0.25, dampingFraction: 0.9, blendDuration: 0.05)
+    
+    /// Gentle ease for subtle transitions
+    static let gentle = Animation.easeInOut(duration: 0.35)
+    
+    /// Fast ease for immediate feedback
+    static let fast = Animation.easeOut(duration: 0.2)
+}
 
 // MARK: - Particle System for Completions
 
 struct CompletionParticles: View {
     @Binding var isActive: Bool
     var color: Color = BrandTheme.success
-    var particleCount: Int = 20
+    var particleCount: Int = 12 // Reduced for performance
     
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var particles: [Particle] = []
     
     struct Particle: Identifiable {
@@ -21,27 +58,35 @@ struct CompletionParticles: View {
         var opacity: Double
         let velocityX: CGFloat
         let velocityY: CGFloat
-        let shape: ParticleShape
-        
-        enum ParticleShape: CaseIterable {
-            case circle, star, sparkle
-        }
+        let shapeType: Int // Use Int instead of enum for performance
     }
     
     var body: some View {
         GeometryReader { geo in
-            ZStack {
-                ForEach(particles) { particle in
-                    ParticleView(particle: particle, color: color)
-                        .position(x: particle.x, y: particle.y)
-                        .scaleEffect(particle.scale)
-                        .rotationEffect(.degrees(particle.rotation))
-                        .opacity(particle.opacity)
+            Canvas { context, size in
+                for particle in particles {
+                    let rect = CGRect(
+                        x: particle.x - 4 * particle.scale,
+                        y: particle.y - 4 * particle.scale,
+                        width: 8 * particle.scale,
+                        height: 8 * particle.scale
+                    )
+                    
+                    context.opacity = particle.opacity
+                    context.fill(
+                        Circle().path(in: rect),
+                        with: .color(color)
+                    )
                 }
             }
             .onChange(of: isActive) { _, newValue in
-                if newValue {
+                if newValue && !reduceMotion {
                     emitParticles(in: geo.size)
+                } else if newValue && reduceMotion {
+                    // Simplified feedback for reduced motion
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        isActive = false
+                    }
                 }
             }
         }
@@ -54,61 +99,36 @@ struct CompletionParticles: View {
         
         particles = (0..<particleCount).map { _ in
             let angle = Double.random(in: 0...(2 * .pi))
-            let velocity = CGFloat.random(in: 3...8)
+            let velocity = CGFloat.random(in: 4...7)
             
             return Particle(
                 x: centerX,
                 y: centerY,
-                scale: CGFloat.random(in: 0.3...1.0),
-                rotation: Double.random(in: 0...360),
+                scale: CGFloat.random(in: 0.4...1.0),
+                rotation: 0,
                 opacity: 1,
                 velocityX: cos(angle) * velocity,
                 velocityY: sin(angle) * velocity,
-                shape: Particle.ParticleShape.allCases.randomElement()!
+                shapeType: Int.random(in: 0...2)
             )
         }
         
-        // Animate particles outward
-        withAnimation(.easeOut(duration: 0.8)) {
+        // Animate particles outward with optimized curve
+        withAnimation(.easeOut(duration: 0.6)) {
             particles = particles.map { particle in
                 var p = particle
-                p.x += particle.velocityX * 60
-                p.y += particle.velocityY * 60
-                p.rotation += Double.random(in: 180...360)
-                p.scale *= 0.3
+                p.x += particle.velocityX * 50
+                p.y += particle.velocityY * 50
+                p.scale *= 0.2
                 p.opacity = 0
                 return p
             }
         }
         
         // Clean up
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
             isActive = false
             particles = []
-        }
-    }
-}
-
-private struct ParticleView: View {
-    let particle: CompletionParticles.Particle
-    let color: Color
-    
-    var body: some View {
-        Group {
-            switch particle.shape {
-            case .circle:
-                Circle()
-                    .fill(color)
-                    .frame(width: 8, height: 8)
-            case .star:
-                Image(systemName: "star.fill")
-                    .font(.system(size: 12))
-                    .foregroundColor(color)
-            case .sparkle:
-                Image(systemName: "sparkle")
-                    .font(.system(size: 10))
-                    .foregroundColor(color)
-            }
         }
     }
 }
@@ -119,6 +139,7 @@ struct FireworkEffect: View {
     @Binding var isActive: Bool
     var colors: [Color] = [BrandTheme.accent, BrandTheme.success, BrandTheme.warning, BrandTheme.love]
     
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var bursts: [Burst] = []
     
     struct Burst: Identifiable {
@@ -135,29 +156,42 @@ struct FireworkEffect: View {
         var scale: CGFloat = 1
         var opacity: Double = 1
         let angle: Double
-        let color: Color
+        let colorIndex: Int // Use index instead of Color for performance
     }
     
     var body: some View {
         GeometryReader { geo in
-            ZStack {
-                ForEach(bursts) { burst in
-                    ZStack {
-                        ForEach(burst.particles) { particle in
-                            Circle()
-                                .fill(particle.color)
-                                .frame(width: 6, height: 6)
-                                .offset(x: particle.offsetX, y: particle.offsetY)
-                                .scaleEffect(particle.scale)
-                                .opacity(particle.opacity)
-                        }
+            // Use Canvas for GPU-accelerated rendering
+            Canvas { context, size in
+                for burst in bursts {
+                    for particle in burst.particles {
+                        let x = burst.x + particle.offsetX
+                        let y = burst.y + particle.offsetY
+                        let particleSize = 5 * particle.scale
+                        
+                        let rect = CGRect(
+                            x: x - particleSize / 2,
+                            y: y - particleSize / 2,
+                            width: particleSize,
+                            height: particleSize
+                        )
+                        
+                        context.opacity = particle.opacity
+                        context.fill(
+                            Circle().path(in: rect),
+                            with: .color(colors[particle.colorIndex % colors.count])
+                        )
                     }
-                    .position(x: burst.x, y: burst.y)
                 }
             }
             .onChange(of: isActive) { _, newValue in
-                if newValue {
+                if newValue && !reduceMotion {
                     createFirework(in: geo.size)
+                } else if newValue && reduceMotion {
+                    // Skip animation for reduced motion
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        isActive = false
+                    }
                 }
             }
         }
@@ -165,30 +199,30 @@ struct FireworkEffect: View {
     }
     
     private func createFirework(in size: CGSize) {
-        // Create multiple bursts
-        for _ in 0..<3 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 0...0.3)) {
-                let x = CGFloat.random(in: size.width * 0.2...size.width * 0.8)
-                let y = CGFloat.random(in: size.height * 0.2...size.height * 0.6)
+        // Create fewer bursts for performance (2 instead of 3)
+        for burstIndex in 0..<2 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(burstIndex) * 0.15) {
+                let x = CGFloat.random(in: size.width * 0.25...size.width * 0.75)
+                let y = CGFloat.random(in: size.height * 0.25...size.height * 0.55)
                 
-                let particleCount = Int.random(in: 12...20)
+                let particleCount = 10 // Reduced from 12-20
                 let particles = (0..<particleCount).map { i in
                     let angle = Double(i) / Double(particleCount) * 2 * .pi
                     return FireworkParticle(
                         angle: angle,
-                        color: colors.randomElement()!
+                        colorIndex: Int.random(in: 0..<colors.count)
                     )
                 }
                 
                 let burst = Burst(x: x, y: y, particles: particles)
                 bursts.append(burst)
                 
-                // Animate expansion
-                withAnimation(.easeOut(duration: 0.6)) {
+                // Combined animation for better performance
+                withAnimation(.easeOut(duration: 0.5)) {
                     if let index = bursts.firstIndex(where: { $0.id == burst.id }) {
                         bursts[index].particles = bursts[index].particles.map { p in
                             var particle = p
-                            let distance = CGFloat.random(in: 40...80)
+                            let distance = CGFloat.random(in: 35...65)
                             particle.offsetX = cos(p.angle) * distance
                             particle.offsetY = sin(p.angle) * distance
                             return particle
@@ -196,14 +230,16 @@ struct FireworkEffect: View {
                     }
                 }
                 
-                // Fade out
-                withAnimation(.easeOut(duration: 0.4).delay(0.4)) {
-                    if let index = bursts.firstIndex(where: { $0.id == burst.id }) {
-                        bursts[index].particles = bursts[index].particles.map { p in
-                            var particle = p
-                            particle.opacity = 0
-                            particle.scale = 0.3
-                            return particle
+                // Fade out with simpler animation
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        if let index = bursts.firstIndex(where: { $0.id == burst.id }) {
+                            bursts[index].particles = bursts[index].particles.map { p in
+                                var particle = p
+                                particle.opacity = 0
+                                particle.scale = 0.2
+                                return particle
+                            }
                         }
                     }
                 }
@@ -211,7 +247,7 @@ struct FireworkEffect: View {
         }
         
         // Clean up
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             isActive = false
             bursts = []
         }
@@ -224,6 +260,7 @@ struct GlowPulseEffect: ViewModifier {
     let color: Color
     let isActive: Bool
     
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var glowOpacity: Double = 0
     @State private var glowRadius: CGFloat = 0
     
@@ -233,24 +270,23 @@ struct GlowPulseEffect: ViewModifier {
                 RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
                     .fill(color.opacity(glowOpacity))
                     .blur(radius: glowRadius)
-                    .scaleEffect(1.1)
+                    .scaleEffect(1.08)
             )
             .onChange(of: isActive) { _, newValue in
-                if newValue {
+                if newValue && !reduceMotion {
                     triggerGlow()
                 }
             }
     }
     
     private func triggerGlow() {
-        withAnimation(.easeIn(duration: 0.2)) {
-            glowOpacity = 0.5
-            glowRadius = 20
-        }
+        // Single smooth animation instead of two conflicting ones
+        glowOpacity = 0.4
+        glowRadius = 15
         
-        withAnimation(.easeOut(duration: 0.6).delay(0.2)) {
+        withAnimation(.easeOut(duration: 0.5)) {
             glowOpacity = 0
-            glowRadius = 40
+            glowRadius = 25
         }
     }
 }
@@ -268,6 +304,7 @@ struct AnimatedCounter: View {
     let font: Font
     let color: Color
     
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var displayValue: Int = 0
     
     var body: some View {
@@ -276,13 +313,21 @@ struct AnimatedCounter: View {
             .foregroundColor(color)
             .contentTransition(.numericText(value: Double(displayValue)))
             .onAppear {
-                withAnimation(.spring(response: 0.8, dampingFraction: 0.8)) {
+                if reduceMotion {
                     displayValue = value
+                } else {
+                    withAnimation(OptimizedAnimation.smooth) {
+                        displayValue = value
+                    }
                 }
             }
             .onChange(of: value) { _, newValue in
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                if reduceMotion {
                     displayValue = newValue
+                } else {
+                    withAnimation(OptimizedAnimation.microInteraction) {
+                        displayValue = newValue
+                    }
                 }
             }
     }
@@ -469,31 +514,43 @@ struct QuoteCard: View {
 // MARK: - Ripple Effect
 
 struct RippleEffect: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var ripples: [RippleData] = []
     
     struct RippleData: Identifiable {
         let id = UUID()
-        var scale: CGFloat = 0
-        var opacity: Double = 0.5
+        var scale: CGFloat = 0.3
+        var opacity: Double = 0.4
         let position: CGPoint
     }
     
     func body(content: Content) -> some View {
         content
             .overlay(
-                GeometryReader { geo in
-                    ZStack {
-                        ForEach(ripples) { ripple in
-                            Circle()
-                                .stroke(BrandTheme.accent.opacity(ripple.opacity), lineWidth: 2)
-                                .scaleEffect(ripple.scale)
-                                .position(ripple.position)
-                        }
+                Canvas { context, size in
+                    for ripple in ripples {
+                        let radius = 30 * ripple.scale
+                        let rect = CGRect(
+                            x: ripple.position.x - radius,
+                            y: ripple.position.y - radius,
+                            width: radius * 2,
+                            height: radius * 2
+                        )
+                        
+                        context.opacity = ripple.opacity
+                        context.stroke(
+                            Circle().path(in: rect),
+                            with: .color(BrandTheme.accent),
+                            lineWidth: 2
+                        )
                     }
                 }
+                .allowsHitTesting(false)
             )
             .onTapGesture { location in
-                createRipple(at: location)
+                if !reduceMotion {
+                    createRipple(at: location)
+                }
             }
     }
     
@@ -501,14 +558,14 @@ struct RippleEffect: ViewModifier {
         let ripple = RippleData(position: position)
         ripples.append(ripple)
         
-        withAnimation(.easeOut(duration: 0.6)) {
+        withAnimation(.easeOut(duration: 0.45)) {
             if let index = ripples.firstIndex(where: { $0.id == ripple.id }) {
                 ripples[index].scale = 2
                 ripples[index].opacity = 0
             }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             ripples.removeAll { $0.id == ripple.id }
         }
     }
@@ -528,19 +585,17 @@ struct FloatingActionButton: View {
     let action: () -> Void
     
     @State private var isPressed = false
-    @State private var showRipple = false
     
     var body: some View {
         Button(action: {
             HapticsEngine.mediumImpact()
-            showRipple = true
             action()
         }) {
             ZStack {
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [color, color.opacity(0.8)],
+                            colors: [color, color.opacity(0.85)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -552,9 +607,9 @@ struct FloatingActionButton: View {
                     .foregroundColor(.white)
             }
         }
-        .scaleEffect(isPressed ? 0.9 : 1)
-        .shadow(color: color.opacity(0.4), radius: isPressed ? 8 : 16, y: isPressed ? 4 : 8)
-        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isPressed)
+        .scaleEffect(isPressed ? 0.92 : 1)
+        .shadow(color: color.opacity(0.35), radius: isPressed ? 6 : 12, y: isPressed ? 3 : 6)
+        .animation(OptimizedAnimation.quick, value: isPressed)
         .simultaneousGesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in isPressed = true }
@@ -569,35 +624,40 @@ struct SkeletonView: View {
     var height: CGFloat = 20
     var cornerRadius: CGFloat = DesignSystem.radius.sm
     
-    @State private var phase: CGFloat = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     var body: some View {
-        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            .fill(BrandTheme.borderSubtle.opacity(0.5))
-            .frame(height: height)
-            .overlay(
-                GeometryReader { geo in
-                    LinearGradient(
-                        colors: [
-                            Color.clear,
-                            Color.white.opacity(0.3),
-                            Color.clear
-                        ],
-                        startPoint: .leading,
-                        endPoint: .trailing
+        TimelineView(.animation(minimumInterval: 1.0/30, paused: reduceMotion)) { timeline in
+            let phase = computePhase(for: timeline.date)
+            
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .fill(BrandTheme.borderSubtle.opacity(0.5))
+                .frame(height: height)
+                .overlay(
+                    GeometryReader { geo in
+                        LinearGradient(
+                            colors: [
+                                Color.clear,
+                                Color.white.opacity(0.25),
+                                Color.clear
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                        .frame(width: geo.size.width * 0.6)
+                        .offset(x: phase * geo.size.width * 1.6 - geo.size.width * 0.3)
+                    }
+                    .mask(
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     )
-                    .frame(width: geo.size.width * 0.5)
-                    .offset(x: phase * geo.size.width * 1.5 - geo.size.width * 0.25)
-                }
-                .mask(
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                 )
-            )
-            .onAppear {
-                withAnimation(.linear(duration: 1.5).repeatForever(autoreverses: false)) {
-                    phase = 1
-                }
-            }
+        }
+    }
+    
+    private func computePhase(for date: Date) -> CGFloat {
+        let seconds = date.timeIntervalSinceReferenceDate
+        let cycle = seconds.truncatingRemainder(dividingBy: 1.8)
+        return CGFloat(cycle / 1.8)
     }
 }
 
@@ -673,23 +733,30 @@ struct StaggeredAppearModifier: ViewModifier {
     let baseDelay: Double
     let staggerDelay: Double
     
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared = false
     
     func body(content: Content) -> some View {
         content
             .opacity(appeared ? 1 : 0)
-            .offset(y: appeared ? 0 : 20)
+            .offset(y: appeared ? 0 : (reduceMotion ? 0 : 15))
             .onAppear {
-                let delay = baseDelay + (Double(index) * staggerDelay)
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(delay)) {
+                if reduceMotion {
                     appeared = true
+                } else {
+                    // Cap max delay to prevent too long waits
+                    let cappedIndex = min(index, 8)
+                    let delay = baseDelay + (Double(cappedIndex) * staggerDelay)
+                    withAnimation(OptimizedAnimation.smooth.delay(delay)) {
+                        appeared = true
+                    }
                 }
             }
     }
 }
 
 extension View {
-    func staggeredAppear(index: Int, baseDelay: Double = 0, staggerDelay: Double = 0.05) -> some View {
+    func staggeredAppear(index: Int, baseDelay: Double = 0, staggerDelay: Double = 0.04) -> some View {
         modifier(StaggeredAppearModifier(index: index, baseDelay: baseDelay, staggerDelay: staggerDelay))
     }
 }
@@ -701,9 +768,10 @@ struct SuccessCheckmark: View {
     var size: CGFloat = 80
     var color: Color = BrandTheme.success
     
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var circleProgress: CGFloat = 0
     @State private var checkProgress: CGFloat = 0
-    @State private var scale: CGFloat = 0.8
+    @State private var scale: CGFloat = 0.85
     
     var body: some View {
         ZStack {
@@ -732,23 +800,30 @@ struct SuccessCheckmark: View {
     }
     
     private func animate() {
-        // Circle animation
-        withAnimation(.easeOut(duration: 0.4)) {
+        if reduceMotion {
+            circleProgress = 1
+            checkProgress = 1
+            scale = 1
+            return
+        }
+        
+        // Single smooth animation sequence
+        withAnimation(.easeOut(duration: 0.35)) {
             circleProgress = 1
             scale = 1
         }
         
-        // Checkmark animation
-        withAnimation(.easeOut(duration: 0.3).delay(0.3)) {
+        // Checkmark follows
+        withAnimation(.easeOut(duration: 0.25).delay(0.25)) {
             checkProgress = 1
         }
         
-        // Bounce
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.5).delay(0.5)) {
-            scale = 1.1
+        // Subtle bounce at end
+        withAnimation(OptimizedAnimation.bouncy.delay(0.45)) {
+            scale = 1.05
         }
         
-        withAnimation(.spring(response: 0.2, dampingFraction: 0.7).delay(0.6)) {
+        withAnimation(OptimizedAnimation.quick.delay(0.55)) {
             scale = 1
         }
     }
@@ -756,7 +831,7 @@ struct SuccessCheckmark: View {
     private func reset() {
         circleProgress = 0
         checkProgress = 0
-        scale = 0.8
+        scale = 0.85
     }
 }
 

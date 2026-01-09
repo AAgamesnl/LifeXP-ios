@@ -54,42 +54,28 @@ struct ContentView: View {
             if isReady {
                 // Main content (deferred to allow Playgrounds UI to render first)
                 VStack(spacing: 0) {
-                    // Tab content
+                    // Tab content - optimized transitions
                     ZStack {
                         switch selectedTab {
                         case .home:
                             HomeView()
-                                .transition(.asymmetric(
-                                    insertion: .opacity.combined(with: .scale(scale: 0.98)),
-                                    removal: .opacity
-                                ))
+                                .transition(.opacity)
                         case .arcs:
                             ArcsView()
-                                .transition(.asymmetric(
-                                    insertion: .opacity.combined(with: .move(edge: .trailing)),
-                                    removal: .opacity
-                                ))
+                                .transition(.opacity)
                         case .packs:
                             PacksView()
-                                .transition(.asymmetric(
-                                    insertion: .opacity.combined(with: .move(edge: .trailing)),
-                                    removal: .opacity
-                                ))
+                                .transition(.opacity)
                         case .stats:
                             StatsView()
-                                .transition(.asymmetric(
-                                    insertion: .opacity.combined(with: .move(edge: .trailing)),
-                                    removal: .opacity
-                                ))
+                                .transition(.opacity)
                         case .settings:
                             SettingsView()
-                                .transition(.asymmetric(
-                                    insertion: .opacity.combined(with: .move(edge: .trailing)),
-                                    removal: .opacity
-                                ))
+                                .transition(.opacity)
                         }
                     }
-                    .animation(.spring(response: 0.4, dampingFraction: 0.85), value: selectedTab)
+                    // Smoother, more responsive tab animation
+                    .animation(.spring(response: 0.35, dampingFraction: 0.9, blendDuration: 0.1), value: selectedTab)
                     
                     // Custom Tab Bar
                     CustomTabBar(selectedTab: $selectedTab, level: model.level, streak: model.currentStreak)
@@ -99,7 +85,7 @@ struct ContentView: View {
                 // Level up celebration
                 if showCelebration {
                     LevelUpCelebration(level: model.level, isPresented: $showCelebration)
-                        .transition(.opacity.combined(with: .scale))
+                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
                 }
             } else {
                 // Loading state - allows Playgrounds to render UI before heavy content
@@ -119,7 +105,7 @@ struct ContentView: View {
             // Defer heavy content loading to next run loop
             // This allows Swift Playgrounds to render the initial UI
             try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 second
-            withAnimation(.easeOut(duration: 0.3)) {
+            withAnimation(.easeOut(duration: 0.25)) {
                 isReady = true
             }
             previousLevel = model.level
@@ -129,7 +115,7 @@ struct ContentView: View {
         }
         .onChange(of: model.level) { oldValue, newValue in
             if newValue > oldValue {
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.85, blendDuration: 0.1)) {
                     showCelebration = true
                 }
                 HapticsEngine.success()
@@ -162,7 +148,8 @@ struct CustomTabBar: View {
                     isSelected: selectedTab == tab,
                     namespace: tabAnimation
                 ) {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    // Use optimized animation curve
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85, blendDuration: 0.08)) {
                         selectedTab = tab
                     }
                     HapticsEngine.lightImpact()
@@ -184,6 +171,8 @@ private struct TabBarItem: View {
     let namespace: Namespace.ID
     let action: () -> Void
     
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    
     var body: some View {
         Button(action: action) {
             VStack(spacing: 4) {
@@ -198,7 +187,8 @@ private struct TabBarItem: View {
                     Image(systemName: isSelected ? tab.selectedIcon : tab.icon)
                         .font(.system(size: 20, weight: isSelected ? .bold : .medium))
                         .foregroundColor(isSelected ? BrandTheme.accent : BrandTheme.mutedText)
-                        .symbolEffect(.bounce, value: isSelected)
+                        // Only use symbolEffect when not reducing motion
+                        .symbolEffect(.bounce, options: reduceMotion ? .nonRepeating : .default, value: isSelected)
                 }
                 .frame(height: 36)
                 
@@ -260,10 +250,11 @@ struct LevelUpCelebration: View {
     let level: Int
     @Binding var isPresented: Bool
     
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showContent = false
     @State private var showConfetti = false
-    @State private var ringScale: CGFloat = 0.3
-    @State private var textScale: CGFloat = 0.5
+    @State private var ringScale: CGFloat = 0.4
+    @State private var textScale: CGFloat = 0.6
     
     var body: some View {
         ZStack {
@@ -275,19 +266,17 @@ struct LevelUpCelebration: View {
                 }
             
             // Confetti (reduced particle count for performance)
-            ConfettiView(isActive: $showConfetti, particleCount: 30)
+            ConfettiView(isActive: $showConfetti, particleCount: 25)
             
             // Content
             VStack(spacing: DesignSystem.spacing.xl) {
-                // Level ring
+                // Level ring - simplified for performance
                 ZStack {
-                    // Outer glow rings
-                    ForEach(0..<3) { i in
-                        Circle()
-                            .stroke(BrandTheme.accent.opacity(0.3 - Double(i) * 0.1), lineWidth: 2)
-                            .frame(width: 160 + CGFloat(i) * 30, height: 160 + CGFloat(i) * 30)
-                            .scaleEffect(ringScale)
-                    }
+                    // Single outer glow ring (reduced from 3)
+                    Circle()
+                        .stroke(BrandTheme.accent.opacity(0.25), lineWidth: 2)
+                        .frame(width: 170, height: 170)
+                        .scaleEffect(ringScale)
                     
                     // Main circle
                     Circle()
@@ -299,11 +288,11 @@ struct LevelUpCelebration: View {
                                 ],
                                 center: .center,
                                 startRadius: 20,
-                                endRadius: 80
+                                endRadius: 75
                             )
                         )
                         .frame(width: 140, height: 140)
-                        .shadow(color: BrandTheme.accent.opacity(0.6), radius: 30)
+                        .shadow(color: BrandTheme.accent.opacity(0.5), radius: 25)
                         .scaleEffect(ringScale)
                     
                     // Level number
@@ -314,6 +303,7 @@ struct LevelUpCelebration: View {
                         Text("\(level)")
                             .font(.system(size: 52, weight: .black, design: .rounded))
                             .foregroundColor(.white)
+                            .contentTransition(.numericText())
                     }
                     .scaleEffect(textScale)
                 }
@@ -329,7 +319,7 @@ struct LevelUpCelebration: View {
                         .multilineTextAlignment(.center)
                 }
                 .opacity(showContent ? 1 : 0)
-                .offset(y: showContent ? 0 : 20)
+                .offset(y: showContent ? 0 : 15)
                 
                 Button {
                     dismiss()
@@ -345,7 +335,7 @@ struct LevelUpCelebration: View {
                         )
                 }
                 .opacity(showContent ? 1 : 0)
-                .scaleEffect(showContent ? 1 : 0.8)
+                .scaleEffect(showContent ? 1 : 0.85)
             }
             .padding(DesignSystem.spacing.xxl)
         }
@@ -355,25 +345,30 @@ struct LevelUpCelebration: View {
     }
     
     private func animateIn() {
-        withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+        if reduceMotion {
             ringScale = 1
+            textScale = 1
+            showContent = true
+            return
         }
         
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.1)) {
+        // Combined, smoother animation sequence
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.8, blendDuration: 0.1)) {
+            ringScale = 1
             textScale = 1
         }
         
-        withAnimation(.easeOut(duration: 0.5).delay(0.3)) {
+        withAnimation(.easeOut(duration: 0.35).delay(0.2)) {
             showContent = true
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
             showConfetti = true
         }
     }
     
     private func dismiss() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.85, blendDuration: 0.05)) {
             isPresented = false
         }
     }
