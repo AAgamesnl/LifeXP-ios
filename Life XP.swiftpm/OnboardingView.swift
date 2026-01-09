@@ -18,12 +18,12 @@ struct OnboardingView: View {
     
     var body: some View {
         ZStack {
-            // Animated background
-            BrandBackground(animated: true, intensity: 1.2)
+            // Static background for performance
+            BrandBackgroundStatic()
                 .ignoresSafeArea()
             
-            // Confetti on completion
-            ConfettiView(isActive: $showConfetti, particleCount: 100)
+            // Confetti on completion (reduced particle count)
+            ConfettiView(isActive: $showConfetti, particleCount: 30)
             
             VStack(spacing: 0) {
                 // Progress indicator

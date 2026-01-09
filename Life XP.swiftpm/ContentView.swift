@@ -4,10 +4,8 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var model = AppModel()
-    @StateObject private var tutorialManager = TutorialManager()
     
     @AppStorage("lifeXP.hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
-    @AppStorage("lifeXP.hasSeenWelcomeTutorial") private var hasSeenWelcomeTutorial: Bool = false
     @State private var showOnboarding: Bool = false
     @State private var selectedTab: Tab = .home
     @State private var showCelebration: Bool = false
@@ -49,8 +47,8 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            // Background
-            BrandBackground(animated: true, intensity: 0.8)
+            // Background (use static for better performance in Playgrounds)
+            BrandBackgroundStatic()
             
             // Main content
             VStack(spacing: 0) {
@@ -100,26 +98,14 @@ struct ContentView: View {
                 LevelUpCelebration(level: model.level, isPresented: $showCelebration)
                     .transition(.opacity.combined(with: .scale))
             }
-            
-            // Tutorial overlay
-            TutorialOverlay(manager: tutorialManager)
         }
         .environmentObject(model)
-        .environmentObject(tutorialManager)
         .tint(BrandTheme.accent)
         .preferredColorScheme(model.preferredColorScheme)
         .onAppear {
             previousLevel = model.level
             if !hasCompletedOnboarding {
                 showOnboarding = true
-            }
-            
-            // Show welcome tutorial for new users after onboarding
-            if hasCompletedOnboarding && !hasSeenWelcomeTutorial {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    tutorialManager.startTutorial(.welcome)
-                    hasSeenWelcomeTutorial = true
-                }
             }
         }
         .onChange(of: model.level) { oldValue, newValue in
@@ -269,8 +255,8 @@ struct LevelUpCelebration: View {
                     dismiss()
                 }
             
-            // Confetti
-            ConfettiView(isActive: $showConfetti, particleCount: 80)
+            // Confetti (reduced particle count for performance)
+            ConfettiView(isActive: $showConfetti, particleCount: 30)
             
             // Content
             VStack(spacing: DesignSystem.spacing.xl) {

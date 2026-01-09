@@ -212,15 +212,54 @@ final class AppModel: ObservableObject {
         didSet { persistState() }
     }
     
-    // MARK: - AAA Game Systems
-    @Published var dailyChallengeManager = DailyChallengeManager()
-    @Published var moodTracker = MoodTracker()
-    @Published var personalGoalsManager = PersonalGoalsManager()
-    @Published var skillTreeManager = SkillTreeManager()
-    @Published var weeklyReviewManager = WeeklyReviewManager()
-    @Published var seasonalEventManager = SeasonalEventManager()
-    @Published var insightsEngine = InsightsEngine()
-    @Published var soundManager = SoundManager()
+    // MARK: - AAA Game Systems (Lazy-loaded to improve startup)
+    private var _dailyChallengeManager: DailyChallengeManager?
+    var dailyChallengeManager: DailyChallengeManager {
+        if _dailyChallengeManager == nil { _dailyChallengeManager = DailyChallengeManager() }
+        return _dailyChallengeManager!
+    }
+    
+    private var _moodTracker: MoodTracker?
+    var moodTracker: MoodTracker {
+        if _moodTracker == nil { _moodTracker = MoodTracker() }
+        return _moodTracker!
+    }
+    
+    private var _personalGoalsManager: PersonalGoalsManager?
+    var personalGoalsManager: PersonalGoalsManager {
+        if _personalGoalsManager == nil { _personalGoalsManager = PersonalGoalsManager() }
+        return _personalGoalsManager!
+    }
+    
+    private var _skillTreeManager: SkillTreeManager?
+    var skillTreeManager: SkillTreeManager {
+        if _skillTreeManager == nil { _skillTreeManager = SkillTreeManager() }
+        return _skillTreeManager!
+    }
+    
+    private var _weeklyReviewManager: WeeklyReviewManager?
+    var weeklyReviewManager: WeeklyReviewManager {
+        if _weeklyReviewManager == nil { _weeklyReviewManager = WeeklyReviewManager() }
+        return _weeklyReviewManager!
+    }
+    
+    private var _seasonalEventManager: SeasonalEventManager?
+    var seasonalEventManager: SeasonalEventManager {
+        if _seasonalEventManager == nil { _seasonalEventManager = SeasonalEventManager() }
+        return _seasonalEventManager!
+    }
+    
+    private var _insightsEngine: InsightsEngine?
+    var insightsEngine: InsightsEngine {
+        if _insightsEngine == nil { _insightsEngine = InsightsEngine() }
+        return _insightsEngine!
+    }
+    
+    private var _soundManager: SoundManager?
+    var soundManager: SoundManager {
+        if _soundManager == nil { _soundManager = SoundManager() }
+        return _soundManager!
+    }
     
     // Combo system (value type, managed inline)
     @Published var comboSystem = ComboSystem()
