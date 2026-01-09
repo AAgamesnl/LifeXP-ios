@@ -3,13 +3,14 @@ import SwiftUI
 // MARK: - Main Content View
 
 struct ContentView: View {
-    @StateObject private var model = AppModel()
+    @EnvironmentObject var model: AppModel
     
     @AppStorage("lifeXP.hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     @State private var showOnboarding: Bool = false
     @State private var selectedTab: Tab = .home
     @State private var showCelebration: Bool = false
     @State private var previousLevel: Int = 1
+    @State private var isReady: Bool = false
     
     enum Tab: String, CaseIterable {
         case home, arcs, packs, stats, settings
@@ -50,59 +51,77 @@ struct ContentView: View {
             // Background (use static for better performance in Playgrounds)
             BrandBackgroundStatic()
             
-            // Main content
-            VStack(spacing: 0) {
-                // Tab content
-                ZStack {
-                    switch selectedTab {
-                    case .home:
-                        HomeView()
-                            .transition(.asymmetric(
-                                insertion: .opacity.combined(with: .scale(scale: 0.98)),
-                                removal: .opacity
-                            ))
-                    case .arcs:
-                        ArcsView()
-                            .transition(.asymmetric(
-                                insertion: .opacity.combined(with: .move(edge: .trailing)),
-                                removal: .opacity
-                            ))
-                    case .packs:
-                        PacksView()
-                            .transition(.asymmetric(
-                                insertion: .opacity.combined(with: .move(edge: .trailing)),
-                                removal: .opacity
-                            ))
-                    case .stats:
-                        StatsView()
-                            .transition(.asymmetric(
-                                insertion: .opacity.combined(with: .move(edge: .trailing)),
-                                removal: .opacity
-                            ))
-                    case .settings:
-                        SettingsView()
-                            .transition(.asymmetric(
-                                insertion: .opacity.combined(with: .move(edge: .trailing)),
-                                removal: .opacity
-                            ))
+            if isReady {
+                // Main content (deferred to allow Playgrounds UI to render first)
+                VStack(spacing: 0) {
+                    // Tab content
+                    ZStack {
+                        switch selectedTab {
+                        case .home:
+                            HomeView()
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .scale(scale: 0.98)),
+                                    removal: .opacity
+                                ))
+                        case .arcs:
+                            ArcsView()
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .move(edge: .trailing)),
+                                    removal: .opacity
+                                ))
+                        case .packs:
+                            PacksView()
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .move(edge: .trailing)),
+                                    removal: .opacity
+                                ))
+                        case .stats:
+                            StatsView()
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .move(edge: .trailing)),
+                                    removal: .opacity
+                                ))
+                        case .settings:
+                            SettingsView()
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .move(edge: .trailing)),
+                                    removal: .opacity
+                                ))
+                        }
                     }
+                    .animation(.spring(response: 0.4, dampingFraction: 0.85), value: selectedTab)
+                    
+                    // Custom Tab Bar
+                    CustomTabBar(selectedTab: $selectedTab, level: model.level, streak: model.currentStreak)
                 }
-                .animation(.spring(response: 0.4, dampingFraction: 0.85), value: selectedTab)
+                .transition(.opacity)
                 
-                // Custom Tab Bar
-                CustomTabBar(selectedTab: $selectedTab, level: model.level, streak: model.currentStreak)
-            }
-            
-            // Level up celebration
-            if showCelebration {
-                LevelUpCelebration(level: model.level, isPresented: $showCelebration)
-                    .transition(.opacity.combined(with: .scale))
+                // Level up celebration
+                if showCelebration {
+                    LevelUpCelebration(level: model.level, isPresented: $showCelebration)
+                        .transition(.opacity.combined(with: .scale))
+                }
+            } else {
+                // Loading state - allows Playgrounds to render UI before heavy content
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .scaleEffect(1.2)
+                        .tint(BrandTheme.accent)
+                    Text("Life XP")
+                        .font(.headline)
+                        .foregroundColor(BrandTheme.textPrimary)
+                }
             }
         }
-        .environmentObject(model)
         .tint(BrandTheme.accent)
         .preferredColorScheme(model.preferredColorScheme)
-        .onAppear {
+        .task {
+            // Defer heavy content loading to next run loop
+            // This allows Swift Playgrounds to render the initial UI
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 second
+            withAnimation(.easeOut(duration: 0.3)) {
+                isReady = true
+            }
             previousLevel = model.level
             if !hasCompletedOnboarding {
                 showOnboarding = true
@@ -365,9 +384,11 @@ struct LevelUpCelebration: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            .environmentObject(AppModel())
             .preferredColorScheme(.light)
         
         ContentView()
+            .environmentObject(AppModel())
             .preferredColorScheme(.dark)
     }
 }
