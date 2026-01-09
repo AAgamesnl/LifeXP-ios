@@ -1,12 +1,138 @@
 import SwiftUI
 
-// MARK: - Design System 2.0
+// MARK: - Design System 3.0 - Premium Visual Experience
 
 /// Comprehensive design system with spacing, typography, colors, and components.
-/// Provides consistent styling across the entire app with support for light/dark modes.
+/// Optimized for smooth 60fps animations and modern visual aesthetics.
 struct DesignSystem {
     // MARK: - Spacing Scale
     struct Spacing {
+        static let xxs: CGFloat = 2
+        static let xs: CGFloat = 4
+        static let sm: CGFloat = 8
+        static let md: CGFloat = 12
+        static let lg: CGFloat = 16
+        static let xl: CGFloat = 20
+        static let xxl: CGFloat = 24
+        static let xxxl: CGFloat = 32
+        static let huge: CGFloat = 48
+        static let massive: CGFloat = 64
+    }
+
+    // MARK: - Corner Radii
+    struct Radii {
+        static let xs: CGFloat = 8
+        static let sm: CGFloat = 12
+        static let md: CGFloat = 16
+        static let lg: CGFloat = 20
+        static let xl: CGFloat = 28
+        static let xxl: CGFloat = 36
+        static let pill: CGFloat = 999
+    }
+
+    // MARK: - Shadow System
+    struct Shadows {
+        static let subtle = Shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+        static let soft = Shadow(color: Color.black.opacity(0.1), radius: 16, x: 0, y: 6)
+        static let lifted = Shadow(color: Color.black.opacity(0.15), radius: 24, x: 0, y: 12)
+        static let floating = Shadow(color: Color.black.opacity(0.2), radius: 32, x: 0, y: 16)
+        static let glow = Shadow(color: Color.accentColor.opacity(0.3), radius: 20, x: 0, y: 4)
+        static func coloredGlow(_ color: Color) -> Shadow {
+            Shadow(color: color.opacity(0.4), radius: 20, x: 0, y: 8)
+        }
+    }
+
+    // MARK: - Typography System
+    struct TextStyles {
+        // Display
+        static let heroTitle = Font.system(.largeTitle, design: .rounded).weight(.black)
+        static let displayLarge = Font.system(size: 48, weight: .black, design: .rounded)
+        static let displayMedium = Font.system(size: 36, weight: .bold, design: .rounded)
+        static let displaySmall = Font.system(size: 28, weight: .bold, design: .rounded)
+        
+        // Headlines
+        static let headline = Font.system(.headline, design: .rounded).weight(.bold)
+        static let headlineLarge = Font.system(.title2, design: .rounded).weight(.bold)
+        static let headlineMedium = Font.system(.title3, design: .rounded).weight(.semibold)
+        
+        // Body
+        static let bodyLarge = Font.system(.body, design: .rounded).weight(.medium)
+        static let bodyMedium = Font.system(.callout, design: .rounded)
+        static let bodySmall = Font.system(.subheadline, design: .rounded)
+        
+        // Labels
+        static let labelLarge = Font.system(.subheadline, design: .rounded).weight(.semibold)
+        static let labelMedium = Font.system(.footnote, design: .rounded).weight(.semibold)
+        static let labelSmall = Font.system(.caption, design: .rounded).weight(.medium)
+        
+        // Captions
+        static let captionEmphasis = Font.caption.weight(.bold)
+        static let captionRegular = Font.caption
+        static let captionMini = Font.caption2
+        
+        // Special
+        static let sectionTitle = Font.system(.headline, design: .rounded).weight(.bold)
+        static let cardTitle = Font.system(.title3, design: .rounded).weight(.bold)
+        static let statNumber = Font.system(size: 64, weight: .black, design: .rounded)
+        static let xpCounter = Font.system(.title, design: .monospaced).weight(.bold)
+    }
+
+    // MARK: - Animation Durations
+    struct Durations {
+        static let instant: Double = 0.1
+        static let fast: Double = 0.2
+        static let normal: Double = 0.3
+        static let slow: Double = 0.45
+        static let gentle: Double = 0.6
+        static let dramatic: Double = 0.8
+    }
+
+    // MARK: - 60fps Optimized Animation Curves
+    struct AnimationCurves {
+        /// Ultra-fast micro-interaction (button taps)
+        static let micro = Animation.spring(response: 0.2, dampingFraction: 0.9)
+        /// Quick response for immediate feedback
+        static let quick = Animation.spring(response: 0.25, dampingFraction: 0.85)
+        /// Snappy spring for interactions
+        static let snappy = Animation.spring(response: 0.3, dampingFraction: 0.8)
+        /// Smooth spring for state changes
+        static let smooth = Animation.spring(response: 0.4, dampingFraction: 0.85)
+        /// Gentle spring for subtle transitions
+        static let gentle = Animation.spring(response: 0.5, dampingFraction: 0.9)
+        /// Bouncy spring for celebrations
+        static let bouncy = Animation.spring(response: 0.45, dampingFraction: 0.65)
+        /// Linear for continuous animations
+        static let linear = Animation.linear(duration: 0.3)
+    }
+
+    // MARK: - Icon Sizes
+    struct IconSizes {
+        static let xs: CGFloat = 12
+        static let sm: CGFloat = 16
+        static let md: CGFloat = 20
+        static let lg: CGFloat = 24
+        static let xl: CGFloat = 32
+        static let xxl: CGFloat = 48
+        static let hero: CGFloat = 64
+    }
+
+    struct Shadow {
+        let color: Color
+        let radius: CGFloat
+        let x: CGFloat
+        let y: CGFloat
+    }
+
+    // MARK: - Legacy Singleton Accessors (for compatibility)
+    static let spacing = SpacingLegacy()
+    static let radius = RadiiLegacy()
+    static let shadow = ShadowsLegacy()
+    static let text = TextStylesLegacy()
+    static let duration = DurationsLegacy()
+    static let animation = AnimationCurvesLegacy()
+    static let iconSize = IconSizesLegacy()
+    
+    struct SpacingLegacy {
         let xxs: CGFloat = 2
         let xs: CGFloat = 4
         let sm: CGFloat = 8
@@ -18,67 +144,52 @@ struct DesignSystem {
         let huge: CGFloat = 48
         let massive: CGFloat = 64
     }
-
-    // MARK: - Corner Radii
-    struct Radii {
-        let xs: CGFloat = 6
-        let sm: CGFloat = 10
-        let md: CGFloat = 14
+    
+    struct RadiiLegacy {
+        let xs: CGFloat = 8
+        let sm: CGFloat = 12
+        let md: CGFloat = 16
         let lg: CGFloat = 20
-        let xl: CGFloat = 26
-        let xxl: CGFloat = 32
+        let xl: CGFloat = 28
+        let xxl: CGFloat = 36
         let pill: CGFloat = 999
     }
-
-    // MARK: - Shadow System
-    struct Shadows {
-        let subtle = Shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+    
+    struct ShadowsLegacy {
+        let subtle = Shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
         let soft = Shadow(color: Color.black.opacity(0.1), radius: 16, x: 0, y: 6)
         let lifted = Shadow(color: Color.black.opacity(0.15), radius: 24, x: 0, y: 12)
         let floating = Shadow(color: Color.black.opacity(0.2), radius: 32, x: 0, y: 16)
         let glow = Shadow(color: Color.accentColor.opacity(0.3), radius: 20, x: 0, y: 4)
-        let coloredGlow: (Color) -> Shadow = { color in
-            Shadow(color: color.opacity(0.35), radius: 16, x: 0, y: 6)
+        func coloredGlow(_ color: Color) -> Shadow {
+            Shadow(color: color.opacity(0.4), radius: 20, x: 0, y: 8)
         }
     }
-
-    // MARK: - Typography System
-    struct TextStyles {
-        // Display
+    
+    struct TextStylesLegacy {
         let heroTitle = Font.system(.largeTitle, design: .rounded).weight(.black)
         let displayLarge = Font.system(size: 48, weight: .black, design: .rounded)
         let displayMedium = Font.system(size: 36, weight: .bold, design: .rounded)
         let displaySmall = Font.system(size: 28, weight: .bold, design: .rounded)
-        
-        // Headlines
         let headline = Font.system(.headline, design: .rounded).weight(.bold)
         let headlineLarge = Font.system(.title2, design: .rounded).weight(.bold)
         let headlineMedium = Font.system(.title3, design: .rounded).weight(.semibold)
-        
-        // Body
         let bodyLarge = Font.system(.body, design: .rounded).weight(.medium)
         let bodyMedium = Font.system(.callout, design: .rounded)
         let bodySmall = Font.system(.subheadline, design: .rounded)
-        
-        // Labels
         let labelLarge = Font.system(.subheadline, design: .rounded).weight(.semibold)
         let labelMedium = Font.system(.footnote, design: .rounded).weight(.semibold)
         let labelSmall = Font.system(.caption, design: .rounded).weight(.medium)
-        
-        // Captions
         let captionEmphasis = Font.caption.weight(.bold)
         let captionRegular = Font.caption
         let captionMini = Font.caption2
-        
-        // Special
         let sectionTitle = Font.system(.headline, design: .rounded).weight(.bold)
         let cardTitle = Font.system(.title3, design: .rounded).weight(.bold)
         let statNumber = Font.system(size: 64, weight: .black, design: .rounded)
         let xpCounter = Font.system(.title, design: .monospaced).weight(.bold)
     }
-
-    // MARK: - Animation Durations
-    struct Durations {
+    
+    struct DurationsLegacy {
         let instant: Double = 0.1
         let fast: Double = 0.2
         let normal: Double = 0.3
@@ -86,27 +197,18 @@ struct DesignSystem {
         let gentle: Double = 0.6
         let dramatic: Double = 0.8
     }
-
-    // MARK: - Animation Curves (Optimized for 60fps smoothness)
-    struct AnimationCurves {
-        /// Bouncy spring for celebrations and emphasis
-        let bouncy = Animation.spring(response: 0.4, dampingFraction: 0.75, blendDuration: 0.1)
-        /// Smooth spring for general state changes
-        let smooth = Animation.spring(response: 0.45, dampingFraction: 0.9, blendDuration: 0.12)
-        /// Snappy spring for quick interactions
-        let snappy = Animation.spring(response: 0.25, dampingFraction: 0.85, blendDuration: 0.05)
-        /// Gentle spring for subtle transitions
-        let gentle = Animation.spring(response: 0.5, dampingFraction: 0.92, blendDuration: 0.15)
-        /// Elastic spring for playful elements (use sparingly)
-        let elastic = Animation.spring(response: 0.45, dampingFraction: 0.65, blendDuration: 0.08)
-        /// Quick ease for immediate feedback
-        let quick = Animation.easeOut(duration: 0.2)
-        /// Micro interaction for tap feedback
-        let micro = Animation.spring(response: 0.2, dampingFraction: 0.9, blendDuration: 0.03)
+    
+    struct AnimationCurvesLegacy {
+        let micro = Animation.spring(response: 0.2, dampingFraction: 0.9)
+        let quick = Animation.spring(response: 0.25, dampingFraction: 0.85)
+        let snappy = Animation.spring(response: 0.3, dampingFraction: 0.8)
+        let smooth = Animation.spring(response: 0.4, dampingFraction: 0.85)
+        let gentle = Animation.spring(response: 0.5, dampingFraction: 0.9)
+        let bouncy = Animation.spring(response: 0.45, dampingFraction: 0.65)
+        let elastic = Animation.spring(response: 0.45, dampingFraction: 0.65)
     }
-
-    // MARK: - Icon Sizes
-    struct IconSizes {
+    
+    struct IconSizesLegacy {
         let xs: CGFloat = 12
         let sm: CGFloat = 16
         let md: CGFloat = 20
@@ -115,61 +217,45 @@ struct DesignSystem {
         let xxl: CGFloat = 48
         let hero: CGFloat = 64
     }
-
-    struct Shadow {
-        let color: Color
-        let radius: CGFloat
-        let x: CGFloat
-        let y: CGFloat
-    }
-
-    // MARK: - Singleton Accessors
-    static let spacing = Spacing()
-    static let radius = Radii()
-    static let shadow = Shadows()
-    static let text = TextStyles()
-    static let duration = Durations()
-    static let animation = AnimationCurves()
-    static let iconSize = IconSizes()
 }
 
-// MARK: - Brand Theme 2.0
+// MARK: - Brand Theme 3.0 - Vibrant Modern Colors
 
-/// Comprehensive color and styling system with full light/dark mode support.
+/// Premium color system with vibrant gradients and full light/dark mode support.
 struct BrandTheme {
-    // MARK: - Primary Palette
+    // MARK: - Primary Palette (Vibrant Purple-Blue)
     static let primary = Color.dynamic(
-        light: Color(hex: "4F46E5", default: .accentColor),
-        dark: Color(hex: "818CF8", default: .accentColor)
+        light: Color(hex: "6366F1", default: .indigo),
+        dark: Color(hex: "818CF8", default: .indigo)
     )
     
     static let primaryLight = Color.dynamic(
-        light: Color(hex: "6366F1", default: .accentColor),
-        dark: Color(hex: "A5B4FC", default: .accentColor)
+        light: Color(hex: "818CF8", default: .indigo),
+        dark: Color(hex: "A5B4FC", default: .indigo)
     )
     
     static let primaryDark = Color.dynamic(
-        light: Color(hex: "3730A3", default: .accentColor),
-        dark: Color(hex: "6366F1", default: .accentColor)
+        light: Color(hex: "4F46E5", default: .indigo),
+        dark: Color(hex: "6366F1", default: .indigo)
     )
     
-    // MARK: - Accent Colors
+    // MARK: - Accent Colors (Electric Violet)
     static let accent = Color.dynamic(
-        light: Color(hex: "6366F1", default: .accentColor),
-        dark: Color(hex: "A5B4FC", default: .accentColor)
+        light: Color(hex: "7C3AED", default: .purple),
+        dark: Color(hex: "A78BFA", default: .purple)
     )
     
     static let accentSoft = Color.dynamic(
-        light: Color(hex: "818CF8", default: .accentColor),
-        dark: Color(hex: "C7D2FE", default: .accentColor)
+        light: Color(hex: "A78BFA", default: .purple),
+        dark: Color(hex: "C4B5FD", default: .purple)
     )
     
     static let accentMuted = Color.dynamic(
-        light: Color(hex: "E0E7FF", default: .accentColor),
-        dark: Color(hex: "312E81", default: .accentColor)
+        light: Color(hex: "EDE9FE", default: .purple.opacity(0.2)),
+        dark: Color(hex: "3B2D5A", default: .purple.opacity(0.3))
     )
     
-    // MARK: - Semantic Colors
+    // MARK: - Semantic Colors (Vibrant)
     static let success = Color.dynamic(
         light: Color(hex: "10B981", default: .green),
         dark: Color(hex: "34D399", default: .green)
@@ -186,11 +272,11 @@ struct BrandTheme {
     )
     
     static let info = Color.dynamic(
-        light: Color(hex: "3B82F6", default: .blue),
-        dark: Color(hex: "60A5FA", default: .blue)
+        light: Color(hex: "0EA5E9", default: .cyan),
+        dark: Color(hex: "38BDF8", default: .cyan)
     )
     
-    // MARK: - Dimension Colors
+    // MARK: - Dimension Colors (Rich & Vibrant)
     static let love = Color.dynamic(
         light: Color(hex: "EC4899", default: .pink),
         dark: Color(hex: "F472B6", default: .pink)
@@ -220,36 +306,41 @@ struct BrandTheme {
         }
     }
     
-    // MARK: - Background Gradients
-    static let waveSky = Color.dynamic(
-        light: Color(hex: "EEF2FF", default: .blue.opacity(0.1)),
-        dark: Color(hex: "0F172A", default: .black)
+    // MARK: - Background Colors (Rich Depth)
+    static let backgroundTop = Color.dynamic(
+        light: Color(hex: "F8FAFC", default: .white),
+        dark: Color(hex: "0F0F1A", default: .black)
     )
     
-    static let waveMist = Color.dynamic(
-        light: Color(hex: "E0E7FF", default: .purple.opacity(0.1)),
-        dark: Color(hex: "1E1B4B", default: .purple.opacity(0.3))
+    static let backgroundMiddle = Color.dynamic(
+        light: Color(hex: "EEF2FF", default: .indigo.opacity(0.1)),
+        dark: Color(hex: "1A1A2E", default: .indigo.opacity(0.2))
     )
     
-    static let waveDeep = Color.dynamic(
-        light: Color(hex: "C7D2FE", default: .indigo.opacity(0.2)),
-        dark: Color(hex: "312E81", default: .indigo.opacity(0.4))
+    static let backgroundBottom = Color.dynamic(
+        light: Color(hex: "E0E7FF", default: .indigo.opacity(0.15)),
+        dark: Color(hex: "16162A", default: .indigo.opacity(0.3))
     )
+    
+    // Legacy aliases
+    static let waveSky = backgroundTop
+    static let waveMist = backgroundMiddle
+    static let waveDeep = backgroundBottom
     
     // MARK: - Surface Colors
     static let cardBackground = Color.dynamic(
         light: .white,
-        dark: Color(hex: "1E1B4B", default: .black)
+        dark: Color(hex: "1E1E32", default: .black)
     )
     
     static let cardBackgroundElevated = Color.dynamic(
         light: Color(hex: "FAFAFA", default: .white),
-        dark: Color(hex: "262153", default: .gray)
+        dark: Color(hex: "252540", default: .gray)
     )
     
     static let surfaceOverlay = Color.dynamic(
-        light: Color.white.opacity(0.9),
-        dark: Color(hex: "1E1B4B", default: .black).opacity(0.95)
+        light: Color.white.opacity(0.95),
+        dark: Color(hex: "1E1E32", default: .black).opacity(0.98)
     )
     
     // MARK: - Text Colors
@@ -289,49 +380,79 @@ struct BrandTheme {
         dark: Color(hex: "475569", default: .gray.opacity(0.3))
     )
     
-    // MARK: - Gradient Presets
+    // MARK: - Premium Gradient Presets
     static let gradientPrimary = LinearGradient(
-        colors: [primaryLight, primary, primaryDark],
+        colors: [
+            Color(hex: "7C3AED", default: .purple),
+            Color(hex: "6366F1", default: .indigo),
+            Color(hex: "0EA5E9", default: .cyan)
+        ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
     
     static let gradientAccent = LinearGradient(
-        colors: [accentSoft, accent],
+        colors: [
+            Color(hex: "A78BFA", default: .purple),
+            Color(hex: "7C3AED", default: .purple)
+        ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
     
     static let gradientBackground = LinearGradient(
-        colors: [waveSky, waveMist, waveDeep],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
+        colors: [backgroundTop, backgroundMiddle, backgroundBottom],
+        startPoint: .top,
+        endPoint: .bottom
     )
     
     static let gradientCard = LinearGradient(
-        colors: [waveMist.opacity(0.4), waveSky.opacity(0.3)],
+        colors: [
+            Color.white.opacity(0.1),
+            Color.white.opacity(0.05)
+        ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
     
     static let gradientGlow = RadialGradient(
-        colors: [accent.opacity(0.4), accent.opacity(0)],
+        colors: [accent.opacity(0.5), accent.opacity(0)],
         center: .center,
         startRadius: 0,
-        endRadius: 100
+        endRadius: 120
     )
     
-    // MARK: - Legacy Compatibility
-    static let gradientTop = waveSky
-    static let gradientMiddle = waveMist
-    static let gradientBottom = waveDeep
+    static let gradientSunrise = LinearGradient(
+        colors: [
+            Color(hex: "F472B6", default: .pink),
+            Color(hex: "F59E0B", default: .orange),
+            Color(hex: "FBBF24", default: .yellow)
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+    
+    static let gradientOcean = LinearGradient(
+        colors: [
+            Color(hex: "0EA5E9", default: .cyan),
+            Color(hex: "6366F1", default: .indigo),
+            Color(hex: "7C3AED", default: .purple)
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+    
+    // Legacy aliases
+    static let gradientTop = backgroundTop
+    static let gradientMiddle = backgroundMiddle
+    static let gradientBottom = backgroundBottom
 }
 
-// MARK: - Brand Background 2.0
+// MARK: - Premium Animated Background
 
-/// Animated, layered background with subtle motion and depth.
-/// Optimized for performance with TimelineView instead of repeatForever.
+/// Beautiful mesh-gradient inspired background with silky smooth 60fps animations.
 struct BrandBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     var animated: Bool = true
@@ -339,222 +460,254 @@ struct BrandBackground: View {
     
     var body: some View {
         if animated && !reduceMotion {
-            // Use TimelineView for smoother, more controlled animations
-            TimelineView(.animation(minimumInterval: 1.0/30, paused: false)) { timeline in
-                AnimatedBackgroundContent(
-                    date: timeline.date,
-                    intensity: intensity
+            TimelineView(.animation(minimumInterval: 1.0/60, paused: false)) { timeline in
+                PremiumBackgroundCanvas(
+                    time: timeline.date.timeIntervalSinceReferenceDate,
+                    intensity: intensity,
+                    isDark: colorScheme == .dark
                 )
             }
         } else {
-            // Static version for better performance
-            StaticBackgroundContent(intensity: intensity)
+            StaticPremiumBackground(intensity: intensity)
         }
     }
 }
 
-private struct AnimatedBackgroundContent: View {
-    let date: Date
+/// GPU-accelerated premium background using Canvas
+private struct PremiumBackgroundCanvas: View {
+    let time: TimeInterval
     let intensity: Double
-    
-    private var phase1: CGFloat {
-        let seconds = date.timeIntervalSinceReferenceDate
-        return CGFloat((seconds / 25).truncatingRemainder(dividingBy: 1)) * .pi * 2
-    }
-    
-    private var phase2: CGFloat {
-        let seconds = date.timeIntervalSinceReferenceDate
-        return CGFloat((seconds / 30).truncatingRemainder(dividingBy: 1)) * .pi * 2
-    }
-    
-    private var orbOffset: CGFloat {
-        let seconds = date.timeIntervalSinceReferenceDate
-        let cycle = sin(seconds / 10 * .pi)
-        return CGFloat(cycle) * 25
-    }
+    let isDark: Bool
     
     var body: some View {
         GeometryReader { geo in
-            ZStack {
-                // Base gradient - static for performance
-                LinearGradient(
-                    colors: [BrandTheme.waveSky, BrandTheme.waveMist, BrandTheme.waveDeep],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+            Canvas { context, size in
+                // Base gradient
+                let baseGradient = Gradient(colors: isDark ? [
+                    Color(hex: "0F0F1A", default: .black),
+                    Color(hex: "1A1A2E", default: .black),
+                    Color(hex: "16162A", default: .black)
+                ] : [
+                    Color(hex: "F8FAFC", default: .white),
+                    Color(hex: "EEF2FF", default: .white),
+                    Color(hex: "E0E7FF", default: .white)
+                ])
                 
-                // Single animated wave (reduced from 2)
-                WaveShape(amplitude: 45 * intensity, waveLength: 280, phase: phase1)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                BrandTheme.waveDeep.opacity(0.35 * intensity),
-                                BrandTheme.waveMist.opacity(0.4 * intensity)
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
+                let baseRect = CGRect(origin: .zero, size: size)
+                context.fill(
+                    Path(baseRect),
+                    with: .linearGradient(
+                        baseGradient,
+                        startPoint: .zero,
+                        endPoint: CGPoint(x: 0, y: size.height)
+                    )
+                )
+                
+                // Animated orbs
+                let orb1X = size.width * 0.3 + sin(time * 0.3) * 50 * intensity
+                let orb1Y = size.height * 0.2 + cos(time * 0.25) * 30 * intensity
+                
+                let orb2X = size.width * 0.7 + cos(time * 0.35) * 40 * intensity
+                let orb2Y = size.height * 0.6 + sin(time * 0.3) * 35 * intensity
+                
+                let orb3X = size.width * 0.5 + sin(time * 0.4) * 30 * intensity
+                let orb3Y = size.height * 0.85 + cos(time * 0.28) * 25 * intensity
+                
+                // Orb 1 - Purple/Violet
+                let orb1Colors = isDark ? [
+                    Color(hex: "7C3AED", default: .purple).opacity(0.25 * intensity),
+                    Color(hex: "7C3AED", default: .purple).opacity(0)
+                ] : [
+                    Color(hex: "7C3AED", default: .purple).opacity(0.15 * intensity),
+                    Color(hex: "7C3AED", default: .purple).opacity(0)
+                ]
+                
+                context.drawLayer { ctx in
+                    ctx.addFilter(.blur(radius: 60))
+                    ctx.fill(
+                        Circle().path(in: CGRect(x: orb1X - 150, y: orb1Y - 150, width: 300, height: 300)),
+                        with: .radialGradient(
+                            Gradient(colors: orb1Colors),
+                            center: CGPoint(x: orb1X, y: orb1Y),
+                            startRadius: 0,
+                            endRadius: 150
                         )
                     )
-                    .frame(height: 350)
-                    .offset(x: -40, y: -120)
-                    .blur(radius: 25)
+                }
                 
-                // Subtle orb with gentle movement
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [
-                                BrandTheme.accent.opacity(0.2 * intensity),
-                                BrandTheme.accent.opacity(0)
-                            ],
-                            center: .center,
-                            startRadius: 30,
+                // Orb 2 - Cyan/Blue
+                let orb2Colors = isDark ? [
+                    Color(hex: "0EA5E9", default: .cyan).opacity(0.2 * intensity),
+                    Color(hex: "0EA5E9", default: .cyan).opacity(0)
+                ] : [
+                    Color(hex: "0EA5E9", default: .cyan).opacity(0.12 * intensity),
+                    Color(hex: "0EA5E9", default: .cyan).opacity(0)
+                ]
+                
+                context.drawLayer { ctx in
+                    ctx.addFilter(.blur(radius: 70))
+                    ctx.fill(
+                        Circle().path(in: CGRect(x: orb2X - 180, y: orb2Y - 180, width: 360, height: 360)),
+                        with: .radialGradient(
+                            Gradient(colors: orb2Colors),
+                            center: CGPoint(x: orb2X, y: orb2Y),
+                            startRadius: 0,
                             endRadius: 180
                         )
                     )
-                    .frame(width: 350, height: 350)
-                    .offset(x: orbOffset, y: -orbOffset * 0.6)
-                    .blur(radius: 50)
-            }
-            .drawingGroup() // GPU acceleration
-        }
-    }
-}
-
-private struct StaticBackgroundContent: View {
-    let intensity: Double
-    
-    var body: some View {
-        GeometryReader { geo in
-            ZStack {
-                LinearGradient(
-                    colors: [BrandTheme.waveSky, BrandTheme.waveMist, BrandTheme.waveDeep],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                }
                 
-                // Static decorative wave
-                WaveShape(amplitude: 40 * intensity, waveLength: 280, phase: 0.5)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                BrandTheme.waveDeep.opacity(0.3 * intensity),
-                                BrandTheme.waveMist.opacity(0.35 * intensity)
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
+                // Orb 3 - Pink/Magenta
+                let orb3Colors = isDark ? [
+                    Color(hex: "EC4899", default: .pink).opacity(0.18 * intensity),
+                    Color(hex: "EC4899", default: .pink).opacity(0)
+                ] : [
+                    Color(hex: "EC4899", default: .pink).opacity(0.1 * intensity),
+                    Color(hex: "EC4899", default: .pink).opacity(0)
+                ]
+                
+                context.drawLayer { ctx in
+                    ctx.addFilter(.blur(radius: 55))
+                    ctx.fill(
+                        Circle().path(in: CGRect(x: orb3X - 120, y: orb3Y - 120, width: 240, height: 240)),
+                        with: .radialGradient(
+                            Gradient(colors: orb3Colors),
+                            center: CGPoint(x: orb3X, y: orb3Y),
+                            startRadius: 0,
+                            endRadius: 120
                         )
                     )
-                    .frame(height: 300)
-                    .offset(x: -30, y: -100)
-                    .blur(radius: 25)
-                
-                // Static orb
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [
-                                BrandTheme.accent.opacity(0.15 * intensity),
-                                BrandTheme.accent.opacity(0)
-                            ],
-                            center: .center,
-                            startRadius: 30,
-                            endRadius: 160
-                        )
-                    )
-                    .frame(width: 300, height: 300)
-                    .offset(x: 20, y: -30)
-                    .blur(radius: 45)
+                }
             }
+            .ignoresSafeArea()
             .drawingGroup()
         }
     }
 }
 
-/// Simplified static background for performance-critical views.
-struct BrandBackgroundStatic: View {
+/// Static premium background for reduced motion
+private struct StaticPremiumBackground: View {
+    let intensity: Double
+    @Environment(\.colorScheme) private var colorScheme
+    
     var body: some View {
-        LinearGradient(
-            colors: [BrandTheme.waveSky, BrandTheme.waveMist, BrandTheme.waveDeep],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        ZStack {
+            // Base gradient
+            LinearGradient(
+                colors: colorScheme == .dark ? [
+                    Color(hex: "0F0F1A", default: .black),
+                    Color(hex: "1A1A2E", default: .black),
+                    Color(hex: "16162A", default: .black)
+                ] : [
+                    Color(hex: "F8FAFC", default: .white),
+                    Color(hex: "EEF2FF", default: .white),
+                    Color(hex: "E0E7FF", default: .white)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            
+            // Static orb 1
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color(hex: "7C3AED", default: .purple).opacity(colorScheme == .dark ? 0.2 : 0.12),
+                            Color.clear
+                        ],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 150
+                    )
+                )
+                .frame(width: 300, height: 300)
+                .offset(x: -50, y: -100)
+                .blur(radius: 50)
+            
+            // Static orb 2
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color(hex: "0EA5E9", default: .cyan).opacity(colorScheme == .dark ? 0.15 : 0.1),
+                            Color.clear
+                        ],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 180
+                    )
+                )
+                .frame(width: 360, height: 360)
+                .offset(x: 80, y: 150)
+                .blur(radius: 60)
+        }
         .ignoresSafeArea()
     }
 }
 
-// MARK: - Wave Shape
-
-private struct WaveShape: Shape {
-    var amplitude: CGFloat
-    var waveLength: CGFloat
-    var phase: CGFloat = 0
+/// Simplified static background for performance-critical views
+struct BrandBackgroundStatic: View {
+    @Environment(\.colorScheme) private var colorScheme
     
-    var animatableData: CGFloat {
-        get { phase }
-        set { phase = newValue }
-    }
-
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: rect.minX, y: rect.midY))
-
-        let steps = Int(rect.width / 6)
-        for step in 0...steps {
-            let x = CGFloat(step) / CGFloat(steps) * rect.width
-            let relative = x / waveLength
-            let sine = sin(relative * .pi * 2 + phase)
-            let y = rect.midY + sine * amplitude
-            path.addLine(to: CGPoint(x: x, y: y))
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: colorScheme == .dark ? [
+                    Color(hex: "0F0F1A", default: .black),
+                    Color(hex: "1A1A2E", default: .black),
+                    Color(hex: "16162A", default: .black)
+                ] : [
+                    Color(hex: "F8FAFC", default: .white),
+                    Color(hex: "EEF2FF", default: .white),
+                    Color(hex: "E0E7FF", default: .white)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            
+            // Subtle accent glow
+            RadialGradient(
+                colors: [
+                    Color(hex: "7C3AED", default: .purple).opacity(colorScheme == .dark ? 0.08 : 0.05),
+                    Color.clear
+                ],
+                center: UnitPoint(x: 0.3, y: 0.2),
+                startRadius: 0,
+                endRadius: 400
+            )
         }
-
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
-        path.closeSubpath()
-        return path
+        .ignoresSafeArea()
     }
 }
 
 // MARK: - Card Modifiers
 
-/// Modern glassmorphic card style with optional glow.
-private struct BrandCardModifier: ViewModifier {
-    var cornerRadius: CGFloat = DesignSystem.radius.lg
+/// Modern glassmorphic card style
+struct BrandCardModifier: ViewModifier {
+    var cornerRadius: CGFloat = DesignSystem.Radii.lg
     var enableGlow: Bool = false
     var glowColor: Color = BrandTheme.accent
-    var padding: CGFloat = DesignSystem.spacing.lg
+    var padding: CGFloat = DesignSystem.Spacing.lg
     var shadowIntensity: Double = 1.0
+    
+    @Environment(\.colorScheme) private var colorScheme
 
     func body(content: Content) -> some View {
         content
             .padding(padding)
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(.ultraThinMaterial)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        BrandTheme.cardBackground.opacity(0.8),
-                                        BrandTheme.cardBackground.opacity(0.6)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    )
+                    .fill(colorScheme == .dark ? 
+                          Color(hex: "1E1E32", default: .black).opacity(0.9) :
+                          Color.white.opacity(0.95))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .strokeBorder(
                         LinearGradient(
                             colors: [
-                                Color.white.opacity(0.3),
-                                Color.white.opacity(0.1),
-                                BrandTheme.accent.opacity(0.15)
+                                Color.white.opacity(colorScheme == .dark ? 0.15 : 0.5),
+                                Color.white.opacity(colorScheme == .dark ? 0.05 : 0.2)
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -563,41 +716,44 @@ private struct BrandCardModifier: ViewModifier {
                     )
             )
             .shadow(
-                color: BrandTheme.waveDeep.opacity(0.2 * shadowIntensity),
-                radius: DesignSystem.shadow.soft.radius,
-                y: DesignSystem.shadow.soft.y
+                color: Color.black.opacity(colorScheme == .dark ? 0.4 : 0.08),
+                radius: 16 * shadowIntensity,
+                y: 8 * shadowIntensity
             )
             .background(
                 Group {
                     if enableGlow {
                         RoundedRectangle(cornerRadius: cornerRadius + 4, style: .continuous)
-                            .fill(glowColor.opacity(0.15))
-                            .blur(radius: 12)
-                            .offset(y: 4)
+                            .fill(glowColor.opacity(0.2))
+                            .blur(radius: 15)
+                            .offset(y: 5)
                     }
                 }
             )
     }
 }
 
-/// Elevated card style for prominent content.
+/// Elevated card style for prominent content
 private struct ElevatedCardModifier: ViewModifier {
-    var cornerRadius: CGFloat = DesignSystem.radius.xl
+    var cornerRadius: CGFloat = DesignSystem.Radii.xl
     var accentColor: Color = BrandTheme.accent
+    @Environment(\.colorScheme) private var colorScheme
     
     func body(content: Content) -> some View {
         content
-            .padding(DesignSystem.spacing.xl)
+            .padding(DesignSystem.Spacing.xl)
             .background(
                 ZStack {
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(BrandTheme.cardBackground)
+                        .fill(colorScheme == .dark ?
+                              Color(hex: "1E1E32", default: .black) :
+                              Color.white)
                     
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .fill(
                             LinearGradient(
                                 colors: [
-                                    accentColor.opacity(0.08),
+                                    accentColor.opacity(0.1),
                                     Color.clear
                                 ],
                                 startPoint: .topLeading,
@@ -608,23 +764,26 @@ private struct ElevatedCardModifier: ViewModifier {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(accentColor.opacity(0.2), lineWidth: 1.5)
+                    .strokeBorder(accentColor.opacity(0.3), lineWidth: 1.5)
             )
-            .shadow(color: accentColor.opacity(0.2), radius: 20, y: 10)
-            .shadow(color: Color.black.opacity(0.1), radius: 10, y: 5)
+            .shadow(color: accentColor.opacity(0.25), radius: 24, y: 12)
+            .shadow(color: Color.black.opacity(0.1), radius: 12, y: 6)
     }
 }
 
-/// Subtle card for secondary content.
+/// Subtle card for secondary content
 private struct SubtleCardModifier: ViewModifier {
-    var cornerRadius: CGFloat = DesignSystem.radius.md
+    var cornerRadius: CGFloat = DesignSystem.Radii.md
+    @Environment(\.colorScheme) private var colorScheme
     
     func body(content: Content) -> some View {
         content
-            .padding(DesignSystem.spacing.md)
+            .padding(DesignSystem.Spacing.md)
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(BrandTheme.cardBackgroundElevated.opacity(0.7))
+                    .fill(colorScheme == .dark ?
+                          Color.white.opacity(0.05) :
+                          Color.black.opacity(0.03))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
@@ -644,16 +803,16 @@ struct GlowButtonStyle: ButtonStyle {
         
         var padding: EdgeInsets {
             switch self {
-            case .small: return EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
-            case .medium: return EdgeInsets(top: 12, leading: 24, bottom: 12, trailing: 24)
-            case .large: return EdgeInsets(top: 16, leading: 32, bottom: 16, trailing: 32)
+            case .small: return EdgeInsets(top: 10, leading: 18, bottom: 10, trailing: 18)
+            case .medium: return EdgeInsets(top: 14, leading: 28, bottom: 14, trailing: 28)
+            case .large: return EdgeInsets(top: 18, leading: 36, bottom: 18, trailing: 36)
             }
         }
         
         var font: Font {
             switch self {
             case .small: return .subheadline.weight(.semibold)
-            case .medium: return .headline.weight(.semibold)
+            case .medium: return .headline.weight(.bold)
             case .large: return .title3.weight(.bold)
             }
         }
@@ -669,24 +828,24 @@ struct GlowButtonStyle: ButtonStyle {
                     Capsule()
                         .fill(
                             LinearGradient(
-                                colors: [color.opacity(0.9), color],
+                                colors: [color.opacity(0.95), color],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
                     
                     Capsule()
-                        .fill(Color.white.opacity(configuration.isPressed ? 0 : 0.2))
+                        .fill(Color.white.opacity(configuration.isPressed ? 0 : 0.25))
                         .padding(1)
                 }
             )
             .overlay(
                 Capsule()
-                    .strokeBorder(Color.white.opacity(0.3), lineWidth: 1)
+                    .strokeBorder(Color.white.opacity(0.4), lineWidth: 1)
             )
-            .shadow(color: color.opacity(0.4), radius: configuration.isPressed ? 4 : 12, y: configuration.isPressed ? 2 : 6)
+            .shadow(color: color.opacity(0.5), radius: configuration.isPressed ? 6 : 16, y: configuration.isPressed ? 3 : 8)
             .scaleEffect(configuration.isPressed ? 0.96 : 1)
-            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: configuration.isPressed)
+            .animation(.spring(response: 0.25, dampingFraction: 0.7), value: configuration.isPressed)
     }
 }
 
@@ -697,18 +856,18 @@ struct SoftButtonStyle: ButtonStyle {
         configuration.label
             .font(.subheadline.weight(.semibold))
             .foregroundColor(color)
-            .padding(.horizontal, DesignSystem.spacing.lg)
-            .padding(.vertical, DesignSystem.spacing.md)
+            .padding(.horizontal, DesignSystem.Spacing.lg)
+            .padding(.vertical, DesignSystem.Spacing.md)
             .background(
                 Capsule()
                     .fill(color.opacity(configuration.isPressed ? 0.2 : 0.12))
             )
             .overlay(
                 Capsule()
-                    .strokeBorder(color.opacity(0.2), lineWidth: 1)
+                    .strokeBorder(color.opacity(0.25), lineWidth: 1)
             )
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
-            .animation(.spring(response: 0.25, dampingFraction: 0.8), value: configuration.isPressed)
+            .animation(.spring(response: 0.2, dampingFraction: 0.8), value: configuration.isPressed)
     }
 }
 
@@ -719,18 +878,14 @@ struct GhostButtonStyle: ButtonStyle {
         configuration.label
             .font(.subheadline.weight(.medium))
             .foregroundColor(color.opacity(configuration.isPressed ? 0.6 : 1))
-            .padding(.horizontal, DesignSystem.spacing.md)
-            .padding(.vertical, DesignSystem.spacing.sm)
+            .padding(.horizontal, DesignSystem.Spacing.md)
+            .padding(.vertical, DesignSystem.Spacing.sm)
             .background(
                 Capsule()
-                    .fill(Color.clear)
-                    .background(
-                        Capsule()
-                            .fill(color.opacity(configuration.isPressed ? 0.1 : 0))
-                    )
+                    .fill(color.opacity(configuration.isPressed ? 0.1 : 0))
             )
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+            .animation(.spring(response: 0.15, dampingFraction: 0.9), value: configuration.isPressed)
     }
 }
 
@@ -747,23 +902,23 @@ struct ChipView: View {
         
         var font: Font {
             switch self {
-            case .small: return .caption2.weight(.semibold)
-            case .medium: return .caption.weight(.semibold)
-            case .large: return .subheadline.weight(.semibold)
+            case .small: return .caption2.weight(.bold)
+            case .medium: return .caption.weight(.bold)
+            case .large: return .subheadline.weight(.bold)
             }
         }
         
         var padding: EdgeInsets {
             switch self {
-            case .small: return EdgeInsets(top: 3, leading: 6, bottom: 3, trailing: 6)
-            case .medium: return EdgeInsets(top: 5, leading: 10, bottom: 5, trailing: 10)
-            case .large: return EdgeInsets(top: 8, leading: 14, bottom: 8, trailing: 14)
+            case .small: return EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8)
+            case .medium: return EdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12)
+            case .large: return EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16)
             }
         }
     }
     
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 5) {
             if let icon = icon {
                 Image(systemName: icon)
                     .font(size.font)
@@ -775,11 +930,11 @@ struct ChipView: View {
         .padding(size.padding)
         .background(
             Capsule()
-                .fill(color.opacity(0.12))
+                .fill(color.opacity(0.15))
         )
         .overlay(
             Capsule()
-                .strokeBorder(color.opacity(0.2), lineWidth: 0.5)
+                .strokeBorder(color.opacity(0.25), lineWidth: 1)
         )
     }
 }
@@ -790,7 +945,7 @@ struct XPChip: View {
     
     var body: some View {
         ChipView(
-            text: "\(xp) XP",
+            text: "+\(xp) XP",
             icon: "star.fill",
             color: BrandTheme.warning,
             size: size
@@ -816,10 +971,10 @@ struct StreakChip: View {
 
 extension View {
     func brandCard(
-        cornerRadius: CGFloat = DesignSystem.radius.lg,
+        cornerRadius: CGFloat = DesignSystem.Radii.lg,
         enableGlow: Bool = false,
         glowColor: Color = BrandTheme.accent,
-        padding: CGFloat = DesignSystem.spacing.lg
+        padding: CGFloat = DesignSystem.Spacing.lg
     ) -> some View {
         modifier(BrandCardModifier(
             cornerRadius: cornerRadius,
@@ -830,22 +985,22 @@ extension View {
     }
     
     func elevatedCard(
-        cornerRadius: CGFloat = DesignSystem.radius.xl,
+        cornerRadius: CGFloat = DesignSystem.Radii.xl,
         accentColor: Color = BrandTheme.accent
     ) -> some View {
         modifier(ElevatedCardModifier(cornerRadius: cornerRadius, accentColor: accentColor))
     }
     
-    func subtleCard(cornerRadius: CGFloat = DesignSystem.radius.md) -> some View {
+    func subtleCard(cornerRadius: CGFloat = DesignSystem.Radii.md) -> some View {
         modifier(SubtleCardModifier(cornerRadius: cornerRadius))
     }
     
-    func brandShadow(_ shadow: DesignSystem.Shadow = DesignSystem.shadow.soft) -> some View {
+    func brandShadow(_ shadow: DesignSystem.Shadow = DesignSystem.Shadows.soft) -> some View {
         self.shadow(color: shadow.color, radius: shadow.radius, x: shadow.x, y: shadow.y)
     }
     
-    func glowShadow(_ color: Color = BrandTheme.accent, radius: CGFloat = 16) -> some View {
-        self.shadow(color: color.opacity(0.4), radius: radius, y: 4)
+    func glowShadow(_ color: Color = BrandTheme.accent, radius: CGFloat = 20) -> some View {
+        self.shadow(color: color.opacity(0.45), radius: radius, y: 6)
     }
     
     /// Applies a shimmer/loading effect
@@ -864,7 +1019,7 @@ extension View {
     }
 }
 
-// MARK: - Animation Modifiers
+// MARK: - 60fps Animation Modifiers
 
 private struct ShimmerModifier: ViewModifier {
     let isActive: Bool
@@ -872,7 +1027,7 @@ private struct ShimmerModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         if isActive && !reduceMotion {
-            TimelineView(.animation(minimumInterval: 1.0/30, paused: false)) { timeline in
+            TimelineView(.animation(minimumInterval: 1.0/60, paused: false)) { timeline in
                 let phase = computePhase(for: timeline.date)
                 
                 content
@@ -881,7 +1036,7 @@ private struct ShimmerModifier: ViewModifier {
                             LinearGradient(
                                 colors: [
                                     Color.clear,
-                                    Color.white.opacity(0.25),
+                                    Color.white.opacity(0.3),
                                     Color.clear
                                 ],
                                 startPoint: .leading,
@@ -900,8 +1055,8 @@ private struct ShimmerModifier: ViewModifier {
     
     private func computePhase(for date: Date) -> CGFloat {
         let seconds = date.timeIntervalSinceReferenceDate
-        let cycle = seconds.truncatingRemainder(dividingBy: 2.0)
-        return CGFloat(cycle / 2.0)
+        let cycle = seconds.truncatingRemainder(dividingBy: 1.5)
+        return CGFloat(cycle / 1.5)
     }
 }
 
@@ -911,7 +1066,7 @@ private struct PulseModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         if isActive && !reduceMotion {
-            TimelineView(.animation(minimumInterval: 1.0/20, paused: false)) { timeline in
+            TimelineView(.animation(minimumInterval: 1.0/60, paused: false)) { timeline in
                 let scale = computeScale(for: timeline.date)
                 
                 content
@@ -924,8 +1079,8 @@ private struct PulseModifier: ViewModifier {
     
     private func computeScale(for date: Date) -> CGFloat {
         let seconds = date.timeIntervalSinceReferenceDate
-        let cycle = sin(seconds * 2.5)
-        return 1.0 + CGFloat(cycle) * 0.03 // Subtle 3% pulse
+        let cycle = sin(seconds * 3)
+        return 1.0 + CGFloat(cycle) * 0.02
     }
 }
 
@@ -942,9 +1097,8 @@ private struct BounceOnAppearModifier: ViewModifier {
                 if reduceMotion {
                     appeared = true
                 } else {
-                    // Cap delay to prevent excessive wait
-                    let cappedDelay = min(delay, 0.5)
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8, blendDuration: 0.1).delay(cappedDelay)) {
+                    let cappedDelay = min(delay, 0.4)
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.75).delay(cappedDelay)) {
                         appeared = true
                     }
                 }
@@ -969,10 +1123,7 @@ struct AnimatedProgressRing: View {
         ZStack {
             // Background ring
             Circle()
-                .stroke(
-                    BrandTheme.borderSubtle.opacity(0.3),
-                    lineWidth: lineWidth
-                )
+                .stroke(BrandTheme.borderSubtle.opacity(0.4), lineWidth: lineWidth)
             
             // Progress ring
             Circle()
@@ -992,7 +1143,7 @@ struct AnimatedProgressRing: View {
             if showPercentage {
                 VStack(spacing: 2) {
                     Text("\(Int(animatedProgress * 100))")
-                        .font(DesignSystem.text.displaySmall)
+                        .font(DesignSystem.TextStyles.displaySmall)
                         .fontWeight(.black)
                         .foregroundColor(BrandTheme.textPrimary)
                         .contentTransition(.numericText())
@@ -1006,8 +1157,7 @@ struct AnimatedProgressRing: View {
             if reduceMotion {
                 animatedProgress = clamped
             } else {
-                // Smoother, optimized animation
-                withAnimation(.spring(response: 0.9, dampingFraction: 0.85, blendDuration: 0.15)) {
+                withAnimation(.spring(response: 0.8, dampingFraction: 0.8)) {
                     animatedProgress = clamped
                 }
             }
@@ -1017,7 +1167,7 @@ struct AnimatedProgressRing: View {
             if reduceMotion {
                 animatedProgress = newClamped
             } else {
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.85, blendDuration: 0.1)) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
                     animatedProgress = newClamped
                 }
             }
@@ -1045,7 +1195,7 @@ struct AnimatedProgressBar: View {
             ZStack(alignment: .leading) {
                 // Background
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .fill(BrandTheme.borderSubtle.opacity(0.3))
+                    .fill(BrandTheme.borderSubtle.opacity(0.4))
                 
                 // Progress
                 RoundedRectangle(cornerRadius: cornerRadius)
@@ -1057,7 +1207,7 @@ struct AnimatedProgressBar: View {
                         )
                     )
                     .frame(width: max(cornerRadius * 2, geo.size.width * CGFloat(animatedProgress)))
-                    .shadow(color: showGlow ? color.opacity(0.4) : .clear, radius: 6, y: 2)
+                    .shadow(color: showGlow ? color.opacity(0.5) : .clear, radius: 8, y: 3)
             }
         }
         .frame(height: height)
@@ -1065,7 +1215,7 @@ struct AnimatedProgressBar: View {
             if reduceMotion {
                 animatedProgress = clamped
             } else {
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.85, blendDuration: 0.1)) {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
                     animatedProgress = clamped
                 }
             }
@@ -1075,7 +1225,7 @@ struct AnimatedProgressBar: View {
             if reduceMotion {
                 animatedProgress = newClamped
             } else {
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.85, blendDuration: 0.08)) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                     animatedProgress = newClamped
                 }
             }
@@ -1096,28 +1246,28 @@ struct IconContainer: View {
         
         var containerSize: CGFloat {
             switch self {
-            case .small: return 36
-            case .medium: return 48
-            case .large: return 64
-            case .hero: return 88
+            case .small: return 40
+            case .medium: return 52
+            case .large: return 68
+            case .hero: return 92
             }
         }
         
         var iconSize: CGFloat {
             switch self {
-            case .small: return 16
-            case .medium: return 22
-            case .large: return 30
-            case .hero: return 40
+            case .small: return 18
+            case .medium: return 24
+            case .large: return 32
+            case .hero: return 44
             }
         }
         
         var cornerRadius: CGFloat {
             switch self {
-            case .small: return 10
-            case .medium: return 14
-            case .large: return 18
-            case .hero: return 24
+            case .small: return 12
+            case .medium: return 16
+            case .large: return 20
+            case .hero: return 28
             }
         }
     }
@@ -1134,7 +1284,7 @@ struct IconContainer: View {
                     .fill(color)
             case .soft:
                 RoundedRectangle(cornerRadius: size.cornerRadius, style: .continuous)
-                    .fill(color.opacity(0.12))
+                    .fill(color.opacity(0.15))
             case .outlined:
                 RoundedRectangle(cornerRadius: size.cornerRadius, style: .continuous)
                     .strokeBorder(color, lineWidth: 2)
@@ -1142,7 +1292,7 @@ struct IconContainer: View {
                 RoundedRectangle(cornerRadius: size.cornerRadius, style: .continuous)
                     .fill(
                         LinearGradient(
-                            colors: [color, color.opacity(0.7)],
+                            colors: [color, color.opacity(0.75)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -1161,19 +1311,25 @@ struct IconContainer: View {
 
 struct ConfettiView: View {
     @Binding var isActive: Bool
-    var particleCount: Int = 35 // Reduced for performance
+    var particleCount: Int = 40
     
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var particles: [(id: Int, x: CGFloat, y: CGFloat, scale: CGFloat, colorIndex: Int)] = []
+    @State private var particles: [(id: Int, x: CGFloat, y: CGFloat, scale: CGFloat, rotation: Double, colorIndex: Int)] = []
     
-    private let colors: [Color] = [BrandTheme.accent, BrandTheme.success, BrandTheme.warning, BrandTheme.love, BrandTheme.mind]
+    private let colors: [Color] = [
+        BrandTheme.accent,
+        BrandTheme.success,
+        BrandTheme.warning,
+        BrandTheme.love,
+        BrandTheme.mind,
+        BrandTheme.info
+    ]
     
     var body: some View {
         GeometryReader { geo in
-            // Use Canvas for GPU-accelerated rendering
             Canvas { context, size in
                 for particle in particles {
-                    let particleSize = 7 * particle.scale
+                    let particleSize = 8 * particle.scale
                     let rect = CGRect(
                         x: particle.x - particleSize / 2,
                         y: particle.y - particleSize / 2,
@@ -1190,8 +1346,7 @@ struct ConfettiView: View {
             .onChange(of: isActive) { _, newValue in
                 if newValue {
                     if reduceMotion {
-                        // Quick fade for reduced motion
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                             isActive = false
                         }
                     } else {
@@ -1209,22 +1364,23 @@ struct ConfettiView: View {
                 id: i,
                 x: size.width / 2,
                 y: size.height / 2,
-                scale: CGFloat.random(in: 0.6...1.3),
+                scale: CGFloat.random(in: 0.5...1.4),
+                rotation: Double.random(in: 0...360),
                 colorIndex: Int.random(in: 0..<colors.count)
             )
         }
         
-        withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.65)) {
             particles = particles.map { particle in
                 var p = particle
-                p.x = CGFloat.random(in: size.width * 0.1...size.width * 0.9)
-                p.y = CGFloat.random(in: size.height * 0.1...size.height * 0.9)
+                p.x = CGFloat.random(in: size.width * 0.05...size.width * 0.95)
+                p.y = CGFloat.random(in: size.height * 0.05...size.height * 0.95)
                 return p
             }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            withAnimation(.easeOut(duration: 0.4)) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            withAnimation(.easeOut(duration: 0.35)) {
                 particles = particles.map { particle in
                     var p = particle
                     p.scale = 0
@@ -1232,7 +1388,7 @@ struct ConfettiView: View {
                 }
             }
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                 isActive = false
                 particles = []
             }
@@ -1250,16 +1406,16 @@ struct EmptyStateView: View {
     var action: (() -> Void)? = nil
     
     var body: some View {
-        VStack(spacing: DesignSystem.spacing.lg) {
+        VStack(spacing: DesignSystem.Spacing.lg) {
             IconContainer(systemName: icon, color: BrandTheme.mutedText, size: .hero, style: .soft)
             
-            VStack(spacing: DesignSystem.spacing.sm) {
+            VStack(spacing: DesignSystem.Spacing.sm) {
                 Text(title)
-                    .font(DesignSystem.text.headlineMedium)
+                    .font(DesignSystem.TextStyles.headlineMedium)
                     .foregroundColor(BrandTheme.textPrimary)
                 
                 Text(message)
-                    .font(DesignSystem.text.bodySmall)
+                    .font(DesignSystem.TextStyles.bodySmall)
                     .foregroundColor(BrandTheme.mutedText)
                     .multilineTextAlignment(.center)
             }
@@ -1271,7 +1427,7 @@ struct EmptyStateView: View {
                 .buttonStyle(GlowButtonStyle(size: .medium))
             }
         }
-        .padding(DesignSystem.spacing.xxl)
+        .padding(DesignSystem.Spacing.xxl)
     }
 }
 
@@ -1283,9 +1439,8 @@ struct LoadingView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     var body: some View {
-        VStack(spacing: DesignSystem.spacing.lg) {
+        VStack(spacing: DesignSystem.Spacing.lg) {
             if reduceMotion {
-                // Static loading indicator for reduced motion
                 ZStack {
                     Circle()
                         .stroke(BrandTheme.borderSubtle, lineWidth: 4)
@@ -1297,7 +1452,6 @@ struct LoadingView: View {
                         .frame(width: 48, height: 48)
                 }
             } else {
-                // Animated loading using TimelineView
                 TimelineView(.animation(minimumInterval: 1.0/60, paused: false)) { timeline in
                     let rotation = computeRotation(for: timeline.date)
                     
@@ -1316,7 +1470,7 @@ struct LoadingView: View {
             }
             
             Text(message)
-                .font(DesignSystem.text.labelMedium)
+                .font(DesignSystem.TextStyles.labelMedium)
                 .foregroundColor(BrandTheme.mutedText)
         }
     }
