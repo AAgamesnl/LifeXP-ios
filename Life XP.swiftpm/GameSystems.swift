@@ -22,6 +22,7 @@ struct DailyChallenge: Identifiable, Codable {
     var progress: Int
     var isCompleted: Bool
     var dateGenerated: Date
+    var completedDimensions: Set<LifeDimension>
     
     enum ChallengeType: String, Codable {
         case completeItems      // Complete X items
@@ -37,6 +38,83 @@ struct DailyChallenge: Identifiable, Codable {
         guard targetCount > 0 else { return 0 }
         return min(1.0, Double(progress) / Double(targetCount))
     }
+
+    init(
+        id: String,
+        title: String,
+        description: String,
+        iconSystemName: String,
+        targetCount: Int,
+        bonusXP: Int,
+        challengeType: ChallengeType,
+        dimensions: [LifeDimension],
+        progress: Int,
+        isCompleted: Bool,
+        dateGenerated: Date,
+        completedDimensions: Set<LifeDimension> = []
+    ) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.iconSystemName = iconSystemName
+        self.targetCount = targetCount
+        self.bonusXP = bonusXP
+        self.challengeType = challengeType
+        self.dimensions = dimensions
+        self.progress = progress
+        self.isCompleted = isCompleted
+        self.dateGenerated = dateGenerated
+        self.completedDimensions = completedDimensions
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case title
+        case description
+        case iconSystemName
+        case targetCount
+        case bonusXP
+        case challengeType
+        case dimensions
+        case progress
+        case isCompleted
+        case dateGenerated
+        case completedDimensions
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        description = try container.decode(String.self, forKey: .description)
+        iconSystemName = try container.decode(String.self, forKey: .iconSystemName)
+        targetCount = try container.decode(Int.self, forKey: .targetCount)
+        bonusXP = try container.decode(Int.self, forKey: .bonusXP)
+        challengeType = try container.decode(ChallengeType.self, forKey: .challengeType)
+        dimensions = try container.decode([LifeDimension].self, forKey: .dimensions)
+        progress = try container.decode(Int.self, forKey: .progress)
+        isCompleted = try container.decode(Bool.self, forKey: .isCompleted)
+        dateGenerated = try container.decode(Date.self, forKey: .dateGenerated)
+        completedDimensions = try container.decodeIfPresent(Set<LifeDimension>.self, forKey: .completedDimensions) ?? []
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(title, forKey: .title)
+        try container.encode(description, forKey: .description)
+        try container.encode(iconSystemName, forKey: .iconSystemName)
+        try container.encode(targetCount, forKey: .targetCount)
+        try container.encode(bonusXP, forKey: .bonusXP)
+        try container.encode(challengeType, forKey: .challengeType)
+        try container.encode(dimensions, forKey: .dimensions)
+        try container.encode(progress, forKey: .progress)
+        try container.encode(isCompleted, forKey: .isCompleted)
+        try container.encode(dateGenerated, forKey: .dateGenerated)
+        if !completedDimensions.isEmpty {
+            try container.encode(completedDimensions, forKey: .completedDimensions)
+        }
+    }
 }
 
 /// Manages daily challenge generation and tracking
@@ -49,6 +127,7 @@ final class DailyChallengeManager: ObservableObject {
     private let challengeKey = "lifeXP.dailyChallenges"
     private let streakKey = "lifeXP.challengeStreak"
     private let lastDateKey = "lifeXP.challengeLastDate"
+    private let defaults = UserDefaults.standard
     
     init() {
         loadChallenges()
@@ -63,6 +142,8 @@ final class DailyChallengeManager: ObservableObject {
             if challengeDate == today { return }
         }
         
+        refreshStreakIfNeeded(for: today)
+
         // Generate new challenges based on player level
         let level = max(1, totalXP / 120 + 1)
         todaysChallenges = generateChallenges(forLevel: level, completedCount: completedCount)
@@ -149,15 +230,18 @@ final class DailyChallengeManager: ObservableObject {
             
             switch todaysChallenges[i].challengeType {
             case .completeItems, .maintainStreak:
-                todaysChallenges[i].progress += 1
+                todaysChallenges[i].progress = min(todaysChallenges[i].progress + 1, todaysChallenges[i].targetCount)
             case .completeDimension:
                 if !todaysChallenges[i].dimensions.isEmpty &&
                    itemDimensions.contains(where: { todaysChallenges[i].dimensions.contains($0) }) {
-                    todaysChallenges[i].progress += 1
+                    todaysChallenges[i].progress = min(todaysChallenges[i].progress + 1, todaysChallenges[i].targetCount)
                 }
             case .balanceDimensions:
-                // Track unique dimensions completed today
-                todaysChallenges[i].progress = min(todaysChallenges[i].progress + 1, todaysChallenges[i].targetCount)
+                let newDimensions = Set(itemDimensions)
+                if !newDimensions.isEmpty {
+                    todaysChallenges[i].completedDimensions.formUnion(newDimensions)
+                    todaysChallenges[i].progress = min(todaysChallenges[i].completedDimensions.count, todaysChallenges[i].targetCount)
+                }
             default:
                 break
             }
@@ -169,6 +253,7 @@ final class DailyChallengeManager: ObservableObject {
         }
         
         saveChallenges()
+        updateStreakIfNeeded()
     }
     
     var totalBonusXPAvailable: Int {
@@ -185,14 +270,46 @@ final class DailyChallengeManager: ObservableObject {
     
     private func saveChallenges() {
         if let encoded = try? JSONEncoder().encode(todaysChallenges) {
-            UserDefaults.standard.set(encoded, forKey: challengeKey)
+            defaults.set(encoded, forKey: challengeKey)
         }
     }
     
     private func loadChallenges() {
-        if let data = UserDefaults.standard.data(forKey: challengeKey),
+        if let data = defaults.data(forKey: challengeKey),
            let decoded = try? JSONDecoder().decode([DailyChallenge].self, from: data) {
             todaysChallenges = decoded
+        }
+        challengeStreak = defaults.integer(forKey: streakKey)
+    }
+
+    private func updateStreakIfNeeded() {
+        guard allChallengesCompleted else { return }
+        let today = calendar.startOfDay(for: Date())
+
+        if let lastDate = defaults.object(forKey: lastDateKey) as? Date,
+           calendar.isDate(lastDate, inSameDayAs: today) {
+            return
+        }
+
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)
+        if let lastDate = defaults.object(forKey: lastDateKey) as? Date,
+           let yesterday = yesterday,
+           calendar.isDate(lastDate, inSameDayAs: yesterday) {
+            challengeStreak += 1
+        } else {
+            challengeStreak = 1
+        }
+
+        defaults.set(today, forKey: lastDateKey)
+        defaults.set(challengeStreak, forKey: streakKey)
+    }
+
+    private func refreshStreakIfNeeded(for today: Date) {
+        guard let lastDate = defaults.object(forKey: lastDateKey) as? Date else { return }
+        guard let yesterday = calendar.date(byAdding: .day, value: -1, to: today) else { return }
+        if lastDate < yesterday {
+            challengeStreak = 0
+            defaults.set(0, forKey: streakKey)
         }
     }
 }

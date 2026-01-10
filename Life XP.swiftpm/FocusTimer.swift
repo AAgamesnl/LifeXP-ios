@@ -148,11 +148,17 @@ final class FocusTimerManager: ObservableObject {
         timer = nil
         
         // Record incomplete session if it was a focus session
-        if let startTime = sessionStartTime, case .running(let type) = state, type == .focus {
-            let elapsed = Date().timeIntervalSince(startTime)
-            if elapsed > 60 { // Only count if more than 1 minute
-                let xp = calculateXP(duration: elapsed, wasCompleted: false)
-                recordSession(type: type, duration: elapsed, wasCompleted: false, xpEarned: xp)
+        if let type = state.sessionType,
+           (state.isRunning || state.isPaused),
+           type == .focus,
+           let startTime = sessionStartTime {
+            let totalDuration = TimeInterval(settings.focusDuration * 60)
+            let elapsed = min(totalDuration, max(0, totalDuration - timeRemaining))
+            let fallbackElapsed = Date().timeIntervalSince(startTime)
+            let recordedElapsed = min(totalDuration, max(elapsed, fallbackElapsed))
+            if recordedElapsed > 60 { // Only count if more than 1 minute
+                let xp = calculateXP(duration: recordedElapsed, wasCompleted: false)
+                recordSession(type: type, duration: recordedElapsed, wasCompleted: false, xpEarned: xp)
             }
         }
         

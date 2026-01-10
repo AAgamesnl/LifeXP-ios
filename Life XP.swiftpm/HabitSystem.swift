@@ -175,11 +175,7 @@ final class HabitManager: ObservableObject {
     }
     
     func isCompleted(_ habit: Habit, for date: Date = Date()) -> Bool {
-        let dayStart = calendar.startOfDay(for: date)
-        return completions.contains { completion in
-            completion.habitID == habit.id &&
-            calendar.startOfDay(for: completion.date) == dayStart
-        }
+        completionCount(habit, for: date) >= habit.targetCount
     }
     
     func completionCount(_ habit: Habit, for date: Date = Date()) -> Int {
@@ -221,39 +217,44 @@ final class HabitManager: ObservableObject {
         
         let habitCompletions = completions.filter { $0.habitID == habit.id }
         guard !habitCompletions.isEmpty else { return 0 }
-        
-        let sortedDates = habitCompletions
-            .map { calendar.startOfDay(for: $0.date) }
-            .sorted()
-        
+
+        let completionDays = Set(habitCompletions.map { calendar.startOfDay(for: $0.date) })
+        let sortedDays = completionDays.sorted()
+
         var best = 0
         var current = 0
         var lastDate: Date?
-        
-        for date in sortedDates {
+
+        for date in sortedDays {
             if let last = lastDate {
-                let diff = calendar.dateComponents([.day], from: last, to: date).day ?? 0
-                if diff == 1 {
-                    current += 1
-                } else if diff > 1 {
+                var cursor = calendar.date(byAdding: .day, value: 1, to: last) ?? date
+                var broke = false
+
+                while cursor < date {
+                    if shouldTrackHabit(habit, on: cursor) {
+                        broke = true
+                        break
+                    }
+                    cursor = calendar.date(byAdding: .day, value: 1, to: cursor) ?? date
+                }
+
+                if broke {
                     best = max(best, current)
                     current = 1
+                } else {
+                    current += 1
                 }
             } else {
                 current = 1
             }
             lastDate = date
         }
-        
+
         return max(best, current)
     }
     
     private func hasCompletion(_ habit: Habit, on date: Date) -> Bool {
-        let dayStart = calendar.startOfDay(for: date)
-        return completions.contains { completion in
-            completion.habitID == habit.id &&
-            calendar.startOfDay(for: completion.date) == dayStart
-        }
+        completionCount(habit, for: date) >= habit.targetCount
     }
     
     private func shouldTrackHabit(_ habit: Habit, on date: Date) -> Bool {
@@ -314,7 +315,9 @@ final class HabitManager: ObservableObject {
         
         // This week
         let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) ?? Date()
-        let thisWeek = habitCompletions.filter { $0.date >= weekStart }.count
+        let thisWeek = habitCompletions
+            .filter { $0.date >= weekStart }
+            .reduce(0) { $0 + $1.count }
         
         let lastCompleted = habitCompletions.sorted { $0.date > $1.date }.first?.date
         
@@ -368,7 +371,9 @@ final class HabitManager: ObservableObject {
         for day in range {
             if let date = calendar.date(byAdding: .day, value: day - 1, to: monthStart) {
                 let dayStart = calendar.startOfDay(for: date)
-                let count = completions.filter { calendar.startOfDay(for: $0.date) == dayStart }.count
+                let count = completions
+                    .filter { calendar.startOfDay(for: $0.date) == dayStart }
+                    .reduce(0) { $0 + $1.count }
                 if count > 0 {
                     data[dayStart] = count
                 }
