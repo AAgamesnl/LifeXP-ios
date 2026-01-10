@@ -1,5 +1,8 @@
 import SwiftUI
 import Foundation
+#if canImport(AVFoundation)
+import AVFoundation
+#endif
 
 // MARK: - AAA Game Systems
 // This file contains advanced gamification systems that elevate the app to AAA quality.
@@ -1073,7 +1076,7 @@ enum TimeOfDay: String, CaseIterable {
 
 // MARK: - Sound Effects Manager
 
-/// Manages app sound effects (placeholder - would need AVFoundation)
+/// Manages app sound effects.
 enum SoundEffect: String {
     case complete = "complete"
     case levelUp = "level_up"
@@ -1090,9 +1093,12 @@ final class SoundManager: ObservableObject {
     @Published var soundEnabled: Bool = true
     @Published var volume: Float = 0.7
     
-    private let storageKey = "lifeXP.soundSettings"
     private let enabledKey = "lifeXP.soundSettings.enabled"
     private let volumeKey = "lifeXP.soundSettings.volume"
+#if canImport(AVFoundation)
+    private var audioPlayers: [SoundEffect: AVAudioPlayer] = [:]
+    private var audioSessionConfigured = false
+#endif
     
     init() {
         loadSettings()
@@ -1100,11 +1106,12 @@ final class SoundManager: ObservableObject {
     
     func play(_ effect: SoundEffect) {
         guard soundEnabled else { return }
-        // In a real implementation, this would use AVFoundation
-        // For now, we can use system sounds via AudioServicesPlaySystemSound
-        #if canImport(UIKit)
-        // Would implement actual sound playback here
-        #endif
+#if canImport(AVFoundation)
+        configureAudioSessionIfNeeded()
+        guard let player = player(for: effect) else { return }
+        player.volume = max(0, min(1, volume))
+        player.play()
+#endif
     }
     
     private func loadSettings() {
@@ -1123,6 +1130,116 @@ final class SoundManager: ObservableObject {
         UserDefaults.standard.set(soundEnabled, forKey: enabledKey)
         UserDefaults.standard.set(volume, forKey: volumeKey)
     }
+
+#if canImport(AVFoundation)
+    private func configureAudioSessionIfNeeded() {
+        guard !audioSessionConfigured else { return }
+        let session = AVAudioSession.sharedInstance()
+        do {
+            try session.setCategory(.ambient, options: [.mixWithOthers])
+            try session.setActive(true)
+            audioSessionConfigured = true
+        } catch {
+            audioSessionConfigured = false
+        }
+    }
+
+    private func player(for effect: SoundEffect) -> AVAudioPlayer? {
+        if let cached = audioPlayers[effect] {
+            return cached
+        }
+
+        let tone = toneProfile(for: effect)
+        let data = Self.makeToneWavData(
+            frequency: tone.frequency,
+            duration: tone.duration,
+            sampleRate: 44_100
+        )
+
+        do {
+            let player = try AVAudioPlayer(data: data)
+            player.prepareToPlay()
+            audioPlayers[effect] = player
+            return player
+        } catch {
+            return nil
+        }
+    }
+
+    private func toneProfile(for effect: SoundEffect) -> (frequency: Double, duration: Double) {
+        switch effect {
+        case .complete:
+            return (880, 0.12)
+        case .levelUp:
+            return (1320, 0.2)
+        case .badgeUnlock:
+            return (1046, 0.18)
+        case .comboIncrease:
+            return (740, 0.12)
+        case .streak:
+            return (988, 0.16)
+        case .celebration:
+            return (1200, 0.22)
+        case .tap:
+            return (600, 0.06)
+        case .swipe:
+            return (520, 0.08)
+        }
+    }
+
+    private static func makeToneWavData(
+        frequency: Double,
+        duration: Double,
+        sampleRate: Double
+    ) -> Data {
+        let totalSamples = Int(duration * sampleRate)
+        let amplitude = 0.25
+        var samples = [Int16](repeating: 0, count: totalSamples)
+
+        for index in 0..<totalSamples {
+            let time = Double(index) / sampleRate
+            let sample = sin(2.0 * Double.pi * frequency * time) * amplitude
+            samples[index] = Int16(sample * Double(Int16.max))
+        }
+
+        var data = Data()
+        let byteRate = Int(sampleRate) * 2
+        let blockAlign: UInt16 = 2
+        let bitsPerSample: UInt16 = 16
+        let subchunk2Size = totalSamples * 2
+        let chunkSize = 36 + subchunk2Size
+
+        data.append("RIFF".data(using: .ascii) ?? Data())
+        data.append(Self.leData(UInt32(chunkSize)))
+        data.append("WAVE".data(using: .ascii) ?? Data())
+        data.append("fmt ".data(using: .ascii) ?? Data())
+        data.append(Self.leData(UInt32(16)))
+        data.append(Self.leData(UInt16(1)))
+        data.append(Self.leData(UInt16(1)))
+        data.append(Self.leData(UInt32(sampleRate)))
+        data.append(Self.leData(UInt32(byteRate)))
+        data.append(Self.leData(blockAlign))
+        data.append(Self.leData(bitsPerSample))
+        data.append("data".data(using: .ascii) ?? Data())
+        data.append(Self.leData(UInt32(subchunk2Size)))
+
+        samples.withUnsafeBufferPointer { buffer in
+            data.append(buffer.baseAddress!, count: buffer.count * MemoryLayout<Int16>.size)
+        }
+
+        return data
+    }
+
+    private static func leData(_ value: UInt16) -> Data {
+        var littleEndian = value.littleEndian
+        return Data(bytes: &littleEndian, count: MemoryLayout<UInt16>.size)
+    }
+
+    private static func leData(_ value: UInt32) -> Data {
+        var littleEndian = value.littleEndian
+        return Data(bytes: &littleEndian, count: MemoryLayout<UInt32>.size)
+    }
+#endif
 }
 
 // MARK: - Smart Insights Engine
