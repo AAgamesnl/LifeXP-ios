@@ -120,12 +120,10 @@ final class AnalyticsEngine: ObservableObject {
     }
     
     private func generateXPTrend(appModel: AppModel) {
-        let cutoff = calendar.date(byAdding: .day, value: -selectedPeriod.days, to: Date()) ?? Date()
         var points: [DataPoint] = []
         var runningXP = 0
         
         // Simulate historical XP gain (in real app, would use actual completion dates)
-        let completedItems = appModel.completedItemIDs.count
         let avgDailyXP = max(1, appModel.totalXP / max(1, selectedPeriod.days))
         
         for dayOffset in (0..<min(selectedPeriod.days, 30)).reversed() {
@@ -141,12 +139,10 @@ final class AnalyticsEngine: ObservableObject {
     
     private func generateLevelProgress(appModel: AppModel) {
         var points: [DataPoint] = []
-        let totalXP = appModel.totalXP
         let currentLevel = appModel.level
         
         // Show level milestones
         for level in max(1, currentLevel - 5)...currentLevel {
-            let xpForLevel = (level - 1) * 120
             let date = calendar.date(byAdding: .day, value: -(currentLevel - level) * 7, to: Date()) ?? Date()
             points.append(DataPoint(date: date, value: Double(level), label: "Level \(level)"))
         }
@@ -1112,8 +1108,8 @@ struct DataExportSheet: View {
         
         if includeSettings {
             export["settings"] = [
-                "coachingTone": appModel.settings.coachingTone.rawValue,
-                "hideHeavyTopics": appModel.settings.hideHeavyTopics,
+                "coachingTone": appModel.settings.toneMode.rawValue,
+                "hideHeavyTopics": appModel.hideHeavyTopics,
                 "enabledDimensions": appModel.settings.enabledDimensions.map { $0.rawValue }
             ]
         }
@@ -1158,8 +1154,8 @@ struct DataExportSheet: View {
         }
         
         if includeSettings {
-            rows.append(["Settings", "Coaching Tone", appModel.settings.coachingTone.rawValue])
-            rows.append(["Settings", "Hide Heavy Topics", "\(appModel.settings.hideHeavyTopics)"])
+            rows.append(["Settings", "Tone Mode", appModel.settings.toneMode.rawValue])
+            rows.append(["Settings", "Hide Heavy Topics", "\(appModel.hideHeavyTopics)"])
         }
         
         exportedData = rows.map { $0.joined(separator: ",") }.joined(separator: "\n")

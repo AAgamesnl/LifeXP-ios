@@ -478,6 +478,7 @@ struct PrecomputedStats {
     let streakInfo: (current: Int, best: Int)
     let completedCount: Int
     
+    @MainActor
     static func compute(from appModel: AppModel) -> PrecomputedStats {
         let completedIDs = appModel.completedItemIDs
         let allItems = appModel.allVisibleItems

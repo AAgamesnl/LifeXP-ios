@@ -1340,8 +1340,8 @@ final class SoundManager: ObservableObject {
         data.append("data".data(using: .ascii) ?? Data())
         data.append(Self.leData(UInt32(subchunk2Size)))
 
-        samples.withUnsafeBufferPointer { buffer in
-            data.append(buffer.baseAddress!, count: buffer.count * MemoryLayout<Int16>.size)
+        samples.withUnsafeBytes { buffer in
+            data.append(contentsOf: buffer)
         }
 
         return data
