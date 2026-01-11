@@ -199,7 +199,7 @@ final class FocusTimerManager: ObservableObject {
         timer?.invalidate()
         timer = nil
         
-        guard let type = state.sessionType, let startTime = sessionStartTime else { return }
+        guard let type = state.sessionType else { return }
         
         let duration: TimeInterval
         switch type {

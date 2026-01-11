@@ -201,7 +201,7 @@ struct AchievementProgress: Identifiable, Codable {
     var lastUpdated: Date
     
     var progressRatio: Double {
-        guard let achievement = AchievementLibrary.achievement(for: id) else { return 0 }
+        guard let achievement = AchievementLibrary.achievement(id) else { return 0 }
         return min(1.0, Double(currentValue) / Double(achievement.requirement.threshold))
     }
 }
@@ -675,7 +675,7 @@ struct AchievementLibrary {
         )
     ]
     
-    static func achievement(for id: String) -> Achievement? {
+    static func achievement(_ id: String) -> Achievement? {
         allAchievements.first { $0.id == id }
     }
     
@@ -726,7 +726,7 @@ final class AchievementManager: ObservableObject {
     
     func progressRatio(for achievementID: String) -> Double {
         guard let progress = progress[achievementID],
-              let achievement = AchievementLibrary.achievement(for: achievementID) else { return 0 }
+              let achievement = AchievementLibrary.achievement(achievementID) else { return 0 }
         return min(1.0, Double(progress.currentValue) / Double(achievement.requirement.threshold))
     }
     
@@ -1157,7 +1157,7 @@ struct RecentUnlocksCard: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     ForEach(manager.recentUnlocks) { unlock in
-                        if let achievement = AchievementLibrary.achievement(for: unlock.achievementID) {
+                        if let achievement = AchievementLibrary.achievement(unlock.achievementID) {
                             Button {
                                 onSelect(achievement)
                             } label: {
