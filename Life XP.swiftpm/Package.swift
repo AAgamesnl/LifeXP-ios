@@ -5,24 +5,20 @@
 // Do not edit it by hand because the contents will be replaced.
 
 import PackageDescription
-
-#if canImport(AppleProductTypes)
 import AppleProductTypes
-#endif
 
-// Conditionally define the product list so the manifest can be parsed outside
-// of Apple platforms (for example in CI on Linux). When AppleProductTypes is
-// unavailable we expose a lightweight library product, which keeps SwiftPM
-// happy without changing the iOS app configuration used in Xcode.
-private let products: [Product] = {
-#if canImport(AppleProductTypes)
-    return [
+let package = Package(
+    name: "Life XP",
+    platforms: [
+        .iOS("18.1")
+    ],
+    products: [
         .iOSApplication(
             name: "Life XP",
             targets: ["AppModule"],
             bundleIdentifier: "com.ayoub.LifeXP",
             teamIdentifier: "26TUM3453K",
-            displayVersion: "0.7",
+            displayVersion: "0.8.3",
             bundleVersion: "1",
             appIcon: .asset("AppIcon"),
             accentColor: .presetColor(.indigo),
@@ -38,59 +34,22 @@ private let products: [Product] = {
             ],
             appCategory: .lifestyle
         )
-    ]
-#else
-    return [
-        .library(name: "AppModule", targets: ["AppModule"])
-    ]
-#endif
-}()
-
-private let targets: [Target] = {
-    let commonSwiftSettings: [SwiftSetting] = [
-        .enableUpcomingFeature("BareSlashRegexLiterals")
-    ]
-
-#if canImport(AppleProductTypes)
-    return [
+    ],
+    targets: [
         .executableTarget(
             name: "AppModule",
             path: ".",
             exclude: ["Tests"],
-            swiftSettings: commonSwiftSettings
+            swiftSettings: [
+                .enableUpcomingFeature("BareSlashRegexLiterals")
+            ]
         ),
         .testTarget(
             name: "AppModuleTests",
-            dependencies: ["AppModule"],
+            dependencies: [
+                "AppModule"
+            ],
             path: "Tests"
         )
     ]
-#else
-    return [
-        // Use a lightweight placeholder target when Apple-only dependencies such
-        // as SwiftUI are unavailable. This keeps `swift build` and `swift test`
-        // working in Linux-based CI without altering the iOS app used on Apple
-        // platforms.
-        .target(
-            name: "AppModule",
-            path: "LinuxSupport",
-            exclude: ["Tests"],
-            swiftSettings: commonSwiftSettings
-        ),
-        .testTarget(
-            name: "AppModuleTests",
-            dependencies: ["AppModule"],
-            path: "Tests"
-        )
-    ]
-#endif
-}()
-
-let package = Package(
-    name: "Life XP",
-    platforms: [
-        .iOS("17.0")
-    ],
-    products: products,
-    targets: targets
 )
