@@ -90,7 +90,7 @@ enum TutorialSequence: String, CaseIterable {
                 TutorialStep(
                     id: "welcome_2",
                     title: "Your Command Center",
-                    message: "This is Home base. See your progress, grab quick wins, and start each day with purpose.",
+                    message: "Home is your daily dashboard. Check momentum, grab quick wins, and reset your focus.",
                     iconSystemName: "house.fill",
                     highlightAnchor: .tab(.home),
                     action: nil,
@@ -99,8 +99,48 @@ enum TutorialSequence: String, CaseIterable {
                 ),
                 TutorialStep(
                     id: "welcome_3",
+                    title: "Story Journeys",
+                    message: "Journeys are guided arcs with quests and chapters. Pick a storyline and make real progress.",
+                    iconSystemName: "book.fill",
+                    highlightAnchor: .tab(.journeys),
+                    action: nil,
+                    celebrationType: .sparkle,
+                    accentColor: BrandTheme.love
+                ),
+                TutorialStep(
+                    id: "welcome_4",
+                    title: "Packs = Action Lists",
+                    message: "Packs hold your checklist items. Tap into any pack to earn XP with quick, focused actions.",
+                    iconSystemName: "checklist",
+                    highlightAnchor: .tab(.packs),
+                    action: nil,
+                    celebrationType: .pulse,
+                    accentColor: BrandTheme.success
+                ),
+                TutorialStep(
+                    id: "welcome_5",
+                    title: "Stats & Achievements",
+                    message: "Stats shows your XP, streaks, and badges. Track growth and celebrate milestones.",
+                    iconSystemName: "chart.bar.xaxis",
+                    highlightAnchor: .tab(.stats),
+                    action: nil,
+                    celebrationType: .bounce,
+                    accentColor: BrandTheme.warning
+                ),
+                TutorialStep(
+                    id: "welcome_6",
+                    title: "Personalize in Settings",
+                    message: "Fine-tune your coaching style, focus dimensions, and app preferences anytime.",
+                    iconSystemName: "gearshape.fill",
+                    highlightAnchor: .tab(.settings),
+                    action: nil,
+                    celebrationType: .pulse,
+                    accentColor: BrandTheme.mind
+                ),
+                TutorialStep(
+                    id: "welcome_7",
                     title: "Four Life Dimensions",
-                    message: "Love ❤️ • Money 💰 • Mind 🧠 • Adventure ⚡\n\nBalance these to become unstoppable.",
+                    message: "Love ❤️ • Money 💰 • Mind 🧠 • Adventure ⚡\n\nBalance them for a stronger, happier you.",
                     iconSystemName: "circle.grid.2x2.fill",
                     highlightAnchor: nil,
                     action: nil,
@@ -108,9 +148,9 @@ enum TutorialSequence: String, CaseIterable {
                     accentColor: BrandTheme.mind
                 ),
                 TutorialStep(
-                    id: "welcome_4",
+                    id: "welcome_8",
                     title: "Earn XP & Level Up",
-                    message: "Every completed item = XP. Stack enough XP and you'll level up with epic celebrations!",
+                    message: "Every completed item gives XP. Stack it up to level fast and unlock rewards.",
                     iconSystemName: "star.fill",
                     highlightAnchor: nil,
                     action: nil,
@@ -118,9 +158,9 @@ enum TutorialSequence: String, CaseIterable {
                     accentColor: BrandTheme.warning
                 ),
                 TutorialStep(
-                    id: "welcome_5",
+                    id: "welcome_9",
                     title: "Your Journey Begins Now",
-                    message: "You're all set! Start completing items and watch yourself transform. 🚀",
+                    message: "You're ready. Complete items, follow arcs, and watch your life transform. 🚀",
                     iconSystemName: "rocket.fill",
                     highlightAnchor: nil,
                     action: TutorialStep.TutorialAction(label: "Let's Go!", handler: {}),
@@ -547,6 +587,7 @@ struct TutorialOverlay: View {
     @State private var cardScale: CGFloat = 0.8
     @State private var cardOpacity: Double = 0
     @State private var backdropOpacity: Double = 0
+    @State private var cardOffset: CGFloat = 24
     @State private var showSparkles: Bool = false
     @State private var showConfetti: Bool = false
     @State private var pulseScale: CGFloat = 1.0
@@ -608,6 +649,7 @@ struct TutorialOverlay: View {
                     )
                     .scaleEffect(cardScale)
                     .opacity(cardOpacity)
+                    .offset(y: cardOffset)
                     .padding(.horizontal, DesignSystem.spacing.lg)
                     .padding(.bottom, DesignSystem.spacing.xxxl)
                 }
@@ -631,6 +673,7 @@ struct TutorialOverlay: View {
         withAnimation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.1)) {
             cardScale = 1
             cardOpacity = 1
+            cardOffset = 0
         }
         
         triggerCelebration(for: step)
@@ -638,10 +681,11 @@ struct TutorialOverlay: View {
     }
     
     private func transitionAnimation(to step: TutorialStep) {
-        // Quick exit
-        withAnimation(.easeIn(duration: 0.15)) {
-            cardScale = 0.9
-            cardOpacity = 0
+        // Gentle micro-transition without disappearing
+        withAnimation(.easeInOut(duration: 0.2)) {
+            cardScale = 0.98
+            cardOffset = 8
+            cardOpacity = 1
         }
         
         // Reset celebrations
@@ -649,10 +693,11 @@ struct TutorialOverlay: View {
         showConfetti = false
         
         // Entrance
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
                 cardScale = 1
                 cardOpacity = 1
+                cardOffset = 0
             }
             
             triggerCelebration(for: step)
@@ -702,29 +747,40 @@ struct TutorialParticlesView: View {
     
     struct TutorialParticle: Identifiable {
         let id = UUID()
-        var x: CGFloat
-        var y: CGFloat
-        var scale: CGFloat
-        var opacity: Double
-        var rotation: Double
+        let baseX: CGFloat
+        let offsetY: CGFloat
+        let scale: CGFloat
+        let opacity: Double
+        let driftSpeed: Double
+        let swayAmplitude: CGFloat
+        let phase: Double
+        let rotationSpeed: Double
     }
     
     var body: some View {
         GeometryReader { geometry in
-            ZStack {
-                ForEach(particles) { particle in
-                    Image(systemName: "sparkle")
-                        .font(.system(size: 12))
-                        .foregroundColor(color)
-                        .scaleEffect(particle.scale)
-                        .opacity(particle.opacity)
-                        .rotationEffect(.degrees(particle.rotation))
-                        .position(x: particle.x, y: particle.y)
+            TimelineView(.animation) { timeline in
+                let time = timeline.date.timeIntervalSinceReferenceDate
+                ZStack {
+                    ForEach(particles) { particle in
+                        let travel = (time * particle.driftSpeed + particle.phase)
+                            .truncatingRemainder(dividingBy: Double(geometry.size.height + 80))
+                        let yPosition = geometry.size.height - CGFloat(travel) + particle.offsetY
+                        let xPosition = particle.baseX + particle.swayAmplitude * CGFloat(sin(time * 0.7 + particle.phase))
+                        let rotation = time * particle.rotationSpeed
+                        
+                        Image(systemName: "sparkle")
+                            .font(.system(size: 12))
+                            .foregroundColor(color)
+                            .scaleEffect(particle.scale)
+                            .opacity(particle.opacity)
+                            .rotationEffect(.degrees(rotation))
+                            .position(x: xPosition, y: yPosition)
+                    }
                 }
-            }
-            .onAppear {
-                createParticles(in: geometry.size)
-                animateParticles(in: geometry.size)
+                .onAppear {
+                    createParticles(in: geometry.size)
+                }
             }
         }
         .allowsHitTesting(false)
@@ -733,32 +789,92 @@ struct TutorialParticlesView: View {
     private func createParticles(in size: CGSize) {
         particles = (0..<20).map { _ in
             TutorialParticle(
-                x: CGFloat.random(in: 0...size.width),
-                y: CGFloat.random(in: 0...size.height),
-                scale: CGFloat.random(in: 0.5...1.5),
-                opacity: Double.random(in: 0.3...0.7),
-                rotation: Double.random(in: 0...360)
+                baseX: CGFloat.random(in: 12...max(12, size.width - 12)),
+                offsetY: CGFloat.random(in: -40...40),
+                scale: CGFloat.random(in: 0.6...1.3),
+                opacity: Double.random(in: 0.35...0.7),
+                driftSpeed: Double.random(in: 18...32),
+                swayAmplitude: CGFloat.random(in: 6...16),
+                phase: Double.random(in: 0...120),
+                rotationSpeed: Double.random(in: -20...20)
             )
         }
     }
+}
+
+private struct TutorialCardParticlesView: View {
+    let color: Color
+    @State private var particles: [TutorialCardParticle] = []
     
-    private func animateParticles(in size: CGSize) {
-        Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
-            withAnimation(.easeInOut(duration: 2.0)) {
-                for i in particles.indices {
-                    particles[i].y -= CGFloat.random(in: 20...50)
-                    particles[i].x += CGFloat.random(in: -20...20)
-                    particles[i].opacity = Double.random(in: 0.2...0.8)
-                    particles[i].rotation += Double.random(in: -45...45)
-                    
-                    // Reset particles that go off screen
-                    if particles[i].y < 0 {
-                        particles[i].y = size.height + 20
-                        particles[i].x = CGFloat.random(in: 0...size.width)
+    struct TutorialCardParticle: Identifiable {
+        let id = UUID()
+        let baseX: CGFloat
+        let baseY: CGFloat
+        let scale: CGFloat
+        let opacity: Double
+        let driftSpeed: Double
+        let phase: Double
+    }
+    
+    var body: some View {
+        GeometryReader { geometry in
+            TimelineView(.animation) { timeline in
+                let time = timeline.date.timeIntervalSinceReferenceDate
+                ZStack {
+                    ForEach(particles) { particle in
+                        let x = particle.baseX + CGFloat(sin(time * 0.5 + particle.phase)) * 8
+                        let y = particle.baseY + CGFloat(cos(time * particle.driftSpeed + particle.phase)) * 6
+                        
+                        Circle()
+                            .fill(color.opacity(particle.opacity))
+                            .frame(width: 4 * particle.scale, height: 4 * particle.scale)
+                            .position(x: x, y: y)
                     }
+                }
+                .onAppear {
+                    createParticles(in: geometry.size)
                 }
             }
         }
+        .allowsHitTesting(false)
+    }
+    
+    private func createParticles(in size: CGSize) {
+        particles = (0..<10).map { _ in
+            TutorialCardParticle(
+                baseX: CGFloat.random(in: 20...max(20, size.width - 20)),
+                baseY: CGFloat.random(in: 20...max(20, size.height - 20)),
+                scale: CGFloat.random(in: 0.6...1.2),
+                opacity: Double.random(in: 0.08...0.18),
+                driftSpeed: Double.random(in: 0.4...0.8),
+                phase: Double.random(in: 0...6.28)
+            )
+        }
+    }
+}
+
+private struct TutorialCardAmbientGlow: View {
+    let color: Color
+    @State private var glowShift: CGFloat = -16
+    
+    var body: some View {
+        RadialGradient(
+            colors: [
+                color.opacity(0.22),
+                color.opacity(0.12),
+                Color.clear
+            ],
+            center: .topLeading,
+            startRadius: 20,
+            endRadius: 220
+        )
+        .offset(x: glowShift, y: -glowShift)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 6).repeatForever(autoreverses: true)) {
+                glowShift = 16
+            }
+        }
+        .allowsHitTesting(false)
     }
 }
 
@@ -775,6 +891,7 @@ struct TutorialCard: View {
     @State private var iconRotation: Double = 0
     @State private var glowPulse: Bool = false
     @State private var progressAnimated: Bool = false
+    @State private var floatingCard: Bool = false
     
     var body: some View {
         VStack(spacing: DesignSystem.spacing.xl) {
@@ -915,6 +1032,16 @@ struct TutorialCard: View {
                         )
                     )
                 
+                TutorialCardAmbientGlow(color: step.accentColor)
+                    .clipShape(
+                        RoundedRectangle(cornerRadius: DesignSystem.radius.xxl, style: .continuous)
+                    )
+                
+                TutorialCardParticlesView(color: step.accentColor)
+                    .clipShape(
+                        RoundedRectangle(cornerRadius: DesignSystem.radius.xxl, style: .continuous)
+                    )
+                
                 // Accent glow at top
                 VStack {
                     LinearGradient(
@@ -943,6 +1070,11 @@ struct TutorialCard: View {
         )
         .shadow(color: step.accentColor.opacity(0.15), radius: 40, y: 20)
         .shadow(color: Color.black.opacity(0.2), radius: 30, y: 15)
+        .offset(y: floatingCard ? -4 : 4)
+        .rotation3DEffect(
+            .degrees(floatingCard ? 0.6 : -0.6),
+            axis: (x: 1, y: 0, z: 0)
+        )
         .onAppear {
             startAnimations()
         }
@@ -956,6 +1088,7 @@ struct TutorialCard: View {
         iconBounce = false
         iconRotation = -10
         glowPulse = false
+        floatingCard = false
         
         // Animate icon entrance
         withAnimation(.spring(response: 0.5, dampingFraction: 0.6).delay(0.1)) {
@@ -977,6 +1110,10 @@ struct TutorialCard: View {
         // Glow pulse
         withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true).delay(0.3)) {
             glowPulse = true
+        }
+        
+        withAnimation(.easeInOut(duration: 5.5).repeatForever(autoreverses: true).delay(0.4)) {
+            floatingCard = true
         }
     }
 }
@@ -1025,20 +1162,7 @@ struct TutorialListView: View {
                     // Animated Header
                     VStack(spacing: DesignSystem.spacing.md) {
                         ZStack {
-                            // Animated rings
-                            ForEach(0..<3) { i in
-                                Circle()
-                                    .stroke(BrandTheme.accent.opacity(0.2 - Double(i) * 0.05), lineWidth: 2)
-                                    .frame(width: CGFloat(100 + i * 25), height: CGFloat(100 + i * 25))
-                                    .scaleEffect(showAnimation ? 1.1 : 1.0)
-                                    .animation(
-                                        .easeInOut(duration: 2)
-                                        .repeatForever(autoreverses: true)
-                                        .delay(Double(i) * 0.2),
-                                        value: showAnimation
-                                    )
-                            }
-                            
+                            TutorialHeaderRings(isAnimating: showAnimation)
                             IconContainer(
                                 systemName: "book.fill",
                                 color: BrandTheme.accent,
@@ -1046,6 +1170,7 @@ struct TutorialListView: View {
                                 style: .gradient
                             )
                         }
+                        .frame(width: 170, height: 170)
                         
                         Text("Master Life XP")
                             .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -1150,6 +1275,30 @@ struct TutorialListView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             manager.startTutorial(sequence)
         }
+    }
+}
+
+private struct TutorialHeaderRings: View {
+    let isAnimating: Bool
+    
+    var body: some View {
+        ZStack {
+            ForEach(0..<3) { index in
+                let size = CGFloat(104 + index * 26)
+                Circle()
+                    .stroke(BrandTheme.accent.opacity(0.24 - Double(index) * 0.06), lineWidth: 2)
+                    .frame(width: size, height: size)
+                    .scaleEffect(isAnimating ? 1.05 + CGFloat(index) * 0.02 : 1.0)
+                    .animation(
+                        .easeInOut(duration: 2.6)
+                            .repeatForever(autoreverses: true)
+                            .delay(Double(index) * 0.2),
+                        value: isAnimating
+                    )
+            }
+        }
+        .drawingGroup()
+        .allowsHitTesting(false)
     }
 }
 
