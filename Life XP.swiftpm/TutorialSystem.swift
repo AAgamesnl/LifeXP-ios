@@ -759,7 +759,7 @@ struct TutorialParticlesView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            TimelineView(.animation) { timeline in
+            TimelineView(.animation) { (timeline: TimelineViewDefaultContext) in
                 let time = timeline.date.timeIntervalSinceReferenceDate
                 ZStack {
                     ForEach(particles) { particle in
@@ -818,7 +818,7 @@ private struct TutorialCardParticlesView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            TimelineView(.animation) { timeline in
+            TimelineView(.animation) { (timeline: TimelineViewDefaultContext) in
                 let time = timeline.date.timeIntervalSinceReferenceDate
                 ZStack {
                     ForEach(particles) { particle in

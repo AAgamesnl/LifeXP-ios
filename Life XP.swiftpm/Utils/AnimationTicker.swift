@@ -5,7 +5,7 @@ import SwiftUI
 struct AdaptiveTimelineView<Content: View>: View {
     let minimumInterval: TimeInterval
     let isActive: Bool
-    let content: (TimelineView<AnimationTimelineSchedule, Content>.Context) -> Content
+    let content: (TimelineViewDefaultContext) -> Content
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -14,7 +14,7 @@ struct AdaptiveTimelineView<Content: View>: View {
     init(
         minimumInterval: TimeInterval = 1.0 / 120,
         isActive: Bool = true,
-        @ViewBuilder content: @escaping (TimelineView<AnimationTimelineSchedule, Content>.Context) -> Content
+        @ViewBuilder content: @escaping (TimelineViewDefaultContext) -> Content
     ) {
         self.minimumInterval = minimumInterval
         self.isActive = isActive
