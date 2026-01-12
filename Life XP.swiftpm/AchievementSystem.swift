@@ -1529,7 +1529,7 @@ struct AchievementUnlockOverlay: View {
 struct TrophyCaseView_Previews: PreviewProvider {
     static var previews: some View {
         TrophyCaseView()
-            .environmentObject(AppModel())
+            .environment(AppModel())
     }
 }
 #endif

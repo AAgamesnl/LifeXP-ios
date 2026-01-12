@@ -628,11 +628,11 @@ struct LevelUpCelebration: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
-            .environmentObject(AppModel())
+            .environment(AppModel())
             .preferredColorScheme(.light)
         
         ContentView()
-            .environmentObject(AppModel())
+            .environment(AppModel())
             .preferredColorScheme(.dark)
     }
 }

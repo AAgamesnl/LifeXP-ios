@@ -95,7 +95,7 @@ final class AnalyticsEngine: ObservableObject {
     @Published var isLoading = false
     
     private let calendar = Calendar.current
-    private weak(AppModel.self) private var appModel?
+    private weak var appModel: AppModel?
     
     func configure(with appModel: AppModel) {
         self.appModel = appModel
@@ -1180,7 +1180,7 @@ struct ShareSheet: UIViewControllerRepresentable {
 struct AnalyticsDashboardView_Previews: PreviewProvider {
     static var previews: some View {
         AnalyticsDashboardView()
-            .environmentObject(AppModel())
+            .environment(AppModel())
     }
 }
 #endif
