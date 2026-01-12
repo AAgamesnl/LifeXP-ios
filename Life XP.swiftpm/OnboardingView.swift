@@ -33,16 +33,16 @@ struct OnboardingView: View {
                 
                 // Content pages
                 TabView(selection: $step) {
-                    WelcomePage()
+                    WelcomePage(isActive: step == 0)
                         .tag(0)
                     
-                    FocusPage(selectedFocuses: $selectedFocuses)
+                    FocusPage(selectedFocuses: $selectedFocuses, isActive: step == 1)
                         .tag(1)
                     
-                    EnergyPage(overwhelmed: $overwhelmed)
+                    EnergyPage(overwhelmed: $overwhelmed, isActive: step == 2)
                         .tag(2)
                     
-                    TonePage(selectedTone: $selectedTone)
+                    TonePage(selectedTone: $selectedTone, isActive: step == 3)
                         .tag(3)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
@@ -121,7 +121,11 @@ struct OnboardingView: View {
         model.toneMode = selectedTone
         
         HapticsEngine.success()
-        showConfetti = true
+        showConfetti = false
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            showConfetti = true
+        }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             onDone()
@@ -207,6 +211,7 @@ struct OnboardingControls: View {
 // MARK: - Welcome Page
 
 struct WelcomePage: View {
+    let isActive: Bool
     @State private var showContent = false
     @State private var showFeatures = false
     @State private var iconScale: CGFloat = 0.5
@@ -302,15 +307,34 @@ struct WelcomePage: View {
             .padding(.horizontal, DesignSystem.spacing.xl)
         }
         .onAppear {
-            withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
-                iconScale = 1
-                showContent = true
-            }
-            
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.3)) {
-                showFeatures = true
+            if isActive {
+                animateIn()
             }
         }
+        .onChange(of: isActive) { _, newValue in
+            if newValue {
+                animateIn()
+            } else {
+                resetState()
+            }
+        }
+    }
+    
+    private func animateIn() {
+        withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
+            iconScale = 1
+            showContent = true
+        }
+        
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.3)) {
+            showFeatures = true
+        }
+    }
+    
+    private func resetState() {
+        showContent = false
+        showFeatures = false
+        iconScale = 0.5
     }
 }
 
@@ -352,6 +376,7 @@ struct FeatureRow: View {
 
 struct FocusPage: View {
     @Binding var selectedFocuses: Set<LifeDimension>
+    let isActive: Bool
     @State private var showContent = false
     
     var body: some View {
@@ -406,9 +431,22 @@ struct FocusPage: View {
             .padding(.horizontal, DesignSystem.spacing.xl)
         }
         .onAppear {
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.1)) {
-                showContent = true
+            if isActive {
+                animateIn()
             }
+        }
+        .onChange(of: isActive) { _, newValue in
+            if newValue {
+                animateIn()
+            } else {
+                showContent = false
+            }
+        }
+    }
+    
+    private func animateIn() {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.1)) {
+            showContent = true
         }
     }
 }
@@ -468,6 +506,7 @@ struct DimensionCard: View {
 
 struct EnergyPage: View {
     @Binding var overwhelmed: Double
+    let isActive: Bool
     @State private var showContent = false
     
     private var energyLevel: String {
@@ -578,9 +617,22 @@ struct EnergyPage: View {
             .padding(.horizontal, DesignSystem.spacing.xl)
         }
         .onAppear {
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.1)) {
-                showContent = true
+            if isActive {
+                animateIn()
             }
+        }
+        .onChange(of: isActive) { _, newValue in
+            if newValue {
+                animateIn()
+            } else {
+                showContent = false
+            }
+        }
+    }
+    
+    private func animateIn() {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.1)) {
+            showContent = true
         }
     }
 }
@@ -589,6 +641,7 @@ struct EnergyPage: View {
 
 struct TonePage: View {
     @Binding var selectedTone: ToneMode
+    let isActive: Bool
     @State private var showContent = false
     
     var body: some View {
@@ -673,9 +726,22 @@ struct TonePage: View {
             .padding(.horizontal, DesignSystem.spacing.xl)
         }
         .onAppear {
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.1)) {
-                showContent = true
+            if isActive {
+                animateIn()
             }
+        }
+        .onChange(of: isActive) { _, newValue in
+            if newValue {
+                animateIn()
+            } else {
+                showContent = false
+            }
+        }
+    }
+    
+    private func animateIn() {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.1)) {
+            showContent = true
         }
     }
 }

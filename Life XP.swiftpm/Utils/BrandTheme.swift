@@ -1325,6 +1325,7 @@ struct ConfettiView: View {
     
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var particles: [(id: Int, x: CGFloat, y: CGFloat, scale: CGFloat, rotation: Double, colorIndex: Int)] = []
+    @State private var containerSize: CGSize = .zero
     
     private let colors: [Color] = [
         BrandTheme.accent,
@@ -1353,6 +1354,15 @@ struct ConfettiView: View {
                     )
                 }
             }
+            .onAppear {
+                containerSize = geo.size
+                if isActive {
+                    triggerIfPossible()
+                }
+            }
+            .onChange(of: geo.size) { _, newSize in
+                containerSize = newSize
+            }
             .onChange(of: isActive) { _, newValue in
                 if newValue {
                     if reduceMotion {
@@ -1360,12 +1370,25 @@ struct ConfettiView: View {
                             isActive = false
                         }
                     } else {
-                        triggerConfetti(in: geo.size)
+                        triggerIfPossible()
                     }
                 }
             }
         }
         .allowsHitTesting(false)
+    }
+    
+    private func triggerIfPossible() {
+        guard containerSize.width > 0, containerSize.height > 0 else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                if isActive {
+                    triggerIfPossible()
+                }
+            }
+            return
+        }
+        
+        triggerConfetti(in: containerSize)
     }
     
     private func triggerConfetti(in size: CGSize) {

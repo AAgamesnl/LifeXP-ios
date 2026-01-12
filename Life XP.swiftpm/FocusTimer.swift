@@ -431,6 +431,7 @@ struct FocusTimerView: View {
 
 struct FocusTimerDisplay: View {
     @ObservedObject var manager: FocusTimerManager
+    @State private var statePulse = false
     
     private var accentColor: Color {
         switch manager.state.sessionType {
@@ -497,92 +498,129 @@ struct FocusTimerDisplay: View {
             }
             
             // Control Buttons
-            HStack(spacing: DesignSystem.spacing.lg) {
+            ZStack {
                 switch manager.state {
                 case .idle:
-                    Button {
-                        manager.startFocus()
-                        HapticsEngine.lightImpact()
-                    } label: {
-                        HStack {
-                            Image(systemName: "play.fill")
-                            Text("Start Focus")
-                        }
-                    }
-                    .buttonStyle(GlowButtonStyle(color: BrandTheme.error, size: .large))
-                    
-                case .running:
-                    Button {
-                        manager.pause()
-                    } label: {
-                        Image(systemName: "pause.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(.white)
-                            .frame(width: 56, height: 56)
-                            .background(Circle().fill(BrandTheme.warning))
-                    }
-                    
-                    Button {
-                        manager.stop()
-                    } label: {
-                        Image(systemName: "stop.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(BrandTheme.error)
-                            .frame(width: 56, height: 56)
-                            .background(Circle().fill(BrandTheme.error.opacity(0.15)))
-                    }
-                    
-                case .paused:
-                    Button {
-                        manager.resume()
-                        HapticsEngine.lightImpact()
-                    } label: {
-                        Image(systemName: "play.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(.white)
-                            .frame(width: 56, height: 56)
-                            .background(Circle().fill(BrandTheme.success))
-                    }
-                    
-                    Button {
-                        manager.stop()
-                    } label: {
-                        Image(systemName: "stop.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(BrandTheme.error)
-                            .frame(width: 56, height: 56)
-                            .background(Circle().fill(BrandTheme.error.opacity(0.15)))
-                    }
-                    
-                case .completed(let type):
-                    if type == .focus {
+                    HStack(spacing: DesignSystem.spacing.lg) {
                         Button {
-                            manager.startShortBreak()
+                            manager.startFocus()
                             HapticsEngine.lightImpact()
                         } label: {
                             HStack {
-                                Image(systemName: "cup.and.saucer.fill")
-                                Text("Take Break")
+                                Image(systemName: "play.fill")
+                                Text("Start Focus")
                             }
                         }
-                        .buttonStyle(GlowButtonStyle(color: BrandTheme.success, size: .medium))
+                        .buttonStyle(GlowButtonStyle(color: BrandTheme.error, size: .large))
                     }
+                    .transition(.scale.combined(with: .opacity))
                     
-                    Button {
-                        manager.startFocus()
-                        HapticsEngine.lightImpact()
-                    } label: {
-                        HStack {
-                            Image(systemName: "play.fill")
-                            Text(type == .focus ? "Another" : "Focus")
+                case .running:
+                    HStack(spacing: DesignSystem.spacing.lg) {
+                        Button {
+                            manager.pause()
+                        } label: {
+                            Image(systemName: "pause.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.white)
+                                .frame(width: 56, height: 56)
+                                .background(Circle().fill(BrandTheme.warning))
+                        }
+                        
+                        Button {
+                            manager.stop()
+                        } label: {
+                            Image(systemName: "stop.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(BrandTheme.error)
+                                .frame(width: 56, height: 56)
+                                .background(Circle().fill(BrandTheme.error.opacity(0.15)))
                         }
                     }
-                    .buttonStyle(GlowButtonStyle(color: BrandTheme.error, size: .medium))
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                    
+                case .paused:
+                    HStack(spacing: DesignSystem.spacing.lg) {
+                        Button {
+                            manager.resume()
+                            HapticsEngine.lightImpact()
+                        } label: {
+                            Image(systemName: "play.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.white)
+                                .frame(width: 56, height: 56)
+                                .background(Circle().fill(BrandTheme.success))
+                        }
+                        
+                        Button {
+                            manager.stop()
+                        } label: {
+                            Image(systemName: "stop.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(BrandTheme.error)
+                                .frame(width: 56, height: 56)
+                                .background(Circle().fill(BrandTheme.error.opacity(0.15)))
+                        }
+                    }
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                    
+                case .completed(let type):
+                    HStack(spacing: DesignSystem.spacing.md) {
+                        if type == .focus {
+                            Button {
+                                manager.startShortBreak()
+                                HapticsEngine.lightImpact()
+                            } label: {
+                                HStack {
+                                    Image(systemName: "cup.and.saucer.fill")
+                                    Text("Take Break")
+                                }
+                            }
+                            .buttonStyle(GlowButtonStyle(color: BrandTheme.success, size: .medium))
+                        }
+                        
+                        Button {
+                            manager.startFocus()
+                            HapticsEngine.lightImpact()
+                        } label: {
+                            HStack {
+                                Image(systemName: "play.fill")
+                                Text(type == .focus ? "Another" : "Focus")
+                            }
+                        }
+                        .buttonStyle(GlowButtonStyle(color: BrandTheme.error, size: .medium))
+                    }
+                    .transition(.opacity.combined(with: .scale))
                 }
             }
+            .animation(.spring(response: 0.35, dampingFraction: 0.85), value: manager.state)
         }
         .elevatedCard(accentColor: accentColor)
         .padding(.top, DesignSystem.spacing.md)
+        .scaleEffect(statePulse ? 1.015 : 1)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: statePulse)
+        .onChange(of: manager.state) { oldValue, newValue in
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                statePulse = true
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    statePulse = false
+                }
+            }
+            
+            switch newValue {
+            case .paused, .completed:
+                HapticsEngine.lightImpact()
+            case .idle:
+                if oldValue != .idle {
+                    HapticsEngine.lightImpact()
+                }
+            case .running:
+                break
+            }
+        }
     }
 }
 
