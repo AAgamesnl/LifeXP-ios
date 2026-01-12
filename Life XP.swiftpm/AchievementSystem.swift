@@ -777,7 +777,7 @@ final class AchievementManager: ObservableObject {
                 .filter { $0.dimensions.contains(dimension) && appModel.completedItemIDs.contains($0.id) }
                 .count
         case .completedArcs:
-            return appModel.arcs.filter { appModel.arcProgress(for: $0) >= 1.0 }.count
+            return appModel.arcs.filter { appModel.arcProgress($0) >= 1.0 }.count
         case .completedQuests:
             return appModel.arcs
                 .flatMap { $0.chapters.flatMap { $0.quests } }
