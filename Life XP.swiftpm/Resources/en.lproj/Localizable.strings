@@ -23,3 +23,37 @@
 "arcs.nextQuests.title" = "Next Quests";
 "settings.nextQuests.title" = "Next Quests Density";
 "settings.nextQuests.subtitle" = "How many upcoming quests to show at once";
+
+"common.done" = "Done";
+
+"moreFeatures.title" = "More Features";
+"moreFeature.habits" = "Habits";
+"moreFeature.journal" = "Journal";
+"moreFeature.focus" = "Focus Timer";
+"moreFeature.analytics" = "Analytics";
+"moreFeature.trophies" = "Trophies";
+
+"packs.title" = "Life Packs";
+"packs.searchPrompt" = "Search packs";
+"packs.empty.title" = "No packs found";
+"packs.empty.message" = "Try adjusting your search or filter.";
+"packs.filter.all" = "All";
+"packs.filter.inProgress" = "In Progress";
+"packs.filter.completed" = "Completed";
+"packs.filter.premium" = "Premium";
+
+"dimension.love" = "Love";
+"dimension.money" = "Money";
+"dimension.mind" = "Mind";
+"dimension.adventure" = "Adventure";
+
+"tone.soft" = "Soft & gentle";
+"tone.realTalk" = "Real talk";
+
+"nudgeIntensity.gentle" = "Gentle";
+"nudgeIntensity.standard" = "Standard";
+"nudgeIntensity.assertive" = "Bold";
+
+"questBoardDensity.lean" = "Lean";
+"questBoardDensity.balanced" = "Balanced";
+"questBoardDensity.packed" = "More options";

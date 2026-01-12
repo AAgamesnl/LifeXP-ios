@@ -11,12 +11,7 @@ enum LifeDimension: String, CaseIterable, Codable, Identifiable, Hashable {
 
     /// User-facing label for the dimension.
     var label: String {
-        switch self {
-        case .love: return "Love"
-        case .money: return "Money"
-        case .mind: return "Mind"
-        case .adventure: return "Adventure"
-        }
+        String(localized: "dimension.\(rawValue)")
     }
 
     /// Symbol that visually represents the dimension.
@@ -52,9 +47,6 @@ enum ToneMode: String, CaseIterable, Identifiable, Hashable, Codable {
 
     /// Human-friendly label for the tone option.
     var label: String {
-        switch self {
-        case .soft: return "Soft & gentle"
-        case .realTalk: return "Real talk"
-        }
+        String(localized: "tone.\(rawValue)")
     }
 }

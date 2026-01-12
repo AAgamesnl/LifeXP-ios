@@ -14,7 +14,6 @@ struct ContentView: View {
     @State private var isReady: Bool = false
     @State private var showLogMood: Bool = false
     @State private var showMoreMenu: Bool = false
-    @StateObject private var journalManager = JournalManager()
     
     // Tutorial system
     @StateObject private var tutorialManager = TutorialManager()
@@ -60,13 +59,7 @@ struct ContentView: View {
         var id: String { rawValue }
         
         var title: String {
-            switch self {
-            case .habits: return "Habits"
-            case .journal: return "Journal"
-            case .focus: return "Focus Timer"
-            case .analytics: return "Analytics"
-            case .trophies: return "Trophies"
-            }
+            String(localized: "moreFeature.\(rawValue)")
         }
         
         var icon: String {
@@ -196,7 +189,7 @@ struct ContentView: View {
             .environment(model)
         }
         .sheet(isPresented: $showLogMood) {
-            LogMoodSheet(manager: journalManager)
+            LogMoodSheet(manager: model.journalManager)
         }
         .sheet(isPresented: $showMoreMenu) {
             MoreFeaturesSheet(selectedFeature: $selectedFeature)
@@ -205,13 +198,13 @@ struct ContentView: View {
         .fullScreenCover(item: $selectedFeature) { feature in
             NavigationStack {
                 featureView(for: feature)
-                    .toolbar {
-                        ToolbarItem(placement: .topBarLeading) {
-                            Button("Done") {
-                                selectedFeature = nil
-                            }
-                        }
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(L10n.commonDone) {
+                        selectedFeature = nil
                     }
+                }
+            }
             }
             .environment(model)
         }
@@ -223,7 +216,7 @@ struct ContentView: View {
         case .habits:
             HabitsView()
         case .journal:
-            JournalView()
+            JournalView(manager: model.journalManager)
         case .focus:
             FocusTimerView()
         case .analytics:
@@ -310,11 +303,11 @@ struct MoreFeaturesSheet: View {
                 Spacer()
             }
             .background(BrandBackgroundStatic())
-            .navigationTitle("More Features")
+            .navigationTitle(L10n.moreFeaturesTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
+                    Button(L10n.commonDone) {
                         dismiss()
                     }
                 }

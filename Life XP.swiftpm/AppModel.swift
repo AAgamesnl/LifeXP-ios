@@ -14,11 +14,7 @@ enum NudgeIntensity: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
     var label: String {
-        switch self {
-        case .gentle: return "Gentle"
-        case .standard: return "Standard"
-        case .assertive: return "Bold"
-        }
+        String(localized: "nudgeIntensity.\(rawValue)")
     }
 
     var questBonus: Int {
@@ -35,11 +31,7 @@ enum QuestBoardDensity: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
     var label: String {
-        switch self {
-        case .lean: return "Lean"
-        case .balanced: return "Balanced"
-        case .packed: return "More options"
-        }
+        String(localized: "questBoardDensity.\(rawValue)")
     }
 
     var questCount: Int {
@@ -225,6 +217,12 @@ final class AppModel {
     var moodTracker: MoodTracker {
         if _moodTracker == nil { _moodTracker = MoodTracker() }
         return _moodTracker!
+    }
+
+    @ObservationIgnored private var _journalManager: JournalManager?
+    var journalManager: JournalManager {
+        if _journalManager == nil { _journalManager = JournalManager() }
+        return _journalManager!
     }
     
     @ObservationIgnored private var _personalGoalsManager: PersonalGoalsManager?

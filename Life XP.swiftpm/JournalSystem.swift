@@ -762,14 +762,17 @@ final class JournalManager: ObservableObject {
 
 /// Main Journal View
 struct JournalView: View {
-    @Environment(AppModel.self) private var appModel
-    @StateObject private var manager = JournalManager()
+    @ObservedObject var manager: JournalManager
     
     @State private var showingNewEntry = false
     @State private var showingQuickMood = false
     @State private var showingHistory = false
     @State private var showingStats = false
     @State private var selectedEntry: JournalEntry?
+
+    init(manager: JournalManager) {
+        _manager = ObservedObject(wrappedValue: manager)
+    }
     
     var body: some View {
         NavigationStack {
@@ -2282,8 +2285,8 @@ struct JournalStatTile: View {
 #if DEBUG
 struct JournalView_Previews: PreviewProvider {
     static var previews: some View {
-        JournalView()
-            .environmentObject(AppModel())
+        JournalView(manager: JournalManager())
+            .environment(AppModel())
     }
 }
 #endif

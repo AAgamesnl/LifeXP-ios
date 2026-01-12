@@ -7,7 +7,6 @@ struct HomeView: View {
     @State private var showHeroCard = false
     @State private var scrollOffset: CGFloat = 0
     @State private var showLogMood = false
-    @StateObject private var journalManager = JournalManager()
     
     var body: some View {
         NavigationStack {
@@ -92,7 +91,7 @@ struct HomeView: View {
                 }
             }
             .sheet(isPresented: $showLogMood) {
-                LogMoodSheet(manager: journalManager)
+                LogMoodSheet(manager: model.journalManager)
             }
         }
     }

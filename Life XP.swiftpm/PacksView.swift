@@ -7,11 +7,17 @@ struct PacksView: View {
     @State private var searchText = ""
     @State private var selectedFilter: PackFilter = .all
     
-    enum PackFilter: String, CaseIterable {
-        case all = "All"
-        case inProgress = "In Progress"
-        case completed = "Completed"
-        case premium = "Premium"
+    enum PackFilter: String, CaseIterable, Identifiable {
+        case all
+        case inProgress
+        case completed
+        case premium
+
+        var id: String { rawValue }
+
+        var label: String {
+            String(localized: "packs.filter.\(rawValue)")
+        }
     }
     
     private var filteredPacks: [CategoryPack] {
@@ -67,8 +73,8 @@ struct PacksView: View {
                         if filteredPacks.isEmpty {
                             EmptyStateView(
                                 icon: "checklist",
-                                title: "No packs found",
-                                message: "Try adjusting your search or filter."
+                                title: String(localized: "packs.empty.title"),
+                                message: String(localized: "packs.empty.message")
                             )
                             .padding(.top, DesignSystem.spacing.xxl)
                         }
@@ -77,8 +83,8 @@ struct PacksView: View {
                     .padding(.bottom, DesignSystem.spacing.xxl)
                 }
             }
-            .navigationTitle("Life Packs")
-            .searchable(text: $searchText, prompt: "Search packs")
+            .navigationTitle(L10n.packsScreenTitle)
+            .searchable(text: $searchText, prompt: L10n.packsSearchPrompt)
         }
     }
 }
@@ -159,9 +165,9 @@ struct FilterChipsRow: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: DesignSystem.spacing.sm) {
-                ForEach(PacksView.PackFilter.allCases, id: \.rawValue) { filter in
+                ForEach(PacksView.PackFilter.allCases) { filter in
                     FilterChip(
-                        title: filter.rawValue,
+                        title: filter.label,
                         isSelected: selectedFilter == filter
                     ) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.85, blendDuration: 0.08)) {

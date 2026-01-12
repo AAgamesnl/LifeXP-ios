@@ -27,6 +27,11 @@ enum L10n {
     static let arcsNextQuestsTitle = LocalizedStringKey("arcs.nextQuests.title")
     static let settingsNextQuestsTitle = LocalizedStringKey("settings.nextQuests.title")
     static let settingsNextQuestsSubtitle = LocalizedStringKey("settings.nextQuests.subtitle")
+
+    static let commonDone = LocalizedStringKey("common.done")
+    static let moreFeaturesTitle = LocalizedStringKey("moreFeatures.title")
+    static let packsScreenTitle = LocalizedStringKey("packs.title")
+    static let packsSearchPrompt = LocalizedStringKey("packs.searchPrompt")
 }
 
 extension String {

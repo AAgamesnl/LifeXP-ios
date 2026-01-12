@@ -80,9 +80,7 @@ struct ArcsView: View {
             }
             .navigationTitle(L10n.tabArcs)
             .onAppear {
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                    showHero = true
-                }
+                showHero = true
             }
             .confirmationDialog(
                 "Choose an arc to pause",
