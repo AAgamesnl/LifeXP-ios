@@ -9,6 +9,7 @@ import AppleProductTypes
 
 let package = Package(
     name: "Life XP",
+    defaultLocalization: "en",
     platforms: [
         .iOS("18.1")
     ],
