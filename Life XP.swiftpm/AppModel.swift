@@ -15,9 +15,9 @@ enum NudgeIntensity: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .gentle: return "Zacht"
-        case .standard: return "Standaard"
-        case .assertive: return "Vurig"
+        case .gentle: return "Gentle"
+        case .standard: return "Standard"
+        case .assertive: return "Bold"
         }
     }
 
@@ -36,9 +36,9 @@ enum QuestBoardDensity: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .lean: return "Compact"
-        case .balanced: return "Normaal"
-        case .packed: return "Veel opties"
+        case .lean: return "Lean"
+        case .balanced: return "Balanced"
+        case .packed: return "More options"
         }
     }
 
@@ -944,8 +944,14 @@ final class AppModel {
         max(1, settings.questBoardDensity.questCount + settings.dailyNudgeIntensity.questBonus)
     }
 
-    /// Arcs we propose the player starts next, prioritizing weak dimensions and unfinished arcs.
+    /// Number of fully completed packs.
+    var completedPackCount: Int {
+        packs.filter { progress(for: $0) >= 1 }.count
+    }
+
+    /// Arcs we propose once the player has meaningful progress.
     var suggestedArcs: [Arc] {
+        guard completedPackCount > 0 else { return [] }
         let incomplete = visibleArcs.filter { arcProgress($0) < 1 }
         guard !incomplete.isEmpty else { return [] }
 
@@ -978,20 +984,13 @@ final class AppModel {
         return Array(prioritized.prefix(4))
     }
 
-    /// Combines the active arc with fallback suggestions to surface the most actionable quest board.
+    /// Returns the active arc's next quests, if any.
     func nextQuestBoard(limit: Int? = nil) -> (arc: Arc?, quests: [Quest]) {
         let finalLimit = limit ?? questBoardLimit
         guard finalLimit > 0 else { return (nil, []) }
-        if let arc = activeArc {
-            let quests = nextQuests(in: arc, limit: finalLimit)
-            if !quests.isEmpty { return (arc, quests) }
-        }
-
-        if let arc = suggestedArcs.first {
-            return (arc, nextQuests(in: arc, limit: finalLimit))
-        }
-
-        return (nil, [])
+        guard let arc = activeArc else { return (nil, []) }
+        let quests = nextQuests(in: arc, limit: finalLimit)
+        return (quests.isEmpty ? nil : arc, quests)
     }
 
     /// Handy entry for surfacing on Home, Stats, and the share card.
@@ -1000,12 +999,12 @@ final class AppModel {
     }
 
     var arcProgressHeadline: String {
-        guard let arc = highlightedArc else { return "Nog geen arc gekozen." }
+        guard let arc = highlightedArc else { return "No arc selected yet." }
         let progress = Int(arcProgress(arc) * 100)
         if let day = arcDay(for: arc) {
-            return "\(arc.title): dag \(day), \(progress)% compleet"
+            return "\(arc.title): day \(day), \(progress)% complete"
         }
-        return "\(arc.title): \(progress)% compleet"
+        return "\(arc.title): \(progress)% complete"
     }
 
     // MARK: - Suggestions & coaching
@@ -1054,21 +1053,21 @@ final class AppModel {
     /// Short label for where the user should aim next.
     var focusHeadline: String {
         if let lowest = lowestDimension {
-            return "Focus \(lowest.label) voor een betere balans."
+            return "Focus \(lowest.label) to bring balance back."
         }
-        return "Pak een willekeurige quest en houd de flow vast."
+        return "Pick any quest and keep the momentum going."
     }
 
     /// Lightweight rituals that rotate daily for extra inspiration.
     var ritualOfTheDay: String {
         let rituals = [
-            "Schrijf 3 zinnen over wat je vandaag wilt voelen.",
-            "Drink water, adem diep in en uit voor 60 seconden.",
-            "Stuur iemand een snelle appreciatie-voice note.",
-            "Maak je favoriete hoekje netjes; micro reset.",
-            "Plan 1 bold move voor je toekomst-self en blok het in.",
-            "Zet een timer en beweeg 7 minuten: springen, rekken, lopen.",
-            "Kies je outfit voor morgen en leg ‘m klaar (future you zegt bedankt).",
+            "Write three sentences about how you want to feel today.",
+            "Drink water and take slow breaths for 60 seconds.",
+            "Send someone a quick appreciation voice note.",
+            "Tidy your favorite corner for a micro reset.",
+            "Plan one bold move for your future self and block it in.",
+            "Set a timer and move for seven minutes: jump, stretch, walk.",
+            "Pick tomorrow's outfit and set it out (future you says thanks)."
         ]
 
         let index = calendar.component(.day, from: Date()) % rituals.count
@@ -1103,7 +1102,7 @@ final class AppModel {
         return Array(candidates.prefix(3))
     }
 
-    /// High XP item to pitch as eenmalige "boss fight".
+    /// High XP item to pitch as a one-time "boss fight".
     var legendaryQuest: ChecklistItem? {
         allVisibleItems
             .filter { !completedItemIDs.contains($0.id) }
@@ -1114,17 +1113,17 @@ final class AppModel {
     /// Soft or real-talk affirmation tuned to progress.
     var dailyAffirmation: String {
         let inspirationsSoft = [
-            "Je hoeft het niet perfect te doen om het toch te laten tellen.",
-            "Vandaag is een goed moment om te bouwen aan het leven dat je wilt voelen.",
-            "Rust en actie kunnen naast elkaar bestaan. Kies één mini-actie nu.",
-            "Je pace is prima. Je verschijnt; dat is de winst.",
+            "It doesn't have to be perfect to count.",
+            "Today is a good moment to build the life you want to feel.",
+            "Rest and action can coexist. Choose one tiny action now.",
+            "Your pace is fine. Showing up is the win."
         ]
 
         let inspirationsRealTalk = [
-            "Niet wachten op motivatie; bewegen creëert motivatie.",
-            "Geen zin? Prima. Doe het alsnog, maar kleiner.",
-            "De toekomst-versie van jou rekent op vandaag. Start.",
-            "Momentum > perfecte planning.", 
+            "Don't wait for motivation; movement creates motivation.",
+            "Not feeling it? Fine. Do it anyway, just smaller.",
+            "Future you is counting on today. Start.",
+            "Momentum beats perfect planning."
         ]
 
         let base = toneMode == .soft ? inspirationsSoft : inspirationsRealTalk
@@ -1136,22 +1135,22 @@ final class AppModel {
     var energyCheckIn: String {
         switch overwhelmedLevel {
         case 0...2:
-            return "Je staat in herstelmodus. Kies iets zachts en vier elke micro stap."
+            return "You're in recovery mode. Choose something gentle and celebrate every micro step."
         case 3...4:
-            return "Je kan wat aan. Kies 1 focus-quest en 1 micro win voor momentum."
+            return "You've got some energy. Pick one focus quest and one small win for momentum."
         default:
-            return "Je bent in beast mode. Pak een hero quest en bouw aan je streak."
+            return "You're in beast mode. Grab a hero quest and build the streak."
         }
     }
 
     /// Gentle resets the user can do when energy is low.
     var recoveryPrompts: [String] {
         [
-            "Doe een 3-minuten reset: ademhaling, water, stretchen.",
-            "Schrijf 5 dingen op die vandaag genoeg zijn. Niet perfect, wel echt.",
-            "Maak een 'done list' van wat al goed ging en claim die dopamine.",
-            "Plan een mini-reward na één task: thee, muziek, een meme kijken.",
-            "Kies de makkelijkste quest die toch vooruitgang boekt." 
+            "Do a 3-minute reset: breathing, water, stretch.",
+            "Write down five things that are enough today. Not perfect, just real.",
+            "Make a done list of what already went well and claim the dopamine.",
+            "Plan a mini reward after one task: tea, music, a meme.",
+            "Pick the easiest quest that still moves you forward."
         ]
     }
 
@@ -1167,19 +1166,19 @@ final class AppModel {
         let dayIndex = calendar.component(.weekday, from: Date())
         let base: [[BlueprintStep]] = [
             [
-                BlueprintStep(title: "Plan 1 bold move", detail: "Blokkeer 30 min voor een taak waar toekomst-jij blij van wordt.", icon: "target"),
-                BlueprintStep(title: "Inbox reset", detail: "Snoei notificaties en 5 snelle replies.", icon: "tray.fill"),
-                BlueprintStep(title: "Body check", detail: "10 minuten bewegen of een wandeling met muziek.", icon: "figure.walk")
+                BlueprintStep(title: "Plan one bold move", detail: "Block 30 minutes for a task future you will thank you for.", icon: "target"),
+                BlueprintStep(title: "Inbox reset", detail: "Trim notifications and send five quick replies.", icon: "tray.fill"),
+                BlueprintStep(title: "Body check", detail: "Move for 10 minutes or take a walk with music.", icon: "figure.walk")
             ],
             [
-                BlueprintStep(title: "Social ping", detail: "Stuur een voice note naar iemand die je energie geeft.", icon: "bubble.left.and.bubble.right.fill"),
-                BlueprintStep(title: "Money micro", detail: "Check 1 rekening of zet 10 euro apart.", icon: "creditcard.fill"),
-                BlueprintStep(title: "Mind care", detail: "Schrijf 3 zinnen over wat je vandaag loslaat.", icon: "brain.head.profile")
+                BlueprintStep(title: "Social ping", detail: "Send a voice note to someone who energizes you.", icon: "bubble.left.and.bubble.right.fill"),
+                BlueprintStep(title: "Money micro", detail: "Check one account or set aside a small amount.", icon: "creditcard.fill"),
+                BlueprintStep(title: "Mind care", detail: "Write three sentences about what you're letting go today.", icon: "brain.head.profile")
             ],
             [
-                BlueprintStep(title: "Adventure seed", detail: "Plan een mini-uitstap voor dit weekend.", icon: "safari.fill"),
-                BlueprintStep(title: "Workspace reset", detail: "Ruim 1 hoekje op zodat je weer kan focussen.", icon: "square.grid.2x2.fill"),
-                BlueprintStep(title: "Sleep prep", detail: "Leg je outfit klaar en zet je telefoon op nachtstand.", icon: "moon.zzz.fill")
+                BlueprintStep(title: "Adventure seed", detail: "Plan a mini outing for this weekend.", icon: "safari.fill"),
+                BlueprintStep(title: "Workspace reset", detail: "Clear one corner so you can focus again.", icon: "square.grid.2x2.fill"),
+                BlueprintStep(title: "Sleep prep", detail: "Set out your outfit and put your phone in night mode.", icon: "moon.zzz.fill")
             ]
         ]
 
@@ -1203,7 +1202,7 @@ final class AppModel {
     }
 
     /// Packs sorted by remaining quests to nudge players into closure.
-    var boosterPacks: [(pack: CategoryPack, remaining: Int, progress: Double)] {
+    var featuredPacks: [(pack: CategoryPack, remaining: Int, progress: Double)] {
         packs.compactMap { pack in
             let visible = items(for: pack)
             guard !visible.isEmpty else { return nil }
@@ -1219,13 +1218,13 @@ final class AppModel {
         }
     }
 
-    /// Weekly spotlight theme that rotates om de gebruiker een hoofdstuk te geven.
+    /// Weekly spotlight theme that rotates to give the week a narrative.
     var seasonalSpotlight: (theme: SpotlightTheme, items: [ChecklistItem])? {
         let themes: [SpotlightTheme] = [
-            SpotlightTheme(title: "Adventure Season", description: "Elke week minstens één herinnering maken die opvalt.", iconSystemName: "safari.fill", focus: .adventure),
-            SpotlightTheme(title: "Soft Power", description: "Rustige discipline: slaap, boundaries, beauty rituals.", iconSystemName: "sparkles.tv.fill", focus: .mind),
-            SpotlightTheme(title: "Glow with friends", description: "Samen leren, bouwen en vieren.", iconSystemName: "person.3.sequence.fill", focus: .love),
-            SpotlightTheme(title: "Money Play", description: "Cashflow, skills en kansen unlocken.", iconSystemName: "creditcard.fill", focus: .money)
+            SpotlightTheme(title: "Adventure Season", description: "Make at least one standout memory each week.", iconSystemName: "safari.fill", focus: .adventure),
+            SpotlightTheme(title: "Soft Power", description: "Quiet discipline: sleep, boundaries, beauty rituals.", iconSystemName: "sparkles.tv.fill", focus: .mind),
+            SpotlightTheme(title: "Glow with friends", description: "Learn, build, and celebrate together.", iconSystemName: "person.3.sequence.fill", focus: .love),
+            SpotlightTheme(title: "Money Play", description: "Unlock cashflow, skills, and opportunities.", iconSystemName: "creditcard.fill", focus: .money)
         ]
 
         guard !themes.isEmpty else { return nil }
@@ -1249,20 +1248,20 @@ final class AppModel {
         switch toneMode {
         case .soft:
             if score < 20 {
-                return "Iedereen start ergens. Eén kleine taak vandaag is genoeg. Je hoeft niet ineens je hele leven te fixen."
+                return "Everyone starts somewhere. One small task today is enough. You don't have to fix your whole life at once."
             } else if score < 50 {
-                return "Je bent bezig, en dat zie je. Kies vandaag iets uit je focus-pack en vier dat het gelukt is."
+                return "You're in motion, and it shows. Pick something from your focus pack today and celebrate the finish."
             } else {
-                return "Je bent al een eind op weg. Vergeet niet ook te rusten en te genieten van wat je al hebt gebouwd."
+                return "You're well on your way. Don't forget to rest and enjoy what you've already built."
             }
 
         case .realTalk:
             if score < 20 {
-                return "Je leven gaat zichzelf niet levelen. Eén kleine taak. Vandaag. Geen excuses."
+                return "Your life won't level itself. One small task. Today. No excuses."
             } else if score < 50 {
-                return "Je bent onderweg, maar je speelt nog op easy mode. Pak vandaag iets waar je eigenlijk geen zin in hebt."
+                return "You're on your way, but you're still on easy mode. Do something today you don't feel like doing."
             } else {
-                return "Je bent aan het levellen. Nu niet achteroverleunen en alles laten rotten. Blijf consequent."
+                return "You're leveling up. Don't coast and let it rot. Stay consistent."
             }
         }
     }
@@ -1294,18 +1293,18 @@ final class AppModel {
     /// A bite-sized hint of what unlocks next.
     var nextUnlockMessage: String {
         let milestones: [(Bool, String)] = [
-            (totalXP < 50, "Nog \(50 - totalXP) XP tot badge ‘Getting Started’."),
-            (totalXP < 200, "Nog \(200 - totalXP) XP tot badge ‘Leveling Up’."),
-            (totalXP < 500, "\(500 - totalXP) XP te gaan tot ‘Life Architect’."),
-            (totalXP < 1000, "Legend status komt dichterbij: nog \(1000 - totalXP) XP."),
-            (xp(for: .adventure) < 120 && maxXP(for: .adventure) > 0, "Focus adventure voor badge ‘Explorer’."),
-            (xp(for: .mind) < 150 && maxXP(for: .mind) > 0, "Mind-work badge ‘Inner Work’ staat klaar als je nog \(150 - xp(for: .mind)) XP pakt."),
-            (completedArcs.isEmpty, "Speel een arc uit om badge ‘Story Arc’ te claimen."),
-            (currentStreak < 7, "\(max(0, 7 - currentStreak)) dagen tot je ‘Consistency Era’ badge terugziet."),
-            (bestStreak < 21, "Ga voor 21 dagen streak om ‘Unstoppable’ te claimen."),
+            (totalXP < 50, "\(50 - totalXP) XP to unlock the Getting Started badge."),
+            (totalXP < 200, "\(200 - totalXP) XP to unlock the Leveling Up badge."),
+            (totalXP < 500, "\(500 - totalXP) XP to reach Life Architect."),
+            (totalXP < 1000, "Legend status is closer: \(1000 - totalXP) XP to go."),
+            (xp(for: .adventure) < 120 && maxXP(for: .adventure) > 0, "Focus Adventure to unlock Explorer."),
+            (xp(for: .mind) < 150 && maxXP(for: .mind) > 0, "Inner Work unlocks after \(150 - xp(for: .mind)) more Mind XP."),
+            (completedArcs.isEmpty, "Complete an arc to claim the Story Arc badge."),
+            (currentStreak < 7, "\(max(0, 7 - currentStreak)) days until your Consistency Era badge."),
+            (bestStreak < 21, "Hit a 21-day streak to unlock Unstoppable."),
         ]
 
-        return milestones.first(where: { $0.0 })?.1 ?? "Je hebt de grote milestones gehaald. Tijd voor je eigen legendarische side quest."
+        return milestones.first(where: { $0.0 })?.1 ?? "You've hit the big milestones. Time for a legendary side quest."
     }
 
     // MARK: - Badges
@@ -1379,21 +1378,21 @@ final class AppModel {
     /// All available badges (locked and unlocked)
     var allBadges: [Badge] {
         let allPossible: [Badge] = [
-            Badge(id: "badge_getting_started", name: "Getting Started", description: "Je hebt de eerste stappen gezet en al 50+ XP verzameld.", iconSystemName: "sparkles"),
-            Badge(id: "badge_leveling_up", name: "Leveling Up", description: "Je hebt 200+ XP. Je bent officieel bezig met een glow-up.", iconSystemName: "arrow.up.circle.fill"),
-            Badge(id: "badge_architect", name: "Life Architect", description: "500+ XP: je leven is een designproject geworden.", iconSystemName: "rectangle.3.group.fill"),
-            Badge(id: "badge_legend", name: "Level 100 Vibes", description: "1000+ XP verzameld. Je speelt nu op Legendary.", iconSystemName: "star.circle.fill"),
-            Badge(id: "badge_soft_lover", name: "Soft Lover", description: "Je investeert serieus in relaties en verbinding.", iconSystemName: "heart.circle.fill"),
-            Badge(id: "badge_money_minded", name: "Money Minded", description: "Je bent eerlijk naar je geld aan het kijken en dat betaalt zich terug.", iconSystemName: "banknote.fill"),
-            Badge(id: "badge_explorer", name: "Explorer", description: "Je verzamelt actief nieuwe herinneringen en micro-avonturen.", iconSystemName: "safari.fill"),
-            Badge(id: "badge_inner_work", name: "Inner Work", description: "Mind-work is priority. Reflectie, therapie en routines zijn geland.", iconSystemName: "brain"),
-            Badge(id: "badge_streak_3", name: "On A Roll", description: "Minstens 3 dagen na elkaar iets voor je leven gedaan.", iconSystemName: "flame.fill"),
-            Badge(id: "badge_streak_7", name: "Consistency Era", description: "Je hebt een streak van 7+ dagen gehaald.", iconSystemName: "calendar.badge.checkmark"),
-            Badge(id: "badge_unstoppable", name: "Unstoppable", description: "21+ dagen streak. Dit is hoe momentum voelt.", iconSystemName: "bolt.fill"),
-            Badge(id: "badge_story_arc", name: "Story Arc", description: "Je hebt minstens één arc volledig uitgespeeld.", iconSystemName: "book.circle.fill"),
-            Badge(id: "badge_arc_collector", name: "Arc Collector", description: "Drie arcs gecompleteerd: je leeft in seizoenen.", iconSystemName: "rectangle.stack.fill"),
-            Badge(id: "badge_chapter_closer", name: "Chapter Closer", description: "Je hebt 3+ chapters afgerond. Jij sluit lusjes.", iconSystemName: "book.closed.fill"),
-            Badge(id: "badge_balanced", name: "Balanced", description: "Elke dimensie staat op 60%+ van zijn potentieel.", iconSystemName: "circle.grid.cross")
+            Badge(id: "badge_getting_started", name: "Getting Started", description: "You took the first steps and earned 50+ XP.", iconSystemName: "sparkles"),
+            Badge(id: "badge_leveling_up", name: "Leveling Up", description: "You hit 200+ XP. The glow-up is official.", iconSystemName: "arrow.up.circle.fill"),
+            Badge(id: "badge_architect", name: "Life Architect", description: "500+ XP: your life is now a design project.", iconSystemName: "rectangle.3.group.fill"),
+            Badge(id: "badge_legend", name: "Level 100 Vibes", description: "1,000+ XP earned. You're playing on Legendary.", iconSystemName: "star.circle.fill"),
+            Badge(id: "badge_soft_lover", name: "Soft Lover", description: "You're seriously investing in relationships and connection.", iconSystemName: "heart.circle.fill"),
+            Badge(id: "badge_money_minded", name: "Money Minded", description: "You're looking at your money honestly, and it's paying off.", iconSystemName: "banknote.fill"),
+            Badge(id: "badge_explorer", name: "Explorer", description: "You're collecting new memories and micro-adventures.", iconSystemName: "safari.fill"),
+            Badge(id: "badge_inner_work", name: "Inner Work", description: "Mind work is the priority. Reflection, therapy, routines.", iconSystemName: "brain"),
+            Badge(id: "badge_streak_3", name: "On A Roll", description: "Three days in a row of doing something for your life.", iconSystemName: "flame.fill"),
+            Badge(id: "badge_streak_7", name: "Consistency Era", description: "You've hit a 7+ day streak.", iconSystemName: "calendar.badge.checkmark"),
+            Badge(id: "badge_unstoppable", name: "Unstoppable", description: "21+ day streak. This is what momentum feels like.", iconSystemName: "bolt.fill"),
+            Badge(id: "badge_story_arc", name: "Story Arc", description: "You've completed at least one arc.", iconSystemName: "book.circle.fill"),
+            Badge(id: "badge_arc_collector", name: "Arc Collector", description: "Three arcs completed. You live in seasons.", iconSystemName: "rectangle.stack.fill"),
+            Badge(id: "badge_chapter_closer", name: "Chapter Closer", description: "Three or more chapters finished. You close loops.", iconSystemName: "book.closed.fill"),
+            Badge(id: "badge_balanced", name: "Balanced", description: "Every dimension is at 60%+ of its potential.", iconSystemName: "circle.grid.cross")
         ]
         return allPossible
     }
@@ -1411,7 +1410,7 @@ final class AppModel {
             result.append(Badge(
                 id: "badge_getting_started",
                 name: "Getting Started",
-                description: "Je hebt de eerste stappen gezet en al 50+ XP verzameld.",
+                description: "You took the first steps and earned 50+ XP.",
                 iconSystemName: "sparkles"
             ))
         }
@@ -1420,7 +1419,7 @@ final class AppModel {
             result.append(Badge(
                 id: "badge_leveling_up",
                 name: "Leveling Up",
-                description: "Je hebt 200+ XP. Je bent officieel bezig met een glow-up.",
+                description: "You hit 200+ XP. The glow-up is official.",
                 iconSystemName: "arrow.up.circle.fill"
             ))
         }
@@ -1429,7 +1428,7 @@ final class AppModel {
             result.append(Badge(
                 id: "badge_architect",
                 name: "Life Architect",
-                description: "500+ XP: je leven is een designproject geworden.",
+                description: "500+ XP: your life is now a design project.",
                 iconSystemName: "rectangle.3.group.fill"
             ))
         }
@@ -1438,7 +1437,7 @@ final class AppModel {
             result.append(Badge(
                 id: "badge_legend",
                 name: "Level 100 Vibes",
-                description: "1000+ XP verzameld. Je speelt nu op Legendary.",
+                description: "1,000+ XP earned. You're playing on Legendary.",
                 iconSystemName: "star.circle.fill"
             ))
         }
@@ -1447,7 +1446,7 @@ final class AppModel {
             result.append(Badge(
                 id: "badge_soft_lover",
                 name: "Soft Lover",
-                description: "Je investeert serieus in relaties en verbinding.",
+                description: "You're seriously investing in relationships and connection.",
                 iconSystemName: "heart.circle.fill"
             ))
         }
@@ -1456,7 +1455,7 @@ final class AppModel {
             result.append(Badge(
                 id: "badge_money_minded",
                 name: "Money Minded",
-                description: "Je bent eerlijk naar je geld aan het kijken en dat betaalt zich terug.",
+                description: "You're looking at your money honestly, and it's paying off.",
                 iconSystemName: "banknote.fill"
             ))
         }
@@ -1465,7 +1464,7 @@ final class AppModel {
             result.append(Badge(
                 id: "badge_explorer",
                 name: "Explorer",
-                description: "Je verzamelt actief nieuwe herinneringen en micro-avonturen.",
+                description: "You're collecting new memories and micro-adventures.",
                 iconSystemName: "safari.fill"
             ))
         }
@@ -1474,7 +1473,7 @@ final class AppModel {
             result.append(Badge(
                 id: "badge_inner_work",
                 name: "Inner Work",
-                description: "Mind-work is priority. Reflectie, therapie en routines zijn geland.",
+                description: "Mind work is the priority. Reflection, therapy, routines.",
                 iconSystemName: "brain"
             ))
         }
@@ -1483,7 +1482,7 @@ final class AppModel {
             result.append(Badge(
                 id: "badge_streak_3",
                 name: "On A Roll",
-                description: "Minstens 3 dagen na elkaar iets voor je leven gedaan.",
+                description: "Three days in a row of doing something for your life.",
                 iconSystemName: "flame.fill"
             ))
         }
@@ -1492,7 +1491,7 @@ final class AppModel {
             result.append(Badge(
                 id: "badge_streak_7",
                 name: "Consistency Era",
-                description: "Je hebt een streak van 7+ dagen gehaald.",
+                description: "You've hit a 7+ day streak.",
                 iconSystemName: "calendar.badge.checkmark"
             ))
         }
@@ -1501,7 +1500,7 @@ final class AppModel {
             result.append(Badge(
                 id: "badge_unstoppable",
                 name: "Unstoppable",
-                description: "21+ dagen streak. Dit is hoe momentum voelt.",
+                description: "21+ day streak. This is what momentum feels like.",
                 iconSystemName: "bolt.fill"
             ))
         }
@@ -1510,7 +1509,7 @@ final class AppModel {
             result.append(Badge(
                 id: "badge_story_arc",
                 name: "Story Arc",
-                description: "Je hebt minstens één arc volledig uitgespeeld.",
+                description: "You've completed at least one arc.",
                 iconSystemName: "book.circle.fill"
             ))
         }
@@ -1519,7 +1518,7 @@ final class AppModel {
             result.append(Badge(
                 id: "badge_arc_collector",
                 name: "Arc Collector",
-                description: "Drie arcs gecompleteerd: je leeft in seizoenen.",
+                description: "Three arcs completed. You live in seasons.",
                 iconSystemName: "rectangle.stack.fill"
             ))
         }
@@ -1528,7 +1527,7 @@ final class AppModel {
             result.append(Badge(
                 id: "badge_chapter_closer",
                 name: "Chapter Closer",
-                description: "Je hebt 3+ chapters afgerond. Jij sluit lusjes.",
+                description: "Three or more chapters finished. You close loops.",
                 iconSystemName: "book.closed.fill"
             ))
         }
@@ -1538,7 +1537,7 @@ final class AppModel {
             result.append(Badge(
                 id: "badge_balanced", 
                 name: "Balanced", 
-                description: "Elke dimensie staat op 60%+ van zijn potentieel.",
+                description: "Every dimension is at 60%+ of its potential.",
                 iconSystemName: "circle.grid.cross"
             ))
         }

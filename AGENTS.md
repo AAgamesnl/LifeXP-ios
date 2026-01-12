@@ -176,7 +176,7 @@ All content is generated in-code. There's no backend, API calls, or remote data 
 
 ### Localization
 
-UI strings are currently hardcoded in Dutch (e.g., coach messages, labels). If adding new strings, follow the existing pattern but be aware localization infrastructure isn't set up yet.
+UI strings default to English and are backed by localized resources. Use `Life XP.swiftpm/Resources/en.lproj/Localizable.strings` for new keys and follow the conventions in `Life XP.swiftpm/Utils/Localization.swift`.
 
 ### Haptics
 

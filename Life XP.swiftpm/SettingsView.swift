@@ -57,7 +57,7 @@ struct SettingsView: View {
                     .padding(.horizontal, DesignSystem.spacing.lg)
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle(L10n.tabSettings)
             .confirmationDialog("Reset Everything?", isPresented: $confirmResetAll, titleVisibility: .visible) {
                 Button("Reset Life XP", role: .destructive) { model.resetAllProgress() }
                 Button("Cancel", role: .cancel) { }
@@ -155,17 +155,17 @@ struct ExperienceSettingsSection: View {
                 
                 Divider().background(BrandTheme.divider)
                 
-                // Quest Board
+                // Next Quests
                 VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
-                    Text("Quest Board Density")
+                    Text(L10n.settingsNextQuestsTitle)
                         .font(DesignSystem.text.labelMedium)
                         .foregroundColor(BrandTheme.textPrimary)
                     
-                    Text("How many quests to show at once")
+                    Text(L10n.settingsNextQuestsSubtitle)
                         .font(.caption)
                         .foregroundColor(BrandTheme.mutedText)
                     
-                    Picker("Quest Board", selection: $model.settings.questBoardDensity) {
+                    Picker(String(localized: "arcs.nextQuests.title"), selection: $model.settings.questBoardDensity) {
                         ForEach(QuestBoardDensity.allCases) { density in
                             Text(density.label).tag(density)
                         }

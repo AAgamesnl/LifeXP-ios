@@ -57,11 +57,15 @@ struct ArcsView: View {
                             ActiveArcsSection2(arcs: activeArcs.filter { $0.id != currentArc?.id }, startAction: attemptStartArc)
                         }
 
-                        // Quest Board
-                        QuestBoardSection(arc: questBoard.arc, quests: questBoard.quests)
+                        // Next Quests
+                        if let arc = questBoard.arc, !questBoard.quests.isEmpty {
+                            QuestBoardSection(arc: arc, quests: questBoard.quests)
+                        }
 
                         // Suggested Arcs
-                        SuggestedArcsSection(suggestions: suggestions.filter { $0.id != currentArc?.id }, startAction: attemptStartArc)
+                        if !suggestions.isEmpty {
+                            SuggestedArcsSection(suggestions: suggestions.filter { $0.id != currentArc?.id }, startAction: attemptStartArc)
+                        }
 
                         // All Arcs
                         AllArcsSection(startAction: attemptStartArc)
@@ -74,7 +78,7 @@ struct ArcsView: View {
                     .padding(.horizontal, DesignSystem.spacing.lg)
                 }
             }
-            .navigationTitle("Arcs")
+            .navigationTitle(L10n.tabArcs)
             .onAppear {
                 withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                     showHero = true
@@ -411,7 +415,7 @@ struct ActiveArcsSection2: View {
     }
 }
 
-// MARK: - Quest Board Section
+// MARK: - Next Quests Section
 
 struct QuestBoardSection: View {
     @Environment(AppModel.self) private var model
@@ -423,7 +427,7 @@ struct QuestBoardSection: View {
             HStack {
                 IconContainer(systemName: "list.bullet.clipboard", color: BrandTheme.accent, size: .small, style: .soft)
                 
-                Text("Quest Board")
+                Text(L10n.arcsNextQuestsTitle)
                     .font(DesignSystem.text.headlineMedium)
                     .foregroundColor(BrandTheme.textPrimary)
                 

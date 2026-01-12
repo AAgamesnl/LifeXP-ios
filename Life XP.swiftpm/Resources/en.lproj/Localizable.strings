@@ -1,0 +1,25 @@
+"app.title" = "Life XP";
+
+"tab.home" = "Home";
+"tab.arcs" = "Arcs";
+"tab.packs" = "Packs";
+"tab.stats" = "Stats";
+"tab.settings" = "Settings";
+
+"home.quickActions.title" = "Quick Actions";
+"home.packs.title" = "Packs";
+"home.packs.subtitle" = "Wrap up packs for easy progress";
+
+"home.startArc.title" = "Start an Arc";
+"home.startArc.subtitle" = "Pick a story arc to unlock quests and momentum.";
+
+"action.logMood.title" = "Log Mood";
+"action.logMood.subtitle" = "Capture how you're feeling right now";
+"action.arcs.title" = "Arcs";
+"action.arcs.subtitle" = "Pick quests and track arc progress";
+"action.packs.title" = "Packs";
+"action.packs.subtitle" = "Browse your life checklist packs";
+
+"arcs.nextQuests.title" = "Next Quests";
+"settings.nextQuests.title" = "Next Quests Density";
+"settings.nextQuests.subtitle" = "How many upcoming quests to show at once";

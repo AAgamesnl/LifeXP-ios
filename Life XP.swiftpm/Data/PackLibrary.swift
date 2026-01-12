@@ -5,23 +5,23 @@ enum PackLibrary {
     static let relationshipCore = CategoryPack(
         id: "relationship_core",
         title: "Relationship Core",
-        subtitle: "Van situationship tot conscious relationship",
+        subtitle: "From situationship to conscious relationship",
         iconSystemName: "heart.circle.fill",
         accentColorHex: "#FF3B6A",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "rel_values_talk",
-                title: "Gesprek over waarden & toekomst",
-                detail: "Je hebt minstens één keer bewust gepraat over geld, kinderen, wonen en toekomstverwachtingen.",
+                title: "Conversation about values & future",
+                detail: "You have consciously talked at least once about money, children, housing and expectations for the future.",
                 xp: 25,
                 dimensions: [.love, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "rel_first_trip",
-                title: "Eerste trip samen overleefd",
-                detail: "Een weekend of langer samen weg geweest zonder elkaar dood te willen maken.",
+                title: "Survived first trip together",
+                detail: "Been away together for a weekend or longer without wanting to kill each other.",
                 xp: 20,
                 dimensions: [.love, .adventure],
                 isPremium: false
@@ -29,15 +29,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "rel_conflict_clean",
                 title: "Conflict clean-up",
-                detail: "Na een ruzie hebben jullie echt gereflecteerd, sorry gezegd en concrete afspraken gemaakt.",
+                detail: "After an argument, you really reflected, said sorry and made concrete agreements.",
                 xp: 30,
                 dimensions: [.love, .mind],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "rel_geld_gesprek",
-                title: "Geld zonder drama",
-                detail: "Jullie hebben een eerlijk gesprek gehad over schulden, sparen en uitgaven zonder dat het escaleerde.",
+                title: "Money without drama",
+                detail: "You had an honest conversation about debt, savings and spending without it escalating.",
                 xp: 25,
                 dimensions: [.love, .money],
                 isPremium: true
@@ -45,7 +45,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "rel_repair_ritual",
                 title: "Monthly repair ritual",
-                detail: "Elke maand een uur ingepland om kleine irritaties, verwachtingen en plannen bij te stellen.",
+                detail: "Scheduled an hour every month to adjust minor irritations, expectations and plans.",
                 xp: 30,
                 dimensions: [.love],
                 isPremium: false
@@ -53,15 +53,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "rel_love_languages",
                 title: "Love languages reality-check",
-                detail: "Jullie hebben getest wat elkaars echte liefdetaal is en hoe je dat dagelijks kan toepassen.",
+                detail: "You tested what each other's real love language is and how you can apply it every day.",
                 xp: 20,
                 dimensions: [.love, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "rel_emergency_plan",
-                title: "Emergency plan als team",
-                detail: "Wie belt je bij pech? Hoe regelen jullie zorg? Er is een plan dat rust geeft in crisismomenten.",
+                title: "Emergency plan as a team",
+                detail: "Who will you call in the event of a breakdown? How do you arrange care? There is a plan that provides peace in moments of crisis.",
                 xp: 25,
                 dimensions: [.love, .mind],
                 isPremium: true
@@ -80,7 +80,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "glow_basic_routine",
                 title: "Routine locked in",
-                detail: "Je hebt minstens 30 dagen na elkaar een ochtend- of avondroutine volgehouden.",
+                detail: "You have maintained a morning or evening routine for at least 30 days in a row.",
                 xp: 30,
                 dimensions: [.mind],
                 isPremium: true
@@ -88,7 +88,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "glow_friend_check",
                 title: "Friend audit",
-                detail: "Je hebt eerlijk gekeken welke mensen je echt energie geven en welke niet.",
+                detail: "You have taken an honest look at which people really give you energy and which do not.",
                 xp: 20,
                 dimensions: [.mind, .love],
                 isPremium: true
@@ -96,15 +96,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "glow_style_update",
                 title: "Style refresh",
-                detail: "Je hebt bewust je kledingstijl geüpdatet naar hoe jij jezelf in je ‘main character era’ ziet.",
+                detail: "You have consciously updated your clothing style to how you see yourself in your 'main character era'.",
                 xp: 25,
                 dimensions: [.mind, .adventure],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "glow_hard_thing",
-                title: "Eén hard ding per dag",
-                detail: "Je hebt minstens 14 dagen na elkaar elke dag iets gedaan waar je tegenop zag.",
+                title: "One hard thing a day",
+                detail: "You have done something you dreaded every day for at least 14 days in a row.",
                 xp: 35,
                 dimensions: [.mind, .adventure],
                 isPremium: true
@@ -112,15 +112,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "glow_digital_detox",
                 title: "Weekend digital detox",
-                detail: "48 uur zonder doomscrollen, meldingen uit en tijd gevuld met echte mensen of creatie.",
+                detail: "48 hours without doomscrolling, notifications off and time filled with real people or creation.",
                 xp: 22,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "glow_strength_routine",
-                title: "Sterker worden",
-                detail: "Minstens 10 kracht-workouts voltooid in 30 dagen met progressie bijgehouden.",
+                title: "Become stronger",
+                detail: "Completed at least 10 strength workouts in 30 days with progress tracked.",
                 xp: 32,
                 dimensions: [.mind, .adventure],
                 isPremium: true
@@ -128,7 +128,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "glow_signature_scent",
                 title: "Signature look & scent",
-                detail: "Je hebt een kenmerkende look + geur gevonden waar je je krachtig in voelt.",
+                detail: "You've found a signature look + scent that makes you feel powerful.",
                 xp: 18,
                 dimensions: [.mind, .love],
                 isPremium: false
@@ -139,31 +139,31 @@ enum PackLibrary {
     static let breakupHealing = CategoryPack(
         id: "breakup_healing",
         title: "Breakup & Healing",
-        subtitle: "Van delulu naar healed and glowing",
+        subtitle: "From delulu to healed and glowing",
         iconSystemName: "bandage.fill",
         accentColorHex: "#EC4899",
         isPremium: true,
         items: [
             ChecklistItem(
                 id: "breakup_no_contact",
-                title: "30 dagen no contact",
-                detail: "Je hebt 30 dagen geen contact gezocht met je ex (en ook niet stiekem gestalkt).",
+                title: "30 days no contact",
+                detail: "You have not contacted your ex for 30 days (or secretly stalked them).",
                 xp: 40,
                 dimensions: [.mind, .love],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "breakup_lessons",
-                title: "3 lessen opgeschreven",
-                detail: "Je hebt eerlijk opgeschreven wat jij hebt geleerd uit de relatie én de breakup.",
+                title: "3 lessons written down",
+                detail: "You have honestly written down what you learned from the relationship and the breakup.",
                 xp: 25,
                 dimensions: [.mind],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "breakup_selfdate",
-                title: "Solo 'ex-date' ervaring",
-                detail: "Je hebt iets gedaan wat je normaal samen deed, maar nu alleen – en je hebt er je eigen versie van gemaakt.",
+                title: "Solo 'ex-date' experience",
+                detail: "You've done something you normally did together, but now alone – and you've made your own version of it.",
                 xp: 30,
                 dimensions: [.mind, .adventure],
                 isPremium: true
@@ -171,15 +171,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "breakup_support_circle",
                 title: "Support circle",
-                detail: "Je hebt 3 mensen benoemd die je mag bellen als je wil terugvallen en hen dat verteld.",
+                detail: "You have appointed 3 people who you can call if you want to fall back and told them so.",
                 xp: 18,
                 dimensions: [.love, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "breakup_new_story",
-                title: "Nieuwe narratief",
-                detail: "Je hebt opgeschreven wie je nu wordt zonder hen en welke waarden daar bij horen.",
+                title: "New narrative",
+                detail: "You have written down who you are now without them and what values go with that.",
                 xp: 24,
                 dimensions: [.mind],
                 isPremium: false
@@ -190,15 +190,15 @@ enum PackLibrary {
     static let moneyCareer = CategoryPack(
         id: "money_career",
         title: "Money & Career",
-        subtitle: "Van chaos naar ‘I’ve got this’",
+        subtitle: "From chaos to 'I've got this'",
         iconSystemName: "briefcase.fill",
         accentColorHex: "#22C55E",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "money_buffer",
-                title: "Eerste spaarbuffer",
-                detail: "Je hebt minstens één maand vaste kosten aan de kant staan.",
+                title: "First savings buffer",
+                detail: "You have at least one month of fixed costs set aside.",
                 xp: 35,
                 dimensions: [.money],
                 isPremium: false
@@ -206,15 +206,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "money_debt_overview",
                 title: "Schuld reality check",
-                detail: "Je hebt alle schulden + rentes op één plek verzameld zodat je niet meer wegkijkt.",
+                detail: "You have collected all debts + interest in one place so that you can no longer look away.",
                 xp: 25,
                 dimensions: [.money, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "career_raise",
-                title: "Gesprek over loon",
-                detail: "Je hebt minstens één keer in je leven zelf een gesprek gestart over opslag of betere voorwaarden.",
+                title: "Discussion about wages",
+                detail: "At least once in your life you have initiated a conversation about a raise or better terms.",
                 xp: 35,
                 dimensions: [.money, .mind],
                 isPremium: true
@@ -222,7 +222,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "career_cv_update",
                 title: "CV & LinkedIn on point",
-                detail: "Je hebt je CV en online profiel geüpdatet zodat ze kloppen met wie je nu bent.",
+                detail: "You've updated your resume and online profile to reflect who you are today.",
                 xp: 20,
                 dimensions: [.money, .mind],
                 isPremium: false
@@ -230,7 +230,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "money_automation",
                 title: "Automate the boring stuff",
-                detail: "Vaste lasten, sparen en beleggen staan automatisch ingepland na elke payday.",
+                detail: "Fixed costs, savings and investments are automatically scheduled after each payday.",
                 xp: 30,
                 dimensions: [.money],
                 isPremium: true
@@ -238,7 +238,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "money_networking",
                 title: "Value-first networking",
-                detail: "Je hebt 3 warme connecties opgebouwd door iets van waarde te brengen zonder te vragen.",
+                detail: "You have built 3 warm connections by bringing something of value without asking.",
                 xp: 22,
                 dimensions: [.money, .love],
                 isPremium: false
@@ -246,7 +246,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "money_portfolio",
                 title: "Portfolio snapshot",
-                detail: "Een simpel portfolio of slide deck dat je skills bewijst en klaarstaat om te delen.",
+                detail: "A simple portfolio or slide deck that proves your skills and is ready to share.",
                 xp: 26,
                 dimensions: [.money, .adventure],
                 isPremium: true
@@ -257,39 +257,39 @@ enum PackLibrary {
     static let adulting = CategoryPack(
         id: "adulting_101",
         title: "Adulting 101",
-        subtitle: "Voor iedereen die ‘ik regel het later’ zegt",
+        subtitle: "For everyone who says 'I'll deal with it later'",
         iconSystemName: "house.fill",
         accentColorHex: "#F97316",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "adult_insurances",
-                title: "Basisverzekeringen geregeld",
-                detail: "Je weet welke verzekeringen je hebt en waarvoor ze zijn (en je betaalt niet voor dubbele dingen).",
+                title: "Basic insurance arranged",
+                detail: "You know which insurance policies you have and what they are for (and you don't pay for duplicates).",
                 xp: 30,
                 dimensions: [.money, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "adult_admin_system",
-                title: "Admin systeem",
-                detail: "Je hebt een eenvoudig systeem om documenten, facturen en brieven te bewaren.",
+                title: "Admin system",
+                detail: "You have a simple system for storing documents, invoices and letters.",
                 xp: 25,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "adult_health_check",
-                title: "Gezondheidscheck gedaan",
-                detail: "Je hebt minstens één keer een algemene gezondheidscheck laten doen (huisarts / tandarts / bloedonderzoek).",
+                title: "Health check done",
+                detail: "You have had a general health check done at least once (GP / dentist / blood test).",
                 xp: 30,
                 dimensions: [.mind],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "adult_emergency_contacts",
-                title: "ICE lijst klaar",
-                detail: "In je telefoon en huis staat een actuele ICE-lijst met contacten, meds en allergies.",
+                title: "ICE list ready",
+                detail: "There is a current ICE list with contacts, meds and allergies in your phone and home.",
                 xp: 18,
                 dimensions: [.mind, .love],
                 isPremium: false
@@ -297,7 +297,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "adult_meal_flow",
                 title: "Meal flow",
-                detail: "Je hebt een rotatie van 6 makkelijke maaltijden + boodschappenlijst die je zonder stress kan doen.",
+                detail: "You have a rotation of 6 easy meals + shopping list that you can do without stress.",
                 xp: 22,
                 dimensions: [.mind],
                 isPremium: false
@@ -308,7 +308,7 @@ enum PackLibrary {
     static let adventure = CategoryPack(
         id: "adventure_memories",
         title: "Adventure & Memories",
-        subtitle: "Main character momentjes verzamelen",
+        subtitle: "Collect main character moments",
         iconSystemName: "airplane.departure",
         accentColorHex: "#3B82F6",
         isPremium: false,
@@ -316,23 +316,23 @@ enum PackLibrary {
             ChecklistItem(
                 id: "adv_solo_trip",
                 title: "Solo trip",
-                detail: "Je bent minstens één keer alleen op reis geweest (dagtrip of langer).",
+                detail: "You have traveled alone at least once (day trip or longer).",
                 xp: 35,
                 dimensions: [.adventure, .mind],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "adv_night_out",
-                title: "All-nighter met vrienden",
-                detail: "Je hebt een nacht gehad die je nog jaren gaat vertellen tegen mensen.",
+                title: "All nighter with friends",
+                detail: "You had a night that you will tell people about for years to come.",
                 xp: 25,
                 dimensions: [.love, .adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "adv_scary_thing",
-                title: "Bang maar gedaan",
-                detail: "Je hebt iets gedaan waar je écht bang voor was, puur om te groeien.",
+                title: "Afraid but done",
+                detail: "You did something that you were really afraid of, purely to grow.",
                 xp: 30,
                 dimensions: [.mind, .adventure],
                 isPremium: false
@@ -340,7 +340,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "adv_memory_bank",
                 title: "Memory bank",
-                detail: "Je hebt een fotoalbum / notitie met 12 momenten die je bewust hebt vastgelegd dit jaar.",
+                detail: "You have a photo album / note with 12 moments that you consciously captured this year.",
                 xp: 18,
                 dimensions: [.adventure, .love],
                 isPremium: false
@@ -348,7 +348,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "adv_monthly_micro",
                 title: "Monthly micro-adventure",
-                detail: "Elke maand één nieuwe plek bezocht in je eigen stad of regio.",
+                detail: "Visited one new place every month in your own city or region.",
                 xp: 24,
                 dimensions: [.adventure],
                 isPremium: true
@@ -359,7 +359,7 @@ enum PackLibrary {
     static let wellnessReset = CategoryPack(
         id: "wellness_reset",
         title: "Wellness Reset",
-        subtitle: "Slapen, ademhalen, grenzen en rust",
+        subtitle: "Sleeping, breathing, boundaries and rest",
         iconSystemName: "leaf.fill",
         accentColorHex: "#10B981",
         isPremium: false,
@@ -367,7 +367,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "wellness_sleep_reset",
                 title: "Sleep reset week",
-                detail: "7 nachten op rij voor middernacht geslapen en schermvrij 60 minuten voor bed.",
+                detail: "Slept before midnight 7 nights in a row and screen-free 60 minutes before bed.",
                 xp: 26,
                 dimensions: [.mind],
                 isPremium: false
@@ -375,7 +375,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "wellness_boundaries",
                 title: "Boundary scripts",
-                detail: "3 voorbeelduitspreken geoefend voor ‘nee zeggen’ zodat je ze paraat hebt.",
+                detail: "Practiced 3 sample statements for 'saying no' so that you have them ready.",
                 xp: 18,
                 dimensions: [.mind, .love],
                 isPremium: false
@@ -383,7 +383,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "wellness_therapy_consult",
                 title: "Therapy consult",
-                detail: "Een intake gepland of gedaan met een therapeut/coach om je emotionele baseline te checken.",
+                detail: "Planned or done an intake with a therapist/coach to check your emotional baseline.",
                 xp: 34,
                 dimensions: [.mind],
                 isPremium: true
@@ -391,7 +391,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "wellness_move_daily",
                 title: "Move daily streak",
-                detail: "Minstens 10.000 stappen of 30 min bewegen voor 21 dagen op rij.",
+                detail: "At least 10,000 steps or 30 minutes of exercise for 21 days in a row.",
                 xp: 30,
                 dimensions: [.mind, .adventure],
                 isPremium: true
@@ -402,7 +402,7 @@ enum PackLibrary {
     static let creatorLab = CategoryPack(
         id: "creator_lab",
         title: "Creator Lab",
-        subtitle: "Maak dingen, ship dingen, groei je reputatie",
+        subtitle: "Make things, ship things, grow your reputation",
         iconSystemName: "wand.and.stars",
         accentColorHex: "#8B5CF6",
         isPremium: true,
@@ -410,7 +410,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "creator_idea_bank",
                 title: "Idea bank",
-                detail: "Een lijst met 30 content/side-project ideeën die je makkelijk kan oppakken.",
+                detail: "A list of 30 content/side-project ideas that you can easily pick up.",
                 xp: 22,
                 dimensions: [.mind],
                 isPremium: true
@@ -418,23 +418,23 @@ enum PackLibrary {
             ChecklistItem(
                 id: "creator_publish_weekly",
                 title: "Publish weekly",
-                detail: "Minstens 4 weken na elkaar iets gepubliceerd (artikel, post, video, code, muziek).",
+                detail: "Published something (article, post, video, code, music) at least 4 weeks in a row.",
                 xp: 32,
                 dimensions: [.adventure, .mind],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "creator_collab",
-                title: "Collab gedaan",
-                detail: "Samen met iemand anders iets gemaakt en live gezet.",
+                title: "Collab done",
+                detail: "Made something together with someone else and put it live.",
                 xp: 26,
                 dimensions: [.love, .adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "creator_monetize",
-                title: "Eerste euro online",
-                detail: "Je hebt je eerste euro online verdiend met iets wat je maakte.",
+                title: "First euro online",
+                detail: "You earned your first euro online with something you made.",
                 xp: 30,
                 dimensions: [.money, .adventure],
                 isPremium: true
@@ -445,7 +445,7 @@ enum PackLibrary {
     static let communityRoots = CategoryPack(
         id: "community_roots",
         title: "Community & Roots",
-        subtitle: "Vrienden, buurt en dingen groter dan jezelf",
+        subtitle: "Friends, neighborhood and things bigger than yourself",
         iconSystemName: "person.3.sequence.fill",
         accentColorHex: "#0EA5E9",
         isPremium: false,
@@ -453,7 +453,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "community_host",
                 title: "Hosted people",
-                detail: "Een diner/board game/filmavond georganiseerd voor vrienden of buren.",
+                detail: "Organized a dinner/board game/movie evening for friends or neighbors.",
                 xp: 20,
                 dimensions: [.love, .adventure],
                 isPremium: false
@@ -461,7 +461,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "community_volunteer",
                 title: "Give back",
-                detail: "Minstens 4 uur vrijwilligerswerk gedaan of gedoneerd waar je achter staat.",
+                detail: "Have done or donated at least 4 hours of volunteer work that you support.",
                 xp: 22,
                 dimensions: [.love, .mind],
                 isPremium: false
@@ -469,7 +469,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "community_club",
                 title: "Join a club",
-                detail: "Aangesloten bij een club/vereniging waar je wekelijks mensen ontmoet.",
+                detail: "Affiliated with a club/association where you meet people every week.",
                 xp: 18,
                 dimensions: [.love, .adventure],
                 isPremium: true
@@ -477,7 +477,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "community_story",
                 title: "Family archive",
-                detail: "Een gesprek opgenomen met (groot)ouders over hun leven en wat je wil bewaren.",
+                detail: "A recorded conversation with (grand)parents about their lives and what you want to keep.",
                 xp: 28,
                 dimensions: [.love, .mind],
                 isPremium: true
@@ -488,7 +488,7 @@ enum PackLibrary {
     static let missionControl = CategoryPack(
         id: "mission_control",
         title: "Mission Control",
-        subtitle: "Systems, focus en output op NASA-niveau",
+        subtitle: "Systems, focus and output at NASA level",
         iconSystemName: "target",
         accentColorHex: "#0EA5E9",
         isPremium: true,
@@ -496,7 +496,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mission_weekly_review",
                 title: "Sunday reset + weekly review",
-                detail: "Elke zondag 45 minuten: kalenders syncen, taken prioriteren, tijd geblokt voor deep work.",
+                detail: "45 minutes every Sunday: sync calendars, prioritize tasks, block time for deep work.",
                 xp: 30,
                 dimensions: [.mind, .money],
                 isPremium: true
@@ -504,7 +504,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mission_timeboxing",
                 title: "Timeboxing master",
-                detail: "Minstens 10 werkdagen timeboxed in je kalender en 80% van je blokken gehaald.",
+                detail: "At least 10 working days timeboxed in your calendar and 80% of your blocks achieved.",
                 xp: 26,
                 dimensions: [.mind],
                 isPremium: true
@@ -512,7 +512,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mission_automation",
                 title: "Automate the boring",
-                detail: "3 terugkerende taken geautomatiseerd (facturen, reminders, templates).",
+                detail: "3 recurring tasks automated (invoices, reminders, templates).",
                 xp: 28,
                 dimensions: [.money, .mind],
                 isPremium: false
@@ -520,7 +520,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mission_focus_room",
                 title: "Focus room",
-                detail: "Een fysieke of digitale werksetup gebouwd die je onmiddellijk in flow brengt.",
+                detail: "Built a physical or digital work setup that immediately puts you in flow.",
                 xp: 32,
                 dimensions: [.mind, .adventure],
                 isPremium: true
@@ -528,7 +528,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mission_12week",
                 title: "12-week mission",
-                detail: "Een 12-week doel gedefinieerd met 3 lead metrics en wekelijkse check-ins.",
+                detail: "A 12-week goal defined with 3 lead metrics and weekly check-ins.",
                 xp: 34,
                 dimensions: [.money, .mind],
                 isPremium: true
@@ -536,7 +536,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mission_recharge_day",
                 title: "Deep recharge day",
-                detail: "Eén dag per maand geblokt voor herstel zonder guilt: sauna, massage, slapen, offline.",
+                detail: "One day a month blocked for guilt-free recovery: sauna, massage, sleeping, offline.",
                 xp: 22,
                 dimensions: [.mind, .love],
                 isPremium: false
@@ -547,7 +547,7 @@ enum PackLibrary {
     static let adventurePassport = CategoryPack(
         id: "adventure_passport",
         title: "Adventure Passport",
-        subtitle: "Micro-adventures die je leven episch maken",
+        subtitle: "Micro-adventures that make your life epic",
         iconSystemName: "globe.americas.fill",
         accentColorHex: "#F97316",
         isPremium: false,
@@ -555,7 +555,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "passport_sunrise_mission",
                 title: "Sunrise mission",
-                detail: "Om 05:30 op, naar een hoog punt en de zonsopgang kijken met koffie.",
+                detail: "Up at 5:30 am, go to a high point and watch the sunrise with coffee.",
                 xp: 18,
                 dimensions: [.adventure, .mind],
                 isPremium: false
@@ -563,7 +563,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "passport_new_flavor",
                 title: "New flavor night",
-                detail: "Eten geproefd dat je nog nooit had – street food, regionale keuken of zelf gekookt.",
+                detail: "Tasted food you've never had before – street food, regional cuisine or home-cooked.",
                 xp: 16,
                 dimensions: [.adventure, .love],
                 isPremium: false
@@ -571,7 +571,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "passport_24h_trip",
                 title: "24h city hop",
-                detail: "24 uur in een andere stad met slechts een backpack en een must-do lijst.",
+                detail: "24 hours in another city with just a backpack and a must-do list.",
                 xp: 30,
                 dimensions: [.adventure],
                 isPremium: true
@@ -579,7 +579,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "passport_memory_capture",
                 title: "Memory capture",
-                detail: "Een mini-vlog of fotoverhaal gemaakt van een dag en gedeeld met 1 persoon.",
+                detail: "A mini vlog or photo story made from a day and shared with 1 person.",
                 xp: 14,
                 dimensions: [.love, .adventure],
                 isPremium: false
@@ -587,7 +587,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "passport_wildcard",
                 title: "Wildcard invite",
-                detail: "Je hebt iemand uitgenodigd voor een spontane activiteit (climbing, museum, silent disco).",
+                detail: "You have invited someone for a spontaneous activity (climbing, museum, silent disco).",
                 xp: 20,
                 dimensions: [.love, .adventure],
                 isPremium: false
@@ -595,7 +595,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "passport_nature_reset",
                 title: "Nature reset",
-                detail: "Minstens 2 uur off-grid in de natuur met journal of schetsboek.",
+                detail: "At least 2 hours off-grid in nature with a journal or sketchbook.",
                 xp: 24,
                 dimensions: [.mind, .adventure],
                 isPremium: true
@@ -606,7 +606,7 @@ enum PackLibrary {
     static let legacyImpact = CategoryPack(
         id: "legacy_impact",
         title: "Legacy & Impact",
-        subtitle: "Bouw iets dat groter is dan jezelf",
+        subtitle: "Build something bigger than yourself",
         iconSystemName: "hand.heart.fill",
         accentColorHex: "#10B981",
         isPremium: true,
@@ -614,7 +614,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "legacy_cause",
                 title: "Pick a cause",
-                detail: "Één thema gekozen waar je 12 maanden aan wil bijdragen (klimaat, jeugd, gelijkheid).",
+                detail: "Chosen one theme that you want to contribute to for 12 months (climate, youth, equality).",
                 xp: 20,
                 dimensions: [.mind, .love],
                 isPremium: false
@@ -622,7 +622,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "legacy_give",
                 title: "Automate giving",
-                detail: "Automatische maandelijkse bijdrage opgezet of tijd geblokt voor vrijwilligerswerk.",
+                detail: "Set up an automatic monthly contribution or block time for volunteer work.",
                 xp: 24,
                 dimensions: [.money, .love],
                 isPremium: true
@@ -630,15 +630,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "legacy_workshop",
                 title: "Teach your craft",
-                detail: "Een workshop of online sessie gegeven over iets waar jij goed in bent.",
+                detail: "Delivered a workshop or online session about something you are good at.",
                 xp: 26,
                 dimensions: [.love, .mind],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "legacy_mentor",
-                title: "Mentor iemand",
-                detail: "Een mentee gevonden en minstens 2 sessies gedaan met duidelijke doelen.",
+                title: "Mentor someone",
+                detail: "Found a mentee and did at least 2 sessions with clear goals.",
                 xp: 22,
                 dimensions: [.love, .money],
                 isPremium: false
@@ -646,7 +646,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "legacy_story_archive",
                 title: "Story archive",
-                detail: "Een familiestuk, community-archief of audio-story gemaakt dat later nog bestaat.",
+                detail: "Created a family heirloom, community archive or audio story that will still exist later.",
                 xp: 30,
                 dimensions: [.love, .mind],
                 isPremium: true
@@ -654,7 +654,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "legacy_micro_fund",
                 title: "Micro-fund",
-                detail: "Een mini-budget apart gezet om ideeën van vrienden of buurt te sponsoren.",
+                detail: "A mini budget set aside to sponsor ideas from friends or neighborhood.",
                 xp: 18,
                 dimensions: [.money, .love],
                 isPremium: false
@@ -665,7 +665,7 @@ enum PackLibrary {
     static let luxuryCalm = CategoryPack(
         id: "luxury_calm",
         title: "Luxury Calm",
-        subtitle: "High-end selfcare die je standaard optilt",
+        subtitle: "High-end self-care that lifts you up by default",
         iconSystemName: "sparkles.tv.fill",
         accentColorHex: "#A855F7",
         isPremium: true,
@@ -673,7 +673,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "calm_spa_day",
                 title: "Spa + sauna day",
-                detail: "Een halve dag ingepland met spa, sauna of hammam zonder telefoon.",
+                detail: "Planned a half day with spa, sauna or hammam without telephone.",
                 xp: 20,
                 dimensions: [.mind],
                 isPremium: false
@@ -681,7 +681,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "calm_sleep_sanctuary",
                 title: "Sleep sanctuary",
-                detail: "Je slaapkamer geüpgradet (licht, geur, lakens) voor elite slaap hygiene.",
+                detail: "Your bedroom upgraded (light, scent, sheets) for elite sleep hygiene.",
                 xp: 24,
                 dimensions: [.mind, .love],
                 isPremium: true
@@ -689,15 +689,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "calm_digital_sabbath",
                 title: "Digital sabbath",
-                detail: "Een wekelijkse dag zonder social media en nieuws, gevuld met analoge dingen.",
+                detail: "A weekly day without social media and news, filled with analogue things.",
                 xp: 22,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "calm_personal_chef",
-                title: "Chef-mode dinner",
-                detail: "Eén keer per maand een restaurant-level maaltijd gekookt of chef aan huis geboekt.",
+                title: "Chef fashion dinner",
+                detail: "Cooked a restaurant-level meal once a month or booked a chef at home.",
                 xp: 26,
                 dimensions: [.love, .mind],
                 isPremium: true
@@ -705,7 +705,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "calm_retreat",
                 title: "Silent retreat",
-                detail: "Een 1-3 daagse retreat gedaan voor stilte, breathwork of mindfulness.",
+                detail: "Did a 1-3 day retreat for silence, breathwork or mindfulness.",
                 xp: 32,
                 dimensions: [.mind, .adventure],
                 isPremium: true
@@ -713,7 +713,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "calm_beauty_ritual",
                 title: "Beauty ritual",
-                detail: "Een skincare/grooming-ritueel ingepland dat je 21 dagen hebt volgehouden.",
+                detail: "Scheduled a skincare/grooming ritual that you continued for 21 days.",
                 xp: 18,
                 dimensions: [.mind, .love],
                 isPremium: false
@@ -724,7 +724,7 @@ enum PackLibrary {
     static let healthKit = CategoryPack(
         id: "health_kit",
         title: "Health Kit",
-        subtitle: "Core health basics voor elke speler",
+        subtitle: "Core health basics for every player",
         iconSystemName: "cross.case.fill",
         accentColorHex: "#0EA4BF",
         isPremium: false,
@@ -732,7 +732,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "health_baseline_checks",
                 title: "Baseline check-up",
-                detail: "Bloedonderzoek, tandarts en huisarts in de afgelopen 12 maanden geregeld.",
+                detail: "Blood tests, dentist and GP arranged in the past 12 months.",
                 xp: 28,
                 dimensions: [.mind],
                 isPremium: false
@@ -740,15 +740,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "health_sleep_consistency",
                 title: "Sleep consistency",
-                detail: "14 dagen lang binnen hetzelfde 60-minutenvenster naar bed en opstaan.",
+                detail: "Going to bed and getting up within the same 60-minute window for 14 days.",
                 xp: 24,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "health_steps_tracking",
-                title: "7k stappen streak",
-                detail: "Minstens 7.000 stappen per dag, 10 dagen achter elkaar gehaald.",
+                title: "7k steps streak",
+                detail: "At least 7,000 steps per day, achieved for 10 days in a row.",
                 xp: 22,
                 dimensions: [.mind, .adventure],
                 isPremium: false
@@ -756,7 +756,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "health_meal_prep",
                 title: "Meal prep ready",
-                detail: "Twee weken achter elkaar 3 gezonde lunches of diners per week voorbereid.",
+                detail: "Prepared 3 healthy lunches or dinners per week for two weeks in a row.",
                 xp: 20,
                 dimensions: [.mind],
                 isPremium: false
@@ -764,7 +764,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "health_mobility_reset",
                 title: "Mobility reset",
-                detail: "10 minuten mobiliteit of stretchen op 10 verschillende dagen gedaan.",
+                detail: "10 minutes of mobility or stretching done on 10 different days.",
                 xp: 16,
                 dimensions: [.mind],
                 isPremium: false
@@ -772,7 +772,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "health_morning_light",
                 title: "Morning sunlight",
-                detail: "7 dagen op rij binnen 60 minuten na het opstaan buiten daglicht gepakt.",
+                detail: "Caught outside daylight within 60 minutes of waking up 7 days in a row.",
                 xp: 14,
                 dimensions: [.mind],
                 isPremium: false
@@ -783,7 +783,7 @@ enum PackLibrary {
     static let socialConfidence = CategoryPack(
         id: "social_confidence",
         title: "Social Confidence",
-        subtitle: "Van awkward naar aanwezig",
+        subtitle: "From awkward to present",
         iconSystemName: "person.3.fill",
         accentColorHex: "#F97316",
         isPremium: false,
@@ -791,7 +791,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "social_coffee_chat",
                 title: "2 coffee chats",
-                detail: "Twee mensen benaderd voor een koffietje om iets nieuws te leren of te connecten.",
+                detail: "Two people approached for a coffee to learn something new or connect.",
                 xp: 18,
                 dimensions: [.love, .adventure],
                 isPremium: false
@@ -799,15 +799,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "social_micro_event",
                 title: "Host a micro-event",
-                detail: "Vier mensen samengebracht voor een spelletjesavond, diner of wandeling.",
+                detail: "Four people brought together for a game night, dinner or walk.",
                 xp: 24,
                 dimensions: [.love, .adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "social_public_question",
-                title: "Stel de eerste vraag",
-                detail: "Tijdens een event of meeting bewust de eerste vraag gesteld of gedeeld.",
+                title: "Ask the first question",
+                detail: "Consciously ask or share the first question during an event or meeting.",
                 xp: 14,
                 dimensions: [.mind],
                 isPremium: false
@@ -815,15 +815,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "social_followups",
                 title: "DM follow-ups",
-                detail: "Na een event drie mensen een DM gestuurd om contact te behouden.",
+                detail: "After an event, three people were sent a DM to maintain contact.",
                 xp: 16,
                 dimensions: [.love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "social_feedback_round",
-                title: "Feedback rondje",
-                detail: "Aan drie mensen feedback gevraagd over hoe je overkomt en wat sterker kan.",
+                title: "Feedback round",
+                detail: "Asked three people for feedback about how you came across and what could be stronger.",
                 xp: 20,
                 dimensions: [.mind],
                 isPremium: false
@@ -842,7 +842,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mega_energy_audit",
                 title: "Energy + attention audit",
-                detail: "60 minuten al je dagelijkse prikkels in kaart gebracht en per bron beslist: keep, cut, delegate of automatiseren.",
+                detail: "60 minutes of mapping all your daily stimuli and deciding per source: keep, cut, delegate or automate.",
                 xp: 30,
                 dimensions: [.mind],
                 isPremium: true
@@ -850,7 +850,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mega_weekly_rhythm",
                 title: "Weekly rhythm map",
-                detail: "Een visuele map gemaakt van je week met vaste focusblokken, recovery slots, sociale touchpoints en chore-time.",
+                detail: "Created a visual map of your week with fixed focus blocks, recovery slots, social touchpoints and chore time.",
                 xp: 26,
                 dimensions: [.mind, .love],
                 isPremium: false
@@ -858,7 +858,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mega_skill_stack",
                 title: "Skill stack refresh",
-                detail: "3 skills gekozen die je in 90 dagen wil stacken, plus micro-practices en meetmomenten vastgelegd.",
+                detail: "Choose 3 skills that you want to stack in 90 days, plus micro-practices and measurement moments recorded.",
                 xp: 32,
                 dimensions: [.money, .mind],
                 isPremium: true
@@ -866,7 +866,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mega_body_baseline",
                 title: "Body baseline",
-                detail: "Slaap, voeding, beweging en labs gelogd in één dashboard zodat je je echte baseline kent.",
+                detail: "Sleep, nutrition, exercise and labs logged in one dashboard so you know your real baseline.",
                 xp: 28,
                 dimensions: [.mind],
                 isPremium: false
@@ -874,15 +874,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mega_connection_squad",
                 title: "Connection squad",
-                detail: "Een vaste groep van 3-5 mensen samengesteld met maandelijkse meetups en een gedeelde accountability thread.",
+                detail: "A permanent group of 3-5 people put together with monthly meetups and a shared accountability thread.",
                 xp: 24,
                 dimensions: [.love, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "mega_risk_rep",
-                title: "Risk rep",
-                detail: "Iets gedaan met berekend risico (investering, pitch, performance) en achteraf lessons & SOP genoteerd.",
+                title: "Risk Rep",
+                detail: "Did something with calculated risk (investment, pitch, performance) and recorded lessons & SOP afterwards.",
                 xp: 34,
                 dimensions: [.adventure, .money],
                 isPremium: true
@@ -890,7 +890,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mega_inbox_zero",
                 title: "Inbox zero protocol",
-                detail: "Voor e-mail, DM's en to-do's één weekly protocol opgesteld en twee weken volgehouden.",
+                detail: "One weekly protocol was drawn up for e-mail, DMs and to-dos and maintained for two weeks.",
                 xp: 20,
                 dimensions: [.mind],
                 isPremium: false
@@ -898,7 +898,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mega_personal_os",
                 title: "Personal OS",
-                detail: "Een eigen ‘operating system’ uitgewerkt met dashboards voor doelen, projecten, habits en reflecties.",
+                detail: "Developed its own operating system with dashboards for goals, projects, habits and reflections.",
                 xp: 36,
                 dimensions: [.mind, .money],
                 isPremium: true
@@ -906,7 +906,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mega_rest_day",
                 title: "Deliberate rest day",
-                detail: "Een volledige dag zonder productiviteit, volledig gepland rond herstel, spel en traagheid.",
+                detail: "A full day without productivity, completely planned around recovery, play and slowness.",
                 xp: 18,
                 dimensions: [.mind, .love],
                 isPremium: false
@@ -914,7 +914,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mega_reputation_loop",
                 title: "Reputation loop",
-                detail: "Bewust 3 reputatie-moves gedaan: iets publiceren, iemand helpen, iets leren en delen.",
+                detail: "Consciously made 3 reputation moves: publish something, help someone, learn something and share.",
                 xp: 30,
                 dimensions: [.money, .adventure],
                 isPremium: true
@@ -922,7 +922,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mega_focus_retreat",
                 title: "Solo focus retreat",
-                detail: "48 uur weg (of thuis) geweest met één duidelijk deliverable en geen notificaties.",
+                detail: "Been away (or at home) for 48 hours with one clear deliverable and no notifications.",
                 xp: 26,
                 dimensions: [.mind, .adventure],
                 isPremium: false
@@ -930,7 +930,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mega_money_flow",
                 title: "Money flow redesign",
-                detail: "Cashflow, buffers en investeringen opnieuw ingedeeld met automatische transfers en guardrails.",
+                detail: "Cash flow, buffers and investments reorganized with automatic transfers and guardrails.",
                 xp: 34,
                 dimensions: [.money],
                 isPremium: true
@@ -938,7 +938,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mega_identity_script",
                 title: "Identity script",
-                detail: "Een 1-pager geschreven over wie je aan het worden bent, met bewijs-stapjes en een ritueel om het te lezen.",
+                detail: "A 1-pager written about who you are becoming, with proof steps and a ritual for reading it.",
                 xp: 22,
                 dimensions: [.mind],
                 isPremium: false
@@ -946,7 +946,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mega_mentor_circuit",
                 title: "Mentor circuit",
-                detail: "Twee mentoren benaderd + een peer gekozen, maandelijkse check-ins gepland en verwachtingen afgestemd.",
+                detail: "Two mentors approached + one peer chosen, monthly check-ins scheduled and expectations aligned.",
                 xp: 28,
                 dimensions: [.love, .money],
                 isPremium: true
@@ -954,7 +954,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mega_artifact_drop",
                 title: "Artifact drop",
-                detail: "Eén tastbaar of digitaal artefact gecreëerd dat je publiekelijk gedeeld hebt (guide, mini-course, tool).",
+                detail: "Created one tangible or digital artifact that you have shared publicly (guide, mini-course, tool).",
                 xp: 32,
                 dimensions: [.adventure, .money],
                 isPremium: true
@@ -962,7 +962,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "mega_legacy_note",
                 title: "Legacy note",
-                detail: "Een brief geschreven voor je toekomstige zelf of iemand die belangrijk is en in een veilige plek bewaard.",
+                detail: "A letter written for your future self or someone important and kept in a safe place.",
                 xp: 20,
                 dimensions: [.love, .mind],
                 isPremium: false
@@ -973,7 +973,7 @@ enum PackLibrary {
     static let studentSurvival = CategoryPack(
         id: "student_survival",
         title: "Student Survival",
-        subtitle: "Voor iedereen die probeert niet te verdrinken in lessen, deadlines en rommelige kotkamers.",
+        subtitle: "For everyone who tries not to drown in classes, deadlines and messy dorm rooms.",
         iconSystemName: "graduationcap.fill",
         accentColorHex: "#3B82F6",
         isPremium: false,
@@ -981,23 +981,23 @@ enum PackLibrary {
             ChecklistItem(
                 id: "student_syllabus_check",
                 title: "Syllabus reality check",
-                detail: "Alle vakken en belangrijke deadlines in één overzicht gezet.",
+                detail: "All subjects and important deadlines in one overview.",
                 xp: 14,
                 dimensions: [.money, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "student_study_spot",
-                title: "Blokplek gekozen",
-                detail: "Een vaste plek gekozen om te studeren (thuis, bib of koffiebar).",
+                title: "Block spot chosen",
+                detail: "Chosen a permanent place to study (home, library or coffee bar).",
                 xp: 12,
                 dimensions: [.mind, .adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "student_budget",
-                title: "Kot-budget gemaakt",
-                detail: "Een weekbudget bepaald voor eten, uitgaan en vervoer.",
+                title: "Kot budget created",
+                detail: "Determined a weekly budget for food, going out and transportation.",
                 xp: 16,
                 dimensions: [.money, .mind],
                 isPremium: false
@@ -1008,23 +1008,23 @@ enum PackLibrary {
     static let movingOut = CategoryPack(
         id: "moving_out_first_place",
         title: "Moving Out & First Place",
-        subtitle: "Van ‘bij ouders’ naar ‘eigen plek, eigen regels’.",
+        subtitle: "From 'with parents' to 'own place, own rules'.",
         iconSystemName: "house.fill",
         accentColorHex: "#F59E0B",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "moving_inventory",
-                title: "Basisinventaris gemaakt",
-                detail: "Een lijst van écht noodzakelijke spullen opgesteld.",
+                title: "Basic inventory created",
+                detail: "Drawn up a list of really necessary items.",
                 xp: 14,
                 dimensions: [.money, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "moving_fixed_costs",
-                title: "Vaste kosten berekend",
-                detail: "Huur, energie, internet en verzekeringen in kaart gebracht.",
+                title: "Fixed costs calculated",
+                detail: "Rent, energy, internet and insurance mapped out.",
                 xp: 16,
                 dimensions: [.money, .mind],
                 isPremium: false
@@ -1032,7 +1032,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "moving_housewarming",
                 title: "Mini housewarming",
-                detail: "Een kleine avond met vrienden of familie georganiseerd.",
+                detail: "Organized a small evening with friends or family.",
                 xp: 12,
                 dimensions: [.love, .adventure],
                 isPremium: false
@@ -1043,23 +1043,23 @@ enum PackLibrary {
     static let newCity = CategoryPack(
         id: "new_city_starter",
         title: "New City Starter Pack",
-        subtitle: "Je woont in een nieuwe stad en wil je er niet verloren voelen.",
+        subtitle: "You live in a new city and don't want to feel lost.",
         iconSystemName: "mappin.and.ellipse",
         accentColorHex: "#22C55E",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "newcity_mark_spots",
-                title: "3 plekken markeren",
-                detail: "Supermarkt, ontspanningsplek en nood-apotheek gemarkeerd.",
+                title: "Mark 3 spots",
+                detail: "Supermarket, relaxation area and emergency pharmacy marked.",
                 xp: 12,
                 dimensions: [.adventure, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "newcity_coffee_base",
-                title: "Koffiebar-found",
-                detail: "Een plek gevonden waar je je alleen comfortabel voelt.",
+                title: "Coffee bar-found",
+                detail: "Found a place where you feel comfortable alone.",
                 xp: 10,
                 dimensions: [.mind, .love],
                 isPremium: false
@@ -1067,7 +1067,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "newcity_walk",
                 title: "Neighborhood walk",
-                detail: "Bewust zonder Google Maps je wijk verkend.",
+                detail: "Consciously explore your neighborhood without Google Maps.",
                 xp: 14,
                 dimensions: [.adventure, .mind],
                 isPremium: false
@@ -1078,31 +1078,31 @@ enum PackLibrary {
     static let socialConfidenceBasics = CategoryPack(
         id: "social_confidence_basics_pack",
         title: "Social Confidence Basics",
-        subtitle: "Minder awkward in gesprekken zonder jezelf te forceren.",
+        subtitle: "Less awkward in conversations without forcing yourself.",
         iconSystemName: "person.2.fill",
         accentColorHex: "#A855F7",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "social_new_person",
-                title: "1 nieuwe persoon aangesproken",
-                detail: "Kleine praat gemaakt in winkel, bar of werk.",
+                title: "1 new person addressed",
+                detail: "Small talk made in the shop, bar or work.",
                 xp: 12,
                 dimensions: [.love, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "social_honest_cancel",
-                title: "Eerlijk ‘ik ben moe’ gezegd",
-                detail: "Een afspraak afgezet zonder smoes.",
+                title: "Honestly said 'I'm tired'",
+                detail: "An appointment canceled without an excuse.",
                 xp: 10,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "social_boundary_check",
-                title: "Grenzen-check",
-                detail: "Drie situaties opgeschreven waarin je eigenlijk ‘nee’ wilde zeggen.",
+                title: "Boundaries check",
+                detail: "Write down three situations in which you actually wanted to say 'no'.",
                 xp: 14,
                 dimensions: [.mind, .love],
                 isPremium: false
@@ -1113,15 +1113,15 @@ enum PackLibrary {
     static let deepFriendships = CategoryPack(
         id: "deep_friendships",
         title: "Deep Friendships",
-        subtitle: "Niet 100 oppervlakkige contacten maar 3–5 mensen die echt tellen.",
+        subtitle: "Not 100 superficial contacts but 3–5 people who really count.",
         iconSystemName: "person.3.fill",
         accentColorHex: "#EC4899",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "friendship_top3",
-                title: "Top-3 mensen gekozen",
-                detail: "De mensen gekozen die je meer aandacht wilt geven.",
+                title: "Top 3 people chosen",
+                detail: "Chose the people you want to give more attention to.",
                 xp: 10,
                 dimensions: [.love, .mind],
                 isPremium: false
@@ -1129,15 +1129,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "friendship_quality_time",
                 title: "Quality time gepland",
-                detail: "Een 1-op-1 moment gepland zonder telefoon.",
+                detail: "A 1-on-1 moment planned without a telephone.",
                 xp: 12,
                 dimensions: [.love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "friendship_checkin",
-                title: "Eerlijke check-in",
-                detail: "Iemand gevraagd hoe het echt gaat.",
+                title: "Fair check-in",
+                detail: "Someone asked how things are really going.",
                 xp: 12,
                 dimensions: [.love, .mind],
                 isPremium: false
@@ -1148,31 +1148,31 @@ enum PackLibrary {
     static let familyBoundaries = CategoryPack(
         id: "family_boundaries_peace",
         title: "Family Boundaries & Peace",
-        subtitle: "Voor iedereen met een familie die… ingewikkeld is.",
+        subtitle: "For anyone with a family that is… complicated.",
         iconSystemName: "shield.lefthalf.fill",
         accentColorHex: "#0EA5E9",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "family_red_flags",
-                title: "Rode vlaggen benoemd",
-                detail: "Genoteerd wat je triggert bij familie.",
+                title: "Red flags identified",
+                detail: "Note what triggers you with family.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "family_soft_boundary",
-                title: "1 zachte grens gezet",
-                detail: "Een klein ‘ik doe dat liever niet’ uitgesproken.",
+                title: "1 soft border set",
+                detail: "A small 'I'd rather not do that' uttered.",
                 xp: 14,
                 dimensions: [.love, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "family_step_back",
-                title: "Uit contact stappen",
-                detail: "Bewust een ruziegeval niet via WhatsApp laten ontploffen.",
+                title: "Get out of contact",
+                detail: "Consciously do not let an argument explode via WhatsApp.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
@@ -1183,31 +1183,31 @@ enum PackLibrary {
     static let singleEra = CategoryPack(
         id: "single_era_solo",
         title: "Single Era – Solo Life",
-        subtitle: "Niet wachten tot je ‘iemand’ hebt; dit is je main character season.",
+        subtitle: "Don't wait until you have 'someone'; this is your main character season.",
         iconSystemName: "person.fill.badge.plus",
         accentColorHex: "#7C3AED",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "single_solo_date",
-                title: "Solo date gepland",
-                detail: "Cinema, koffie, museum of wandeling alleen ingepland.",
+                title: "Solo date planned",
+                detail: "Cinema, coffee, museum or walk only scheduled.",
                 xp: 12,
                 dimensions: [.adventure, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "single_vision",
-                title: "Vision zonder partner",
-                detail: "Opgeschreven hoe je leven eruit mag zien als je alleen blijft.",
+                title: "Vision without a partner",
+                detail: "Written down what your life could be like if you were left alone.",
                 xp: 14,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "single_detox",
-                title: "Social media detox van exen",
-                detail: "Exen en situationships uit je feeds gefilterd.",
+                title: "Social media detox from exes",
+                detail: "Exes and situationships filtered from your feeds.",
                 xp: 10,
                 dimensions: [.mind, .love],
                 isPremium: false
@@ -1218,23 +1218,23 @@ enum PackLibrary {
     static let careerStarter = CategoryPack(
         id: "career_starter",
         title: "Career Starter / First Job",
-        subtitle: "Voor je eerste job/stage: minder imposter, meer rust.",
+        subtitle: "For your first job/internship: less imposter, more peace.",
         iconSystemName: "briefcase.fill",
         accentColorHex: "#22C55E",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "career_goals_firstyear",
-                title: "Job-doelen uitgeschreven",
-                detail: "Opgeschreven wat je wil leren in je eerste jaar.",
+                title: "Job goals written out",
+                detail: "Write down what you want to learn in your first year.",
                 xp: 14,
                 dimensions: [.money, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "career_feedback",
-                title: "Feedback gevraagd",
-                detail: "Actief om eerlijke feedback gevraagd.",
+                title: "Feedback requested",
+                detail: "Actively asked for honest feedback.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
@@ -1242,7 +1242,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "career_commute_ritual",
                 title: "Commute-routine",
-                detail: "Standaard muziek, podcast of ritueel voor onderweg bepaald.",
+                detail: "Standard music, podcast or ritual determined for on the road.",
                 xp: 10,
                 dimensions: [.mind, .love],
                 isPremium: false
@@ -1253,31 +1253,31 @@ enum PackLibrary {
     static let careerPivot = CategoryPack(
         id: "career_pivot",
         title: "Career Pivot & Doubt",
-        subtitle: "Twijfel aan je job zonder op autopilot te blijven.",
+        subtitle: "Question your job without staying on autopilot.",
         iconSystemName: "arrow.triangle.2.circlepath",
         accentColorHex: "#0EA5E9",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "career_diary",
-                title: "Eerlijk jobdagboek",
-                detail: "Eén week per dag 3 bullets: energiegevers en -zuigers.",
+                title: "Honest job diary",
+                detail: "One week 3 bullets per day: energy givers and extractors.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "career_alternatives",
-                title: "Alternatieven verkennen",
-                detail: "Drie andere beroepen of sectoren uitgezocht.",
+                title: "Explore alternatives",
+                detail: "Selected three other professions or sectors.",
                 xp: 14,
                 dimensions: [.money, .adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "career_informational_chat",
-                title: "1 gesprek met iemand die anders werkt",
-                detail: "Een informele call of koffie geregeld om te leren.",
+                title: "1 conversation with someone who works differently",
+                detail: "Arranged an informal call or coffee to learn.",
                 xp: 16,
                 dimensions: [.mind, .love],
                 isPremium: false
@@ -1288,31 +1288,31 @@ enum PackLibrary {
     static let freelanceFoundations = CategoryPack(
         id: "freelance_foundations",
         title: "Freelance & Side Hustle Foundations",
-        subtitle: "Voor iedereen die stiekem liever zijn eigen dingen doet.",
+        subtitle: "For everyone who secretly prefers to do their own things.",
         iconSystemName: "eurosign.circle.fill",
         accentColorHex: "#22C55E",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "freelance_value_prop",
-                title: "Mini value-prop geschreven",
-                detail: "In één zin: wat bied jij en voor wie?",
+                title: "Mini value prop written",
+                detail: "In one sentence: what do you offer and for whom?",
                 xp: 14,
                 dimensions: [.money, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "freelance_first_euro",
-                title: "Eerste € verdient",
-                detail: "Ongeacht bedrag minstens één keer betaald werk gedaan.",
+                title: "First € earned",
+                detail: "Regardless of amount, paid work has been done at least once.",
                 xp: 16,
                 dimensions: [.money, .adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "freelance_admin_folder",
-                title: "Basis administratie-mapje gemaakt",
-                detail: "Facturen en kosten gestructureerd opgeslagen.",
+                title: "Basic administration folder created",
+                detail: "Invoices and costs stored in a structured manner.",
                 xp: 12,
                 dimensions: [.money, .mind],
                 isPremium: false
@@ -1323,7 +1323,7 @@ enum PackLibrary {
     static let digitalHygiene = CategoryPack(
         id: "digital_hygiene",
         title: "Digital Hygiene & Detox",
-        subtitle: "Minder doomscrolling, minder ruis, meer headspace.",
+        subtitle: "Less doom scrolling, less noise, more headspace.",
         iconSystemName: "iphone.gen3.slash",
         accentColorHex: "#8B5CF6",
         isPremium: false,
@@ -1331,15 +1331,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "digital_homescreen",
                 title: "Homescreen clean-up",
-                detail: "Eén pagina met alleen essentials gemaakt.",
+                detail: "Created one page with only essentials.",
                 xp: 10,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "digital_notifications",
-                title: "Notificatie-killer",
-                detail: "Push uit voor minstens drie apps gezet.",
+                title: "Notification killer",
+                detail: "Push turned off for at least three apps.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
@@ -1347,7 +1347,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "digital_phone_free",
                 title: "Phone-free blok",
-                detail: "Twee uur bewust zonder telefoon gegaan.",
+                detail: "Consciously went two hours without a phone.",
                 xp: 14,
                 dimensions: [.mind],
                 isPremium: false
@@ -1358,31 +1358,31 @@ enum PackLibrary {
     static let sleepRest = CategoryPack(
         id: "sleep_rest_foundations",
         title: "Sleep & Rest Foundations",
-        subtitle: "Geen perfecte 5 AM grind, gewoon minder gesloopt wakker worden.",
+        subtitle: "No perfect 5 AM grind, just waking up less wrecked.",
         iconSystemName: "bed.double.fill",
         accentColorHex: "#0EA4BF",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "sleep_goal",
-                title: "Realistische slaapdoel gekozen",
-                detail: "Aantal uren bepaald dat bij jou past.",
+                title: "Realistic sleep goal chosen",
+                detail: "Number of hours determined that suits you.",
                 xp: 10,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "sleep_wind_down",
-                title: "Wind-down signaal",
-                detail: "Vaste reminder of ritueel 30 minuten voor slapen ingesteld.",
+                title: "Wind-down signal",
+                detail: "Fixed reminder or ritual set 30 minutes before bedtime.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "sleep_bed_only",
-                title: "Bed alleen voor slapen",
-                detail: "Een week niet in bed gescrold of gewerkt.",
+                title: "Bed only for sleeping",
+                detail: "Didn't scroll in bed or work for a week.",
                 xp: 14,
                 dimensions: [.mind],
                 isPremium: false
@@ -1393,31 +1393,31 @@ enum PackLibrary {
     static let foodEnergy = CategoryPack(
         id: "food_energy",
         title: "Food & Energy",
-        subtitle: "Niet afvallen, maar beter voelen in je lichaam.",
+        subtitle: "Not losing weight, but feeling better in your body.",
         iconSystemName: "fork.knife",
         accentColorHex: "#84CC16",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "food_mindful_meal",
-                title: "1 maaltijd bewust gegeten",
-                detail: "Zonder scherm en echt proeven.",
+                title: "Consciously eaten 1 meal",
+                detail: "Without a screen and real tasting.",
                 xp: 10,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "food_energy_tracker",
-                title: "Energie-tracker",
-                detail: "Drie dagen bijgehouden welke maaltijden je crash geven.",
+                title: "Energy tracker",
+                detail: "Keep track of which meals give you a crash for three days.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "food_new_meal",
-                title: "Fun nieuwe maaltijd geprobeerd",
-                detail: "Een nieuw recept of keuken getest.",
+                title: "Fun new meal tried",
+                detail: "Tested a new recipe or cuisine.",
                 xp: 12,
                 dimensions: [.adventure, .mind],
                 isPremium: false
@@ -1428,15 +1428,15 @@ enum PackLibrary {
     static let movementBody = CategoryPack(
         id: "movement_body_respect",
         title: "Movement & Body Respect Basics",
-        subtitle: "Bewegen als respect voor je lijf zonder bodyshaming.",
+        subtitle: "Exercise as respect for your body without body shaming.",
         iconSystemName: "figure.walk",
         accentColorHex: "#10B981",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "movement_ten_walk",
-                title: "10-minuten-walk",
-                detail: "Drie dagen na elkaar een 10-minutenwandeling gedaan.",
+                title: "10 minute walk",
+                detail: "Took a 10-minute walk three days in a row.",
                 xp: 10,
                 dimensions: [.mind, .adventure],
                 isPremium: false
@@ -1444,15 +1444,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "movement_daily_stretch",
                 title: "Stretch-moment",
-                detail: "Vijf minuten per dag gestretcht.",
+                detail: "Stretched five minutes a day.",
                 xp: 10,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "movement_fun_activity",
-                title: "1 actieve activiteit die niet sporten voelt",
-                detail: "Iets actiefs gedaan dat vooral leuk was (dans, zwemmen, klimmen).",
+                title: "1 active activity that doesn't feel like exercise",
+                detail: "Did something active that was especially fun (dance, swimming, climbing).",
                 xp: 14,
                 dimensions: [.adventure, .mind],
                 isPremium: false
@@ -1463,23 +1463,23 @@ enum PackLibrary {
     static let creativityPassion = CategoryPack(
         id: "creativity_passion_projects",
         title: "Creativity & Passion Projects",
-        subtitle: "Voor iedereen die ideeën heeft maar nooit eraan begint.",
+        subtitle: "For everyone who has ideas but never gets started.",
         iconSystemName: "paintbrush.pointed.fill",
         accentColorHex: "#F472B6",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "creativity_idea_dump",
-                title: "Ideeën-dump",
-                detail: "Alles wat je ooit wou maken opgeschreven.",
+                title: "Idea dump",
+                detail: "Everything you ever wanted to make written down.",
                 xp: 10,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "creativity_micro_session",
-                title: "1 micro-sessie",
-                detail: "15 minuten aan één project gewerkt.",
+                title: "1 micro session",
+                detail: "Worked on one project for 15 minutes.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
@@ -1487,7 +1487,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "creativity_mini_launch",
                 title: "Mini launch",
-                detail: "Iets online gezet, ongeacht perfectie.",
+                detail: "Put something online, regardless of perfection.",
                 xp: 14,
                 dimensions: [.adventure, .mind],
                 isPremium: false
@@ -1498,31 +1498,31 @@ enum PackLibrary {
     static let selfCompassion = CategoryPack(
         id: "self_compassion_voice",
         title: "Self-Compassion & Inner Voice",
-        subtitle: "Minder innerlijke bully, meer inner coach.",
+        subtitle: "Less inner bully, more inner coach.",
         iconSystemName: "heart.text.square.fill",
         accentColorHex: "#F43F5E",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "compassion_rewrite",
-                title: "1 negatieve gedachte herschreven",
-                detail: "Een harde gedachte naar iets milders herschreven.",
+                title: "1 negative thought rewritten",
+                detail: "A hard thought rewritten into something milder.",
                 xp: 10,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "compassion_letter",
-                title: "Brief naar jezelf",
-                detail: "Een brief geschreven zoals aan een goede vriend(in).",
+                title: "Letter to yourself",
+                detail: "A letter written as if to a good friend.",
                 xp: 12,
                 dimensions: [.mind, .love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "compassion_win_list",
-                title: "Win-lijstje",
-                detail: "Tien dingen genoteerd die je de laatste jaren goed deed.",
+                title: "Win list",
+                detail: "Listed ten things you did well in recent years.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
@@ -1533,7 +1533,7 @@ enum PackLibrary {
     static let everydayCalm = CategoryPack(
         id: "everyday_calm",
         title: "Everyday Calm & Overwhelm",
-        subtitle: "Niet geen stress, maar iets minder ‘alles is te veel’.",
+        subtitle: "Not no stress, but a little less 'everything is too much'.",
         iconSystemName: "brain.head.profile",
         accentColorHex: "#38BDF8",
         isPremium: false,
@@ -1541,23 +1541,23 @@ enum PackLibrary {
             ChecklistItem(
                 id: "calm_radar",
                 title: "Overwhelm radar",
-                detail: "Drie triggers voor stressniveau herkend.",
+                detail: "Three stress level triggers recognized.",
                 xp: 10,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "calm_reset_ritual",
-                title: "Mini reset-ritueel",
-                detail: "Ademhaling, korte wandeling of muziek gekozen als reset.",
+                title: "Mini reset ritual",
+                detail: "Breathing, short walk or music selected as reset.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "calm_half_todos",
-                title: "To-do’s gehalveerd",
-                detail: "Daglijst gehalveerd naar realistisch niveau.",
+                title: "To-do's halved",
+                detail: "Daily list halved to realistic level.",
                 xp: 14,
                 dimensions: [.mind],
                 isPremium: false
@@ -1568,31 +1568,31 @@ enum PackLibrary {
     static let lightMinimalism = CategoryPack(
         id: "light_minimalism",
         title: "Light Minimalism & De-Clutter",
-        subtitle: "Minder spullen, meer ademruimte.",
+        subtitle: "Less stuff, more breathing space.",
         iconSystemName: "trash.circle.fill",
         accentColorHex: "#F97316",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "minimalism_drawer",
-                title: "1 lade of plank opgeruimd",
-                detail: "Een volledige lade of plank uitgekuist.",
+                title: "1 drawer or shelf tidied up",
+                detail: "Cleaned out an entire drawer or shelf.",
                 xp: 10,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "minimalism_clothes_give",
-                title: "Kleding-stapel weggeven",
-                detail: "Minstens vijf items weggegeven of gedoneerd.",
+                title: "Giving away a pile of clothes",
+                detail: "Gave away or donated at least five items.",
                 xp: 12,
                 dimensions: [.mind, .love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "minimalism_digital_trash",
-                title: "Digitale prullenbak",
-                detail: "Downloads en screenshots opgeruimd.",
+                title: "Digital trash can",
+                detail: "Downloads and screenshots cleaned up.",
                 xp: 10,
                 dimensions: [.mind],
                 isPremium: false
@@ -1603,31 +1603,31 @@ enum PackLibrary {
     static let homeVibes = CategoryPack(
         id: "home_vibes_nesting",
         title: "Home Vibes & Nesting",
-        subtitle: "Je plek voelt eindelijk als jij.",
+        subtitle: "Your place finally feels like you.",
         iconSystemName: "lamp.table.fill",
         accentColorHex: "#FDE047",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "home_moodboard",
-                title: "Moodboard gemaakt",
-                detail: "Een album of Pinterestboard gemaakt voor je ruimte.",
+                title: "Created a mood board",
+                detail: "An album or Pinterest board created for your space.",
                 xp: 10,
                 dimensions: [.mind, .adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "home_corner",
-                title: "1 hoekje afgewerkt",
-                detail: "Een hoekje afgewerkt met iets kleins dat sfeer brengt.",
+                title: "1 corner finished",
+                detail: "A corner finished with something small that creates atmosphere.",
                 xp: 12,
                 dimensions: [.mind, .love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "home_scent_light",
-                title: "Geur & licht check",
-                detail: "Bewuste keuze gemaakt voor licht of kaarsen.",
+                title: "Odor & light check",
+                detail: "Conscious choice made for light or candles.",
                 xp: 10,
                 dimensions: [.mind, .love],
                 isPremium: false
@@ -1638,31 +1638,31 @@ enum PackLibrary {
     static let microAdventures = CategoryPack(
         id: "micro_adventures",
         title: "Micro-Adventures & Local Exploration",
-        subtitle: "Main character moments zonder vliegtuig.",
+        subtitle: "Main character moments without an airplane.",
         iconSystemName: "figure.hiking",
         accentColorHex: "#0EA5E9",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "micro_new_park",
-                title: "Nieuw park of wandeling geprobeerd",
-                detail: "Een onbekend park of trail bezocht.",
+                title: "Tried a new park or walk",
+                detail: "Visited an unknown park or trail.",
                 xp: 12,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "micro_new_route",
-                title: "Andere route naar werk of school",
-                detail: "Bewust een andere route genomen.",
+                title: "Different route to work or school",
+                detail: "Consciously took a different route.",
                 xp: 10,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "micro_free_activity",
-                title: "Low budget activiteit gedaan",
-                detail: "Een gratis of goedkope activiteit in je stad opgezocht en gedaan.",
+                title: "Low budget activity done",
+                detail: "Find and do a free or cheap activity in your city.",
                 xp: 14,
                 dimensions: [.adventure, .mind],
                 isPremium: false
@@ -1673,31 +1673,31 @@ enum PackLibrary {
     static let moneyResetLite = CategoryPack(
         id: "money_reset_lite",
         title: "Money Reset Lite",
-        subtitle: "Minder chaos zonder finfluencer te worden.",
+        subtitle: "Less chaos without becoming an influencer.",
         iconSystemName: "eurosign.arrow.circlepath",
         accentColorHex: "#22C55E",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "money_screenshot",
-                title: "Geld-screenshot",
-                detail: "Banksaldo’s en schulden eerlijk bekeken.",
+                title: "Money screenshot",
+                detail: "Bank balances and debts looked at honestly.",
                 xp: 10,
                 dimensions: [.money, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "money_leaks",
-                title: "Top-3 geldlekkages",
-                detail: "Geldlekken opgeschreven en één aangepakt.",
+                title: "Top 3 money leaks",
+                detail: "Money leaks written down and one addressed.",
                 xp: 12,
                 dimensions: [.money],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "money_mini_savings",
-                title: "Mini spaarpotje",
-                detail: "Automatische spaaropdracht ingesteld, al is het €10.",
+                title: "Mini piggy bank",
+                detail: "Automatic savings order set, even if it is €10.",
                 xp: 14,
                 dimensions: [.money, .mind],
                 isPremium: false
@@ -1708,7 +1708,7 @@ enum PackLibrary {
     static let coupleDates = CategoryPack(
         id: "couple_dates",
         title: "Couple Dates & Shared Memories",
-        subtitle: "Van Netflix en telefoon naar echte herinneringen.",
+        subtitle: "From Netflix and telephone to real memories.",
         iconSystemName: "heart.circle.fill",
         accentColorHex: "#EF4444",
         isPremium: false,
@@ -1716,23 +1716,23 @@ enum PackLibrary {
             ChecklistItem(
                 id: "couple_budget_date",
                 title: "Low budget date",
-                detail: "Een budgetvriendelijke date bedacht en gedaan.",
+                detail: "A budget-friendly date thought up and done.",
                 xp: 12,
                 dimensions: [.love, .adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "couple_phonefree",
-                title: "Telefoonvrije date",
-                detail: "Een avond samen zonder telefoon.",
+                title: "Phone-free date",
+                detail: "An evening together without a telephone.",
                 xp: 10,
                 dimensions: [.love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "couple_try_new",
-                title: "Samen iets nieuws geprobeerd",
-                detail: "Een nieuw spel, activiteit of restaurant getest.",
+                title: "Tried something new together",
+                detail: "Tested a new game, activity or restaurant.",
                 xp: 12,
                 dimensions: [.love, .adventure],
                 isPremium: false
@@ -1743,15 +1743,15 @@ enum PackLibrary {
     static let conflictSkills = CategoryPack(
         id: "conflict_skills_repair",
         title: "Conflict Skills & Repair",
-        subtitle: "Niet minder ruzie, maar betere ruzie.",
+        subtitle: "Not less arguing, but better arguing.",
         iconSystemName: "hands.sparkles.fill",
         accentColorHex: "#14B8A6",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "conflict_triggers",
-                title: "Triggers van jezelf benoemd",
-                detail: "Opgeschreven wat je raakt in conflicten.",
+                title: "Identify your own triggers",
+                detail: "Write down what affects you in conflicts.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
@@ -1759,7 +1759,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "conflict_debrief",
                 title: "Conflict ge-debriefed",
-                detail: "Na afloop samen ge-debriefd.",
+                detail: "Debriefed together afterwards.",
                 xp: 14,
                 dimensions: [.love, .mind],
                 isPremium: false
@@ -1767,7 +1767,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "conflict_sorry2",
                 title: "Sorry 2.0",
-                detail: "Echte sorry uitgesproken met gedrag, gevoel en afspraak.",
+                detail: "Genuine sorry expressed with behavior, feeling and agreement.",
                 xp: 14,
                 dimensions: [.love, .mind],
                 isPremium: false
@@ -1778,31 +1778,31 @@ enum PackLibrary {
     static let boundariesPack = CategoryPack(
         id: "boundaries_saying_no",
         title: "Boundaries & Saying No",
-        subtitle: "Voor de people pleasers.",
+        subtitle: "For the people pleasers.",
         iconSystemName: "hand.raised.fill",
         accentColorHex: "#A855F7",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "boundaries_no_excuse",
-                title: "1 ‘nee’ gezegd",
-                detail: "Een nee gezegd zonder duizend excuses.",
+                title: "1 said 'no'",
+                detail: "A no said without a thousand excuses.",
                 xp: 12,
                 dimensions: [.mind, .love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "boundaries_script",
-                title: "Boundary script geschreven",
-                detail: "Een zin bedacht die je kan gebruiken.",
+                title: "Boundary script written",
+                detail: "Come up with a sentence that you can use.",
                 xp: 10,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "boundaries_energy_vamp",
-                title: "Energiezuiger niet toegezegd",
-                detail: "Een moment bewust niet toegezegd.",
+                title: "Energy sucker not promised",
+                detail: "Consciously not promised for a moment.",
                 xp: 12,
                 dimensions: [.mind, .love],
                 isPremium: false
@@ -1813,31 +1813,31 @@ enum PackLibrary {
     static let meaningValues = CategoryPack(
         id: "meaning_values",
         title: "Meaning & Values",
-        subtitle: "Als je even niet weet waar je leven heen gaat.",
+        subtitle: "When you don't know where your life is going.",
         iconSystemName: "sparkle.magnifyingglass",
         accentColorHex: "#6366F1",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "meaning_top_values",
-                title: "Top-5 waarden gekozen",
-                detail: "Een lijst met je vijf belangrijkste waarden gemaakt.",
+                title: "Top 5 values chosen",
+                detail: "Made a list of your five most important values.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "meaning_activity",
-                title: "1 activiteit gekozen",
-                detail: "Een activiteit gekozen die twee waarden ondersteunt.",
+                title: "1 activity chosen",
+                detail: "Chose an activity that supports two values.",
                 xp: 12,
                 dimensions: [.mind, .adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "meaning_good_year",
-                title: "Hoe ziet een goed jaar eruit?",
-                detail: "Eerlijk opgeschreven hoe een goed jaar eruitziet voor jou.",
+                title: "What does a good year look like?",
+                detail: "Honestly wrote down what a good year looks like for you.",
                 xp: 14,
                 dimensions: [.mind],
                 isPremium: false
@@ -1848,31 +1848,31 @@ enum PackLibrary {
     static let weekendUpgrade = CategoryPack(
         id: "weekend_upgrade",
         title: "Weekend Upgrade Pack",
-        subtitle: "Elk weekend net 10% beter dan ‘scrollen en eten’.",
+        subtitle: "Every weekend just 10% better than 'scrolling and eating'.",
         iconSystemName: "calendar.badge.clock",
         accentColorHex: "#F97316",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "weekend_memorable",
-                title: "Weekend-activiteit gepland",
-                detail: "Iets ingepland dat je later herinnert.",
+                title: "Weekend activity planned",
+                detail: "Plan something that you will remember later.",
                 xp: 12,
                 dimensions: [.adventure, .love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "weekend_life_admin",
-                title: "1 uur life admin",
-                detail: "Een uur geblokt voor mail, papieren en planning.",
+                title: "1 hour life admin",
+                detail: "An hour blocked for email, papers and planning.",
                 xp: 10,
                 dimensions: [.mind, .money],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "weekend_rest_block",
-                title: "Bewust rustblok",
-                detail: "Een blok waarin niets moest maar wel gekozen was.",
+                title: "Conscious rest block",
+                detail: "A block in which nothing was required but was chosen.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
@@ -1883,7 +1883,7 @@ enum PackLibrary {
     static let seasonalReset = CategoryPack(
         id: "seasonal_reset",
         title: "Seasonal Reset",
-        subtitle: "Klein seizoensritueel zodat het jaar niet weg-slipt.",
+        subtitle: "Small seasonal ritual so that the year does not slip away.",
         iconSystemName: "leaf.fill",
         accentColorHex: "#22C55E",
         isPremium: false,
@@ -1891,23 +1891,23 @@ enum PackLibrary {
             ChecklistItem(
                 id: "seasonal_checkin",
                 title: "Season check-in",
-                detail: "Genoteerd wat je achterlaat en meeneemt.",
+                detail: "Note what you leave behind and what you take with you.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "seasonal_closet",
-                title: "Kleding-seizoen wissel",
-                detail: "Kleding gewisseld en weggegeven wat niet meer past.",
+                title: "Clothing season change",
+                detail: "Changed clothes and gave away what no longer fit.",
                 xp: 12,
                 dimensions: [.mind, .adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "seasonal_goal",
-                title: "1 seizoensdoel gekozen",
-                detail: "Een heel klein doel voor het nieuwe seizoen gekozen.",
+                title: "1 season goal chosen",
+                detail: "Chosen a very small goal for the new season.",
                 xp: 14,
                 dimensions: [.mind],
                 isPremium: false
@@ -1918,31 +1918,31 @@ enum PackLibrary {
     static let healthAdmin = CategoryPack(
         id: "health_admin",
         title: "Health Admin & Self Check-ins",
-        subtitle: "Uitgestelde dokters- en tandartsdingen zonder adviezen.",
+        subtitle: "Postponed doctor and dentist things without advice.",
         iconSystemName: "cross.case.fill",
         accentColorHex: "#0EA4BF",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "health_make_appointment",
-                title: "Afspraak effectief gemaakt",
-                detail: "Een tandarts- of huisartsafspraak ingepland.",
+                title: "Appointment effectively made",
+                detail: "Scheduled a dentist or GP appointment.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "health_med_overview",
-                title: "Medicatie-overzicht",
-                detail: "Overzicht gemaakt van medicatie en supplementen (zonder advies).",
+                title: "Medication overview",
+                detail: "Overview made of medication and supplements (without advice).",
                 xp: 10,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "health_questions_list",
-                title: "Vragenlijst voor check-up",
-                detail: "Vragen genoteerd voor je volgende consult.",
+                title: "Questionnaire for check-up",
+                detail: "Questions noted for your next consultation.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
@@ -1953,31 +1953,31 @@ enum PackLibrary {
     static let workLifeBoundaries = CategoryPack(
         id: "work_life_boundaries",
         title: "Work–Life Boundaries",
-        subtitle: "Voor iedereen die ’s avonds nog mails leest.",
+        subtitle: "For everyone who still reads emails in the evening.",
         iconSystemName: "rectangle.portrait.and.arrow.right",
         accentColorHex: "#60A5FA",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "work_end_ritual",
-                title: "Hard einde werkdag",
-                detail: "Een uur en ritueel gekozen om af te sluiten.",
+                title: "Hard end of workday",
+                detail: "An hour and ritual chosen to conclude.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "work_notifications_limit",
-                title: "Werkapps gelimiteerd",
-                detail: "Notificaties buiten werkuren beperkt.",
+                title: "Work apps limited",
+                detail: "Notifications outside working hours limited.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "work_evening_free",
-                title: "Werkvrije avond",
-                detail: "Een avond per week volledig werkvrij gepland.",
+                title: "Work-free evening",
+                detail: "Planned one evening a week completely work-free.",
                 xp: 14,
                 dimensions: [.love, .mind],
                 isPremium: false
@@ -1988,31 +1988,31 @@ enum PackLibrary {
     static let creatorSocialStarter = CategoryPack(
         id: "creator_social_starter",
         title: "Creator & Social Media Starter",
-        subtitle: "Voor wie wil posten of maken maar blokkeert.",
+        subtitle: "For those who want to post or create but are blocked.",
         iconSystemName: "camera.fill",
         accentColorHex: "#F472B6",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "creator_reasons",
-                title: "Waarom wil ik creëren?",
-                detail: "Drie redenen opgeschreven waarom je wil maken of posten.",
+                title: "Why do I want to create?",
+                detail: "Three reasons written down why you want to create or post.",
                 xp: 12,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "creator_first_post",
-                title: "1 imperfecte post",
-                detail: "Een post online gezet zonder perfectionisme.",
+                title: "1 imperfect post",
+                detail: "A post put online without perfectionism.",
                 xp: 14,
                 dimensions: [.adventure, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "creator_content_ritual",
-                title: "Content-ritueel",
-                detail: "Een vast moment per week gekozen om te maken.",
+                title: "Content ritual",
+                detail: "Chose a fixed moment per week to make it.",
                 xp: 12,
                 dimensions: [.mind, .money],
                 isPremium: false
@@ -2023,527 +2023,527 @@ enum PackLibrary {
     static let lifeChecklist = CategoryPack(
         id: "life_checklist_classic",
         title: "Life Checklist",
-        subtitle: "Van geboorte tot bucketlist-momenten",
+        subtitle: "From birth to bucket list moments",
         iconSystemName: "checkmark.circle.fill",
         accentColorHex: "#2563EB",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "life_be_born",
-                title: "Geboren worden",
-                detail: "Welkom op de planeet: je eerste XP is binnen.",
+                title: "Being born",
+                detail: "Welcome to the planet: your first XP has arrived.",
                 xp: 5,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_first_steps",
-                title: "Eerste stapjes",
-                detail: "Die wiebelige meters die de wereld openen.",
+                title: "First steps",
+                detail: "Those wobbly meters that open up the world.",
                 xp: 6,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_first_words",
-                title: "Eerste woorden",
-                detail: "Je eerste woorden gedeeld met je wereld.",
+                title: "First words",
+                detail: "Your first words shared with your world.",
                 xp: 6,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_learn_read",
-                title: "Leren lezen",
-                detail: "Boeken en borden ontgrendeld.",
+                title: "Learning to read",
+                detail: "Books and boards unlocked.",
                 xp: 10,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_make_friend",
-                title: "Eerste vriend gemaakt",
-                detail: "Je eerste echte vriend gevonden.",
+                title: "First friend made",
+                detail: "Found your first real friend.",
                 xp: 10,
                 dimensions: [.love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_ride_bike",
-                title: "Leren fietsen",
-                detail: "Balans, vrijheid en schrammen behaald.",
+                title: "Learning to ride a bike",
+                detail: "Achieved balance, freedom and scratches.",
                 xp: 12,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_read_book",
-                title: "Eerste boek uitgelezen",
-                detail: "Een compleet boek uitgelezen uit eigen keuze.",
+                title: "Finished first book",
+                detail: "A complete book read by your own choice.",
                 xp: 8,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_learn_swim",
-                title: "Leren zwemmen",
-                detail: "Je eerste baantjes zonder drijfmiddelen.",
+                title: "Learn to swim",
+                detail: "Your first laps without flotation devices.",
                 xp: 12,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_finish_elementary",
-                title: "Basisschool afgerond",
-                detail: "Je basisschooltijd afgerond.",
+                title: "Completed primary school",
+                detail: "Completed your primary school years.",
                 xp: 14,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_play_sport",
-                title: "Teamsport gespeeld",
-                detail: "Mee gedaan met een sportteam of -club.",
+                title: "Played team sports",
+                detail: "Participated in a sports team or club.",
                 xp: 10,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_fly_plane",
-                title: "Voor het eerst gevlogen",
-                detail: "Je eerste keer de lucht in gegaan.",
+                title: "Flew for the first time",
+                detail: "Your first time in the air.",
                 xp: 12,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_ride_boat",
-                title: "Boottocht gemaakt",
-                detail: "Een tocht op het water gemaakt.",
+                title: "Made a boat trip",
+                detail: "Made a trip on the water.",
                 xp: 10,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_train_trip",
-                title: "Treinreis gemaakt",
-                detail: "Met de trein een bestemming bereikt.",
+                title: "Made a train trip",
+                detail: "Reached a destination by train.",
                 xp: 8,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_helicopter",
-                title: "Helikoptervlucht meegemaakt",
-                detail: "Een vlucht met uitzicht vanuit een heli meegemaakt.",
+                title: "Experienced a helicopter flight",
+                detail: "Experienced a flight with a view from a helicopter.",
                 xp: 18,
                 dimensions: [.adventure],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_see_ocean",
-                title: "De oceaan gezien",
-                detail: "Voor het eerst de zee gezien en geroken.",
+                title: "Seen the ocean",
+                detail: "Saw and smelled the sea for the first time.",
                 xp: 10,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_see_snow",
-                title: "Sneeuw beleefd",
-                detail: "Sneeuw in het echt meegemaakt.",
+                title: "Snow polite",
+                detail: "Experienced snow in real life.",
                 xp: 10,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_make_snowman",
-                title: "Sneeuwpop gebouwd",
-                detail: "Je eigen sneeuwpop gebouwd.",
+                title: "Snowman built",
+                detail: "Built your own snowman.",
                 xp: 10,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_finish_middle",
-                title: "Middelbare onderbouw afgerond",
-                detail: "Je middelbare school onderbouw afgerond.",
+                title: "Completed secondary education",
+                detail: "Completed your junior high school education.",
                 xp: 16,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_concert",
-                title: "Naar een concert geweest",
-                detail: "Live muziek beleefd met volume en vibes.",
+                title: "Went to a concert",
+                detail: "Experience live music with volume and vibes.",
                 xp: 14,
                 dimensions: [.adventure, .love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_camping",
-                title: "Nachtje kamperen",
-                detail: "Een nacht in een tent of onder de sterren geslapen.",
+                title: "Camping overnight",
+                detail: "Slept a night in a tent or under the stars.",
                 xp: 14,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_rollercoaster",
-                title: "Achtbaan gereden",
-                detail: "Een achtbaan overleefd en misschien geschreeuwd.",
+                title: "Rollercoaster ride",
+                detail: "Survived a roller coaster and maybe screamed.",
                 xp: 14,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_play_instrument",
-                title: "Instrument leren bespelen",
-                detail: "Een instrument leren bespelen en laten horen.",
+                title: "Learn to play an instrument",
+                detail: "Learning to play and perform an instrument.",
                 xp: 16,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_first_kiss",
-                title: "Eerste kus gehad",
-                detail: "Je eerste kus gehad.",
+                title: "Had first kiss",
+                detail: "Had your first kiss.",
                 xp: 16,
                 dimensions: [.love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_credit_card",
-                title: "Eerste creditcard geregeld",
-                detail: "Je eerste kredietkaart aangevraagd of gekregen.",
+                title: "First credit card arranged",
+                detail: "Applied for or received your first credit card.",
                 xp: 16,
                 dimensions: [.money, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_start_driving",
-                title: "Begonnen met autorijden",
-                detail: "Je eerste kilometers gereden achter het stuur.",
+                title: "Started driving",
+                detail: "Your first kilometers driven behind the wheel.",
                 xp: 18,
                 dimensions: [.adventure, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_roadtrip",
-                title: "Roadtrip gereden",
-                detail: "Een trip gepland en gereden met stops en verhalen.",
+                title: "Road trip ridden",
+                detail: "A trip planned and driven with stops and stories.",
                 xp: 18,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_new_country",
-                title: "Nieuw land bezocht",
-                detail: "Een grens overgestoken en een nieuw land ontdekt.",
+                title: "Visited a new country",
+                detail: "Crossed a border and discovered a new country.",
                 xp: 20,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_public_speech",
-                title: "Speech gegeven voor publiek",
-                detail: "Voor publiek gesproken zonder wegrennen.",
+                title: "Speech given in front of an audience",
+                detail: "Speaking in front of an audience without running away.",
                 xp: 18,
                 dimensions: [.mind, .adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_graduate_highschool",
-                title: "Middelbareschooldiploma gehaald",
-                detail: "Je middelbare school diploma in handen.",
+                title: "Received a high school diploma",
+                detail: "Your high school diploma in hands.",
                 xp: 22,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_second_language",
-                title: "Tweede taal geleerd",
-                detail: "Een nieuwe taal geleerd en gebruikt in gesprek.",
+                title: "Learned a second language",
+                detail: "Learned a new language and used it in conversation.",
                 xp: 22,
                 dimensions: [.mind],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_invest_money",
-                title: "Eerste investering gedaan",
-                detail: "Je eerste geld belegd of geïnvesteerd.",
+                title: "First investment made",
+                detail: "Your first money invested or invested.",
                 xp: 24,
                 dimensions: [.money, .mind],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_meet_idol",
-                title: "Idool ontmoet",
-                detail: "Iemand ontmoet die je bewondert.",
+                title: "Idol meets",
+                detail: "Meet someone you admire.",
                 xp: 18,
                 dimensions: [.love, .adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_big_mistake",
-                title: "Grote fout gemaakt en geleerd",
-                detail: "Een grote fout gemaakt en ervan geleerd.",
+                title: "Made a big mistake and learned",
+                detail: "Made a big mistake and learned from it.",
                 xp: 16,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_win_trophy",
-                title: "Prijs of trofee gewonnen",
-                detail: "Een prijs of trofee binnengehaald.",
+                title: "Won a prize or trophy",
+                detail: "Won a prize or trophy.",
                 xp: 20,
                 dimensions: [.adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_climb_mountain",
-                title: "Bergtop bereikt",
-                detail: "Een top gehaald waar je hart van ging kloppen.",
+                title: "Reached mountain top",
+                detail: "Reached a summit that made your heart beat.",
                 xp: 24,
                 dimensions: [.adventure],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_run_marathon",
-                title: "Marathon uitgelopen",
-                detail: "42 km afgelegd en de finish gehaald.",
+                title: "Completed marathon",
+                detail: "Completed 42 km and reached the finish.",
                 xp: 28,
                 dimensions: [.adventure, .mind],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_learn_cook",
-                title: "Zelf leren koken",
-                detail: "Een maaltijd zelfstandig gekookt die iemand anders lekker vond.",
+                title: "Learn to cook yourself",
+                detail: "A meal independently cooked that someone else liked.",
                 xp: 14,
                 dimensions: [.mind, .love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_explore_cave",
-                title: "Grot ontdekt",
-                detail: "Ondergronds avontuur in een grot meegemaakt.",
+                title: "Cave discovered",
+                detail: "Experienced an underground adventure in a cave.",
                 xp: 22,
                 dimensions: [.adventure],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_see_volcano",
-                title: "Vulkaan van dichtbij gezien",
-                detail: "Een vulkaan van dichtbij gezien.",
+                title: "Volcano seen up close",
+                detail: "A volcano seen up close.",
                 xp: 22,
                 dimensions: [.adventure],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_graduate_college",
-                title: "Hbo/uni diploma gehaald",
-                detail: "Een hbo/uni diploma behaald.",
+                title: "Obtained a HBO/uni diploma",
+                detail: "Obtained an HBO/uni diploma.",
                 xp: 26,
                 dimensions: [.mind],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_long_relationship",
-                title: "Relatie langer dan een jaar",
-                detail: "Minstens 1 jaar een relatie onderhouden.",
+                title: "Relationship longer than a year",
+                detail: "Maintain a relationship for at least 1 year.",
                 xp: 24,
                 dimensions: [.love],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_get_dumped",
-                title: "Een break-up doorleefd",
-                detail: "Een break-up doorgemaakt en verwerkt.",
+                title: "Experiencing a break-up",
+                detail: "Going through and processing a break-up.",
                 xp: 18,
                 dimensions: [.love, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_sign_contract",
-                title: "Eerste grote contract getekend",
-                detail: "Je eerste grote contract getekend.",
+                title: "First major contract signed",
+                detail: "Signed your first major contract.",
                 xp: 20,
                 dimensions: [.money, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_get_job",
-                title: "Eerste baan gestart",
-                detail: "Je eerste baan of betaalde gig gestart.",
+                title: "First job started",
+                detail: "Started your first job or paid gig.",
                 xp: 20,
                 dimensions: [.money, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_get_promoted",
-                title: "Promotie gekregen",
-                detail: "Een promotie of stap omhoog gekregen.",
+                title: "Got a promotion",
+                detail: "Received a promotion or step up.",
                 xp: 22,
                 dimensions: [.money, .mind],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_first_paycheck",
-                title: "Eerste salaris ontvangen",
-                detail: "Je eerste loon ontvangen en benut.",
+                title: "Receiving first salary",
+                detail: "Receive and use your first salary.",
                 xp: 18,
                 dimensions: [.money],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_get_fired",
-                title: "Ontslag meegemaakt",
-                detail: "Ontslag meegemaakt en opnieuw gestart.",
+                title: "Experiencing dismissal",
+                detail: "Experienced dismissal and started again.",
                 xp: 18,
                 dimensions: [.mind, .money],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_in_news",
-                title: "In het nieuws verschenen",
-                detail: "Vernoemd of verschenen in media.",
+                title: "Appeared in the news",
+                detail: "Mentioned or appearing in media.",
                 xp: 18,
                 dimensions: [.adventure, .mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_vote",
-                title: "Gestemd bij verkiezing",
-                detail: "Gestemd in een lokale of landelijke verkiezing.",
+                title: "Voted in election",
+                detail: "Voted in a local or national election.",
                 xp: 14,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_switch_careers",
-                title: "Carrière geswitcht",
-                detail: "Van richting veranderd en opnieuw begonnen.",
+                title: "Career switched",
+                detail: "Changed direction and started again.",
                 xp: 22,
                 dimensions: [.money, .mind],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_buy_house",
-                title: "Eigen huis gekocht",
-                detail: "Een huis gekocht of hypotheek geregeld.",
+                title: "Bought my own house",
+                detail: "Bought a house or arranged a mortgage.",
                 xp: 26,
                 dimensions: [.money, .mind],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_get_engaged",
-                title: "Verloofd geraakt",
-                detail: "Verloofd geraakt en het gevierd.",
+                title: "Got engaged",
+                detail: "Got engaged and celebrated.",
                 xp: 24,
                 dimensions: [.love],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_get_married",
-                title: "Getrouwd",
-                detail: "Ja gezegd tijdens je huwelijk.",
+                title: "Married",
+                detail: "Said yes during your wedding.",
                 xp: 28,
                 dimensions: [.love],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_have_kid",
-                title: "Eerste kind gekregen",
-                detail: "Ouder geworden van je eerste kind.",
+                title: "Had first child",
+                detail: "Became a parent of your first child.",
                 xp: 28,
                 dimensions: [.love],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_teach_walk",
-                title: "Je kind leren lopen",
-                detail: "Samen de eerste stapjes geoefend.",
+                title: "Teaching your child to walk",
+                detail: "Practiced the first steps together.",
                 xp: 18,
                 dimensions: [.love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_teach_talk",
-                title: "Je kind leren praten",
-                detail: "De eerste woordjes van je kind begeleid.",
+                title: "Teaching your child to talk",
+                detail: "Accompanied by your child's first words.",
                 xp: 18,
                 dimensions: [.love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_watch_kid_graduate",
-                title: "Diploma-uitreiking van je kind",
-                detail: "Aanwezig geweest bij het diploma van je kind.",
+                title: "Your child's graduation ceremony",
+                detail: "Been present at your child's graduation.",
                 xp: 24,
                 dimensions: [.love],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_watch_kid_marry",
-                title: "Huwelijk van je kind meegemaakt",
-                detail: "Je kind het ja-woord zien geven.",
+                title: "Experienced your child's wedding",
+                detail: "Seeing your child say yes.",
                 xp: 26,
                 dimensions: [.love],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_grandparent",
-                title: "Grootouder geworden",
-                detail: "Kleinkinderen verwelkomd in de familie.",
+                title: "Became a grandparent",
+                detail: "Grandchildren welcomed into the family.",
                 xp: 24,
                 dimensions: [.love],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_retire",
-                title: "Met pensioen gegaan",
-                detail: "Gestopt met fulltime werk en een nieuw ritme gekozen.",
+                title: "Retired",
+                detail: "Stopped full-time work and chose a new rhythm.",
                 xp: 22,
                 dimensions: [.mind, .money],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_tell_story",
-                title: "Familieverhaal doorverteld",
-                detail: "Een verhaal gedeeld dat de familie bijblijft.",
+                title: "Family story retold",
+                detail: "A story shared that will stay with the family.",
                 xp: 18,
                 dimensions: [.love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_solar_eclipse",
-                title: "Zonsverduistering gezien",
-                detail: "Een zonsverduistering bewust meegemaakt.",
+                title: "Solar eclipse seen",
+                detail: "Consciously experienced a solar eclipse.",
                 xp: 20,
                 dimensions: [.adventure],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_plant_garden",
-                title: "Eigen tuin aangelegd",
-                detail: "Zelf iets geplant en zien groeien.",
+                title: "Own garden",
+                detail: "Planted something yourself and watched it grow.",
                 xp: 16,
                 dimensions: [.mind, .love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "life_travel_world",
-                title: "Wereld rondgereisd",
-                detail: "Meerdere continenten bezocht en verhalen verzameld.",
+                title: "Traveled around the world",
+                detail: "Visited several continents and collected stories.",
                 xp: 30,
                 dimensions: [.adventure],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "life_turn_100",
-                title: "100ste verjaardag gevierd",
-                detail: "Een eeuw leven gevierd.",
+                title: "Celebrated 100th anniversary",
+                detail: "Celebrating a century of life.",
                 xp: 40,
                 dimensions: [.mind, .love],
                 isPremium: true
@@ -2551,7 +2551,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "life_complete_checklist",
                 title: "Life Checklist voltooid",
-                detail: "Alle mijlpalen in deze lijst afgevinkt.",
+                detail: "All milestones in this list checked off.",
                 xp: 50,
                 dimensions: [.mind, .adventure],
                 isPremium: true
@@ -2562,15 +2562,15 @@ enum PackLibrary {
     static let energyReset = CategoryPack(
         id: "energy_reset",
         title: "Energy Reset",
-        subtitle: "Van drained naar opgeladen dagen.",
+        subtitle: "From drained to charged days.",
         iconSystemName: "bolt.heart.fill",
         accentColorHex: "#22D3EE",
         isPremium: false,
         items: [
             ChecklistItem(
                 id: "energy_sleep",
-                title: "7 nachten slaap-commitment",
-                detail: "Een week lang 7-9 uur geslapen met consistente bedtijden.",
+                title: "7 nights sleep commitment",
+                detail: "Slept 7-9 hours for a week with consistent bedtimes.",
                 xp: 24,
                 dimensions: [.mind],
                 isPremium: false
@@ -2578,7 +2578,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "energy_walk",
                 title: "Daily sunlight walk",
-                detail: "5 dagen achter elkaar 20 minuten buiten gelopen.",
+                detail: "Walked outside for 20 minutes 5 days in a row.",
                 xp: 18,
                 dimensions: [.mind, .adventure],
                 isPremium: false
@@ -2586,15 +2586,15 @@ enum PackLibrary {
             ChecklistItem(
                 id: "energy_meal_prep",
                 title: "Meal prep mini",
-                detail: "Twee energie-vriendelijke maaltijden voorbereid voor drukke dagen.",
+                detail: "Two energy-friendly meals prepared for busy days.",
                 xp: 14,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "energy_afspraken",
-                title: "Rust-blokken gepland",
-                detail: "Bewust 3 herstelmomenten ingepland en nagekomen.",
+                title: "Rest blocks planned",
+                detail: "Consciously planned and complied with 3 recovery moments.",
                 xp: 16,
                 dimensions: [.mind],
                 isPremium: true
@@ -2602,7 +2602,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "energy_caffeine",
                 title: "Caffeine reset",
-                detail: "Een week na 14:00 geen cafeïne meer genomen en energiedip gelogd.",
+                detail: "A week after 2 p.m., no more caffeine and an energy dip logged.",
                 xp: 20,
                 dimensions: [.mind],
                 isPremium: true
@@ -2613,15 +2613,15 @@ enum PackLibrary {
     static let creatorMode = CategoryPack(
         id: "creator_mode",
         title: "Creator Mode",
-        subtitle: "Van idee naar shippen zonder perfectionisme.",
+        subtitle: "From idea to shipping without perfectionism.",
         iconSystemName: "paintbrush.pointed.fill",
         accentColorHex: "#F59E0B",
         isPremium: true,
         items: [
             ChecklistItem(
                 id: "creator_daily_output",
-                title: "10 dagen shipping streak",
-                detail: "10 dagen achter elkaar iets kleins gedeeld: post, prototype of snippet.",
+                title: "10 day shipping streak",
+                detail: "Shared something small for 10 days in a row: post, prototype or snippet.",
                 xp: 30,
                 dimensions: [.adventure, .mind],
                 isPremium: true
@@ -2629,31 +2629,31 @@ enum PackLibrary {
             ChecklistItem(
                 id: "creator_feedback_loop",
                 title: "Feedback loop",
-                detail: "Minstens 3 mensen om gerichte feedback gevraagd en verwerkt.",
+                detail: "At least 3 people were asked for specific feedback and processed.",
                 xp: 22,
                 dimensions: [.mind, .love],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "creator_system",
-                title: "Creator system opgezet",
-                detail: "Een repeterend tijdslot, templating of automation aangezet om te blijven posten.",
+                title: "Creator system set up",
+                detail: "A repetitive time slot, templating or automation enabled to keep posting.",
                 xp: 18,
                 dimensions: [.mind],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "creator_portfolio",
-                title: "Mini-portfolio online",
-                detail: "Een eenvoudige landingspagina of highlight reel live gezet.",
+                title: "Mini portfolio online",
+                detail: "A simple landing page or highlight reel put live.",
                 xp: 26,
                 dimensions: [.adventure],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "creator_collab",
-                title: "Collab gedaan",
-                detail: "Samen met iemand anders iets gecreëerd en gedeeld.",
+                title: "Collab done",
+                detail: "Created and shared something together with someone else.",
                 xp: 20,
                 dimensions: [.love, .adventure],
                 isPremium: false
@@ -2664,7 +2664,7 @@ enum PackLibrary {
     static let friendshipCare = CategoryPack(
         id: "friendship_care",
         title: "Friendship Care",
-        subtitle: "Van losse appjes naar echte support crew.",
+        subtitle: "From individual apps to real support crew.",
         iconSystemName: "hands.sparkles.fill",
         accentColorHex: "#16A34A",
         isPremium: false,
@@ -2672,39 +2672,39 @@ enum PackLibrary {
             ChecklistItem(
                 id: "friendship_checkin",
                 title: "3 check-ins",
-                detail: "Drie vrienden actief gebeld of gesproken buiten socials om.",
+                detail: "Actively called or spoke to three friends outside of social media.",
                 xp: 14,
                 dimensions: [.love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "friendship_memory",
-                title: "Nieuwe gezamenlijke herinnering",
-                detail: "Een activiteit gedaan en vastgelegd als inside joke of foto.",
+                title: "New shared memory",
+                detail: "An activity done and recorded as an inside joke or photo.",
                 xp: 18,
                 dimensions: [.love, .adventure],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "friendship_help",
-                title: "Helpen zonder terugverwachting",
-                detail: "Bewust hulp of tijd gegeven zonder iets terug te verwachten.",
+                title: "Helping without expecting anything in return",
+                detail: "Consciously giving help or time without expecting anything in return.",
                 xp: 16,
                 dimensions: [.love],
                 isPremium: false
             ),
             ChecklistItem(
                 id: "friendship_hard_talk",
-                title: "Eerlijk gesprek gevoerd",
-                detail: "Een moeilijk onderwerp besproken zonder weg te duiken.",
+                title: "Had an honest conversation",
+                detail: "A difficult subject discussed without ducking away.",
                 xp: 20,
                 dimensions: [.love, .mind],
                 isPremium: true
             ),
             ChecklistItem(
                 id: "friendship_followthrough",
-                title: "Afspraak nagekomen",
-                detail: "Een plan dat jij initieerde ook echt door laten gaan.",
+                title: "Appointment kept",
+                detail: "A plan that you initiated actually goes ahead.",
                 xp: 12,
                 dimensions: [.love],
                 isPremium: false
@@ -2715,15 +2715,15 @@ enum PackLibrary {
     static let calmFocus = CategoryPack(
         id: "calm_focus",
         title: "Calm Focus",
-        subtitle: "Van chaos naar heldere dagen.",
+        subtitle: "From chaos to clear days.",
         iconSystemName: "target",
         accentColorHex: "#EF4444",
         isPremium: true,
         items: [
             ChecklistItem(
                 id: "focus_daily_plan",
-                title: "Dagstart met intentie",
-                detail: "5 dagen begonnen met een top-3 en deze geëvalueerd.",
+                title: "Start the day with intention",
+                detail: "Started 5 days with a top 3 and evaluated it.",
                 xp: 18,
                 dimensions: [.mind],
                 isPremium: false
@@ -2731,7 +2731,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "focus_deep_work",
                 title: "3 deep work blocks",
-                detail: "Drie sessies van 90 minuten zonder afleiding voltooid.",
+                detail: "Completed three 90-minute sessions without distractions.",
                 xp: 24,
                 dimensions: [.mind],
                 isPremium: true
@@ -2739,7 +2739,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "focus_inbox_zero",
                 title: "Inbox reset",
-                detail: "Inbox of takenlijst opgeschoond en georganiseerd.",
+                detail: "Inbox or to-do list cleaned and organized.",
                 xp: 16,
                 dimensions: [.mind],
                 isPremium: false
@@ -2747,7 +2747,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "focus_boundaries",
                 title: "Context switch kill-switch",
-                detail: "Notificaties beperkt en focus-modi ingesteld voor werk/privé.",
+                detail: "Notifications limited and focus modes set for work/life.",
                 xp: 20,
                 dimensions: [.mind],
                 isPremium: true
@@ -2755,7 +2755,7 @@ enum PackLibrary {
             ChecklistItem(
                 id: "focus_review",
                 title: "Weekreview",
-                detail: "Eén uur genomen om wins, leercurve en volgende moves te noteren.",
+                detail: "Took one hour to record wins, learning curve and next moves.",
                 xp: 18,
                 dimensions: [.mind],
                 isPremium: false

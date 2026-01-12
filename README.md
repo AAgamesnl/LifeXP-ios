@@ -55,5 +55,11 @@ Life XP is an iOS 18.1 SwiftUI prototype that treats personal growth like a bala
 - Safe mode defaults to hiding heavy topics; reset by clearing app data or toggling in Settings.
 - All persistence is local to `UserDefaults`; deleting the app or resetting the simulator clears progress.
 
+## Localization
+- Base (English) strings live in `Life XP.swiftpm/Resources/en.lproj/Localizable.strings`.
+- Prefer `L10n` keys from `Life XP.swiftpm/Utils/Localization.swift` for new UI copy.
+- To add a new language, create a new `.lproj` folder (e.g., `Resources/nl.lproj/Localizable.strings`) and translate the same keys.
+- Keep keys stable (e.g., `home.startArc.title`) so copy updates don’t break localization.
+
 ## Contributing
 PRs and issues are welcome—especially for improved architecture, content quality, accessibility, or real StoreKit entitlements.

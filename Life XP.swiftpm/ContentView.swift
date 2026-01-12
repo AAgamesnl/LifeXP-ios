@@ -12,8 +12,9 @@ struct ContentView: View {
     @State private var showCelebration: Bool = false
     @State private var previousLevel: Int = 1
     @State private var isReady: Bool = false
-    @State private var showQuickAdd: Bool = false
+    @State private var showLogMood: Bool = false
     @State private var showMoreMenu: Bool = false
+    @StateObject private var journalManager = JournalManager()
     
     // Tutorial system
     @StateObject private var tutorialManager = TutorialManager()
@@ -23,11 +24,11 @@ struct ContentView: View {
         
         var title: String {
             switch self {
-            case .home: return "Home"
-            case .arcs: return "Arcs"
-            case .packs: return "Packs"
-            case .stats: return "Stats"
-            case .settings: return "Settings"
+            case .home: return String(localized: "tab.home")
+            case .arcs: return String(localized: "tab.arcs")
+            case .packs: return String(localized: "tab.packs")
+            case .stats: return String(localized: "tab.stats")
+            case .settings: return String(localized: "tab.settings")
             }
         }
         
@@ -132,12 +133,12 @@ struct ContentView: View {
                 }
                 .transition(.opacity)
                 
-                // Quick Add Floating Button
+                // Log Mood Floating Button
                 VStack {
                     Spacer()
                     HStack {
                         Spacer()
-                        QuickAddButton(showingQuickAdd: $showQuickAdd)
+                        LogMoodFloatingButton(showingLogMood: $showLogMood)
                             .padding(.trailing, 20)
                             .padding(.bottom, 100)
                     }
@@ -194,9 +195,8 @@ struct ContentView: View {
             }
             .environment(model)
         }
-        .sheet(isPresented: $showQuickAdd) {
-            QuickAddSheet()
-                .environment(model)
+        .sheet(isPresented: $showLogMood) {
+            LogMoodSheet(manager: journalManager)
         }
         .sheet(isPresented: $showMoreMenu) {
             MoreFeaturesSheet(selectedFeature: $selectedFeature)
@@ -569,7 +569,7 @@ struct LevelUpCelebration: View {
                         .font(DesignSystem.text.displaySmall)
                         .foregroundColor(.white)
                     
-                    Text("Je bent nu level \(level)! Blijf doorgaan 🚀")
+                    Text("You're now level \(level)! Keep going 🚀")
                         .font(DesignSystem.text.bodyMedium)
                         .foregroundColor(.white.opacity(0.8))
                         .multilineTextAlignment(.center)

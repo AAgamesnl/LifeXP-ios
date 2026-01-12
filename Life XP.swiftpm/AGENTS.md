@@ -12,7 +12,7 @@ This file applies to everything under `Life XP.swiftpm/`.
 - Prefer small, cohesive SwiftUI views. Extract reusable view components when a single view grows beyond a single screen of code.
 - Use `BrandTheme` and `DesignSystem` styling helpers before adding new colors, spacing, or typography.
 - Keep `AppModel` as the only source of mutable state. Add new state there and expose it via methods or computed properties.
-- When adding user-facing strings, keep them in Dutch to match existing UI copy.
+- When adding user-facing strings, default to English and register new copy in the string resources.
 
 ## iOS 18.1 Architecture/Performance/Theming Updates
 
@@ -29,3 +29,10 @@ This file applies to everything under `Life XP.swiftpm/`.
 
 - If you add logic that is testable without SwiftUI, consider adding or updating tests in `Tests/AppModuleTests`.
 - Use `#if canImport(SwiftUI)` guards for tests that depend on SwiftUI types.
+
+## Localization Guidance
+
+- Source strings live in `Life XP.swiftpm/Resources/en.lproj/Localizable.strings`.
+- Use the `L10n` keys in `Utils/Localization.swift` for new UI copy where possible.
+- For new languages, add a new `.lproj` folder (for example, `Resources/nl.lproj/Localizable.strings`) and translate the keys.
+- Prefer stable keys (e.g., `home.startArc.title`) over hard-coded strings so copy can evolve without breaking translations.

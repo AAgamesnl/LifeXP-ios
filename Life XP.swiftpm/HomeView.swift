@@ -6,7 +6,8 @@ struct HomeView: View {
     @Environment(AppModel.self) private var model
     @State private var showHeroCard = false
     @State private var scrollOffset: CGFloat = 0
-    @State private var showQuickAdd = false
+    @State private var showLogMood = false
+    @StateObject private var journalManager = JournalManager()
     
     var body: some View {
         NavigationStack {
@@ -44,24 +45,23 @@ struct HomeView: View {
                             MomentumSection()
                         }
                         
-                        // Micro Wins
-                        if !model.microWins.isEmpty {
-                            MicroWinsSection()
-                        }
-                        
                         // Arc Preview
-                        if let arcPreview = model.highlightedArc, model.showHeroCards {
-                            ArcPreviewCard(arc: arcPreview)
+                        if model.showHeroCards {
+                            if let activeArc = model.activeArc {
+                                ArcPreviewCard(arc: activeArc)
+                            } else {
+                                StartArcCard()
+                            }
                         }
                         
-                        // Booster Packs
-                        if !model.boosterPacks.isEmpty {
-                            BoosterPacksSection()
+                        // Packs
+                        if !model.featuredPacks.isEmpty {
+                            FeaturedPacksSection()
                         }
                         
                         // Quick Actions
                         if model.showQuickActions {
-                            QuickActionsSection()
+                            QuickActionsSection(showLogMood: $showLogMood)
                         }
                         
                         // Optional Cards
@@ -74,7 +74,7 @@ struct HomeView: View {
                     .padding(.top, DesignSystem.spacing.md)
                 }
             }
-            .navigationTitle("Life XP")
+            .navigationTitle(L10n.appTitle)
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -90,6 +90,9 @@ struct HomeView: View {
                 withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                     showHeroCard = true
                 }
+            }
+            .sheet(isPresented: $showLogMood) {
+                LogMoodSheet(manager: journalManager)
             }
         }
     }
@@ -756,72 +759,6 @@ struct MomentumTile2: View {
     }
 }
 
-// MARK: - Micro Wins Section
-
-struct MicroWinsSection: View {
-    @Environment(AppModel.self) private var model
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
-            HStack {
-                IconContainer(systemName: "bolt.fill", color: BrandTheme.warning, size: .small, style: .soft)
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Micro Wins")
-                        .font(DesignSystem.text.headlineMedium)
-                        .foregroundColor(BrandTheme.textPrimary)
-                    Text("Quick dopamine hits")
-                        .font(.caption)
-                        .foregroundColor(BrandTheme.mutedText)
-                }
-                
-                Spacer()
-            }
-            
-            ForEach(model.microWins.prefix(4)) { item in
-                MicroWinRow2(item: item)
-            }
-        }
-        .brandCard()
-    }
-}
-
-struct MicroWinRow2: View {
-    let item: ChecklistItem
-    
-    var body: some View {
-        HStack(spacing: DesignSystem.spacing.md) {
-            Image(systemName: "bolt.fill")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(BrandTheme.warning)
-                .frame(width: 24)
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.title)
-                    .font(DesignSystem.text.labelMedium)
-                    .foregroundColor(BrandTheme.textPrimary)
-                    .lineLimit(1)
-                
-                if let detail = item.detail {
-                    Text(detail)
-                        .font(.caption2)
-                        .foregroundColor(BrandTheme.mutedText)
-                        .lineLimit(1)
-                }
-            }
-            
-            Spacer()
-            
-            XPChip(xp: item.xp, size: .small)
-        }
-        .padding(DesignSystem.spacing.sm)
-        .background(
-            RoundedRectangle(cornerRadius: DesignSystem.radius.sm, style: .continuous)
-                .fill(BrandTheme.cardBackgroundElevated.opacity(0.5))
-        )
-    }
-}
-
 // MARK: - Arc Preview Card
 
 struct ArcPreviewCard: View {
@@ -835,7 +772,6 @@ struct ArcPreviewCard: View {
     var body: some View {
         let progress = model.arcProgress(arc)
         let nextQuests = model.nextQuests(in: arc, limit: 2)
-        let isSuggestion = model.activeArc == nil
         
         NavigationLink(destination: ArcDetailView(arc: arc)) {
             VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -843,12 +779,7 @@ struct ArcPreviewCard: View {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: DesignSystem.spacing.xs) {
                         HStack(spacing: DesignSystem.spacing.sm) {
-                            ChipView(
-                                text: isSuggestion ? "Suggested" : "Current Arc",
-                                icon: "map.fill",
-                                color: accent,
-                                size: .small
-                            )
+                            ChipView(text: "Current Arc", icon: "map.fill", color: accent, size: .small)
                             
                             if let day = model.arcDay(for: arc) {
                                 ChipView(text: "Day \(day)", icon: "clock", color: BrandTheme.mutedText, size: .small)
@@ -923,30 +854,61 @@ struct ArcPreviewCard: View {
     }
 }
 
-// MARK: - Booster Packs Section
+// MARK: - Start Arc Card
 
-struct BoosterPacksSection: View {
+struct StartArcCard: View {
+    var body: some View {
+        NavigationLink(destination: ArcsView()) {
+            VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+                HStack {
+                    IconContainer(systemName: "map.fill", color: BrandTheme.accent, size: .medium, style: .soft)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(L10n.startArcTitle)
+                            .font(DesignSystem.text.headlineMedium)
+                            .foregroundColor(BrandTheme.textPrimary)
+                        
+                        Text(L10n.startArcSubtitle)
+                            .font(DesignSystem.text.bodySmall)
+                            .foregroundColor(BrandTheme.mutedText)
+                    }
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(BrandTheme.mutedText)
+                }
+            }
+            .brandCard()
+        }
+        .buttonStyle(CardButtonStyle())
+    }
+}
+
+// MARK: - Featured Packs Section
+
+struct FeaturedPacksSection: View {
     @Environment(AppModel.self) private var model
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
             HStack {
-                Text("Booster Packs")
+                Text(L10n.packsTitle)
                     .font(DesignSystem.text.headlineMedium)
                     .foregroundColor(BrandTheme.textPrimary)
                 
                 Spacer()
                 
-                Text("Close a pack for dopamine")
+                Text(L10n.packsSubtitle)
                     .font(.caption)
                     .foregroundColor(BrandTheme.mutedText)
             }
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: DesignSystem.spacing.md) {
-                    ForEach(Array(model.boosterPacks.prefix(4).enumerated()), id: \.offset) { index, entry in
+                    ForEach(Array(model.featuredPacks.prefix(4).enumerated()), id: \.offset) { index, entry in
                         NavigationLink(destination: PackDetailView(pack: entry.pack)) {
-                            BoosterCard2(entry: entry)
+                            FeaturedPackCard(entry: entry)
                         }
                         .buttonStyle(CardButtonStyle())
                     }
@@ -958,7 +920,7 @@ struct BoosterPacksSection: View {
     }
 }
 
-struct BoosterCard2: View {
+struct FeaturedPackCard: View {
     let entry: (pack: CategoryPack, remaining: Int, progress: Double)
     
     private var accent: Color {
@@ -1000,29 +962,43 @@ struct BoosterCard2: View {
 // MARK: - Quick Actions Section
 
 struct QuickActionsSection: View {
+    @Binding var showLogMood: Bool
+
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
-            Text("Quick Actions")
+            Text(L10n.quickActionsTitle)
                 .font(DesignSystem.text.headlineMedium)
                 .foregroundColor(BrandTheme.textPrimary)
             
             VStack(spacing: DesignSystem.spacing.sm) {
+                Button {
+                    showLogMood = true
+                } label: {
+                    QuickActionRow2(
+                        icon: "face.smiling",
+                        title: String(localized: "action.logMood.title"),
+                        subtitle: String(localized: "action.logMood.subtitle"),
+                        color: BrandTheme.success
+                    )
+                }
+                .buttonStyle(CardButtonStyle())
+
                 NavigationLink(destination: ArcsView()) {
                     QuickActionRow2(
                         icon: "map.fill",
-                        title: "Arcs Hub",
-                        subtitle: "View your arc progress and quests",
+                        title: String(localized: "action.arcs.title"),
+                        subtitle: String(localized: "action.arcs.subtitle"),
                         color: BrandTheme.accent
                     )
                 }
                 .buttonStyle(CardButtonStyle())
-                
-                NavigationLink(destination: ChallengeView()) {
+
+                NavigationLink(destination: PacksView()) {
                     QuickActionRow2(
-                        icon: "flag.checkered",
-                        title: "Weekend Challenge",
-                        subtitle: "Get a curated challenge",
-                        color: BrandTheme.warning
+                        icon: "checklist",
+                        title: String(localized: "action.packs.title"),
+                        subtitle: String(localized: "action.packs.subtitle"),
+                        color: BrandTheme.info
                     )
                 }
                 .buttonStyle(CardButtonStyle())
