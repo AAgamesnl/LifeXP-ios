@@ -1,26 +1,26 @@
 import SwiftUI
 
 // MARK: - Advanced Visual Effects & Animations
-// Premium-quality visual effects optimized for smooth 60fps performance
+// Premium-quality visual effects optimized for smooth 120fps performance
 
 // MARK: - Optimized Animation Presets
 
-/// High-performance animation presets for smooth 60fps
+/// High-performance animation presets for smooth 120fps
 struct SilkyAnimation {
     /// Ultra-fast micro-interaction (16ms response)
-    static let micro = Animation.spring(response: 0.2, dampingFraction: 0.9)
+    static let micro = Animation.spring(response: 0.22, dampingFraction: 0.92)
     /// Instant feedback for taps
-    static let tap = Animation.spring(response: 0.25, dampingFraction: 0.85)
+    static let tap = Animation.spring(response: 0.28, dampingFraction: 0.88)
     /// Snappy state transitions
-    static let snappy = Animation.spring(response: 0.3, dampingFraction: 0.8)
+    static let snappy = Animation.spring(response: 0.32, dampingFraction: 0.84)
     /// Smooth general animations
-    static let smooth = Animation.spring(response: 0.4, dampingFraction: 0.85)
+    static let smooth = Animation.spring(response: 0.48, dampingFraction: 0.88)
     /// Gentle easing for subtle changes
-    static let gentle = Animation.spring(response: 0.5, dampingFraction: 0.9)
+    static let gentle = Animation.spring(response: 0.6, dampingFraction: 0.92)
     /// Bouncy celebration effect
-    static let bouncy = Animation.spring(response: 0.45, dampingFraction: 0.6)
+    static let bouncy = Animation.spring(response: 0.5, dampingFraction: 0.68)
     /// Elastic for playful interactions
-    static let elastic = Animation.spring(response: 0.5, dampingFraction: 0.55)
+    static let elastic = Animation.spring(response: 0.55, dampingFraction: 0.6)
 }
 
 // MARK: - Completion Particles (GPU Accelerated)
@@ -104,7 +104,7 @@ struct CompletionParticles: View {
     }
 }
 
-// MARK: - Firework Effect (60fps Canvas)
+// MARK: - Firework Effect (120fps Canvas)
 
 struct FireworkEffect: View {
     @Binding var isActive: Bool
@@ -454,7 +454,7 @@ struct QuoteCard: View {
     }
 }
 
-// MARK: - Ripple Effect (60fps)
+// MARK: - Ripple Effect (120fps)
 
 struct RippleEffect: ViewModifier {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -557,16 +557,14 @@ struct FloatingActionButton: View {
     }
 }
 
-// MARK: - Skeleton Loading (60fps shimmer)
+// MARK: - Skeleton Loading (120fps shimmer)
 
 struct SkeletonView: View {
     var height: CGFloat = 20
     var cornerRadius: CGFloat = DesignSystem.Radii.sm
-    
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    
+
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0/120, paused: reduceMotion)) { timeline in
+        AdaptiveTimelineView(minimumInterval: 1.0 / 120) { timeline in
             let phase = computePhase(for: timeline.date)
             
             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)

@@ -95,7 +95,7 @@ final class AnalyticsEngine: ObservableObject {
     @Published var isLoading = false
     
     private let calendar = Calendar.current
-    private weak var appModel: AppModel?
+    private weak(AppModel.self) private var appModel?
     
     func configure(with appModel: AppModel) {
         self.appModel = appModel
@@ -306,7 +306,7 @@ final class AnalyticsEngine: ObservableObject {
 
 /// Main Analytics Dashboard View
 struct AnalyticsDashboardView: View {
-    @EnvironmentObject private var appModel: AppModel
+    @Environment(AppModel.self) private var appModel
     @StateObject private var engine = AnalyticsEngine()
     
     @State private var showingExport = false

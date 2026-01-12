@@ -1,5 +1,6 @@
 import SwiftUI
 import Foundation
+import Observation
 
 struct SpotlightTheme {
     let title: String
@@ -195,74 +196,75 @@ struct UserSettings: Codable {
 }
 
 /// Central source of truth for Life XP state, progress, and preferences.
+@Observable
 @MainActor
-final class AppModel: ObservableObject {
+final class AppModel {
     // MARK: - Published data
-    @Published var packs: [CategoryPack]
+    var packs: [CategoryPack]
     let arcs: [Arc]
     private let arcByID: [String: Arc]
     private let arcByQuestID: [String: Arc]
-    @Published private(set) var completedItemIDs: Set<String>
+    private(set) var completedItemIDs: Set<String>
 
     // MARK: - Premium (placeholder for future IAP)
-    @Published var premiumUnlocked: Bool = false
+    var premiumUnlocked: Bool = false
 
     // MARK: - Preferences
-    @Published var settings: UserSettings {
+    var settings: UserSettings {
         didSet { persistState() }
     }
     
     // MARK: - AAA Game Systems (Lazy-loaded to improve startup)
-    private var _dailyChallengeManager: DailyChallengeManager?
+    @ObservationIgnored private var _dailyChallengeManager: DailyChallengeManager?
     var dailyChallengeManager: DailyChallengeManager {
         if _dailyChallengeManager == nil { _dailyChallengeManager = DailyChallengeManager() }
         return _dailyChallengeManager!
     }
     
-    private var _moodTracker: MoodTracker?
+    @ObservationIgnored private var _moodTracker: MoodTracker?
     var moodTracker: MoodTracker {
         if _moodTracker == nil { _moodTracker = MoodTracker() }
         return _moodTracker!
     }
     
-    private var _personalGoalsManager: PersonalGoalsManager?
+    @ObservationIgnored private var _personalGoalsManager: PersonalGoalsManager?
     var personalGoalsManager: PersonalGoalsManager {
         if _personalGoalsManager == nil { _personalGoalsManager = PersonalGoalsManager() }
         return _personalGoalsManager!
     }
     
-    private var _skillTreeManager: SkillTreeManager?
+    @ObservationIgnored private var _skillTreeManager: SkillTreeManager?
     var skillTreeManager: SkillTreeManager {
         if _skillTreeManager == nil { _skillTreeManager = SkillTreeManager() }
         return _skillTreeManager!
     }
     
-    private var _weeklyReviewManager: WeeklyReviewManager?
+    @ObservationIgnored private var _weeklyReviewManager: WeeklyReviewManager?
     var weeklyReviewManager: WeeklyReviewManager {
         if _weeklyReviewManager == nil { _weeklyReviewManager = WeeklyReviewManager() }
         return _weeklyReviewManager!
     }
     
-    private var _seasonalEventManager: SeasonalEventManager?
+    @ObservationIgnored private var _seasonalEventManager: SeasonalEventManager?
     var seasonalEventManager: SeasonalEventManager {
         if _seasonalEventManager == nil { _seasonalEventManager = SeasonalEventManager() }
         return _seasonalEventManager!
     }
     
-    private var _insightsEngine: InsightsEngine?
+    @ObservationIgnored private var _insightsEngine: InsightsEngine?
     var insightsEngine: InsightsEngine {
         if _insightsEngine == nil { _insightsEngine = InsightsEngine() }
         return _insightsEngine!
     }
     
-    private var _soundManager: SoundManager?
+    @ObservationIgnored private var _soundManager: SoundManager?
     var soundManager: SoundManager {
         if _soundManager == nil { _soundManager = SoundManager() }
         return _soundManager!
     }
     
     // Combo system (value type, managed inline)
-    @Published var comboSystem = ComboSystem()
+    var comboSystem = ComboSystem()
 
     var toneMode: ToneMode {
         get { settings.toneMode }
@@ -360,19 +362,19 @@ final class AppModel: ObservableObject {
     }
 
     // MARK: - Streaks
-    @Published private(set) var currentStreak: Int
-    @Published private(set) var bestStreak: Int
-    private var lastActiveDay: Date?
+    private(set) var currentStreak: Int
+    private(set) var bestStreak: Int
+    @ObservationIgnored private var lastActiveDay: Date?
 
     // MARK: - Arcs
-    @Published private(set) var arcStartDates: [String: Date]
+    private(set) var arcStartDates: [String: Date]
 
     // MARK: - Environment
-    private let calendar: Calendar
-    private let persistence: PersistenceManaging
-    private let persistenceQueue = DispatchQueue(label: "lifeXP.persistence", qos: .utility)
-    private var pendingPersistWorkItem: DispatchWorkItem?
-    private let persistDebounceInterval: TimeInterval = 0.35
+    @ObservationIgnored private let calendar: Calendar
+    @ObservationIgnored private let persistence: PersistenceManaging
+    @ObservationIgnored private let persistenceQueue = DispatchQueue(label: "lifeXP.persistence", qos: .utility)
+    @ObservationIgnored private var pendingPersistWorkItem: DispatchWorkItem?
+    @ObservationIgnored private let persistDebounceInterval: TimeInterval = 0.35
 
     /// Preferred color scheme based on the user's explicit appearance selection.
     var preferredColorScheme: ColorScheme? { settings.appearanceMode.colorScheme }

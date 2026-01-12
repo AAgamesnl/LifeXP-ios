@@ -1,9 +1,10 @@
 import SwiftUI
+import Observation
 
 // MARK: - Settings View
 
 struct SettingsView: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
 
     @State private var confirmResetAll = false
     @State private var confirmResetArcs = false
@@ -82,7 +83,7 @@ struct SettingsView: View {
 // MARK: - Profile Summary Card
 
 struct ProfileSummaryCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         HStack(spacing: DesignSystem.spacing.lg) {
@@ -128,9 +129,10 @@ struct ProfileSummaryCard: View {
 // MARK: - Experience Settings Section
 
 struct ExperienceSettingsSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
+        @Bindable var model = model
         SettingsSection(title: "Experience", icon: "sparkles", color: BrandTheme.accent) {
             VStack(spacing: DesignSystem.spacing.md) {
                 // Tone
@@ -178,9 +180,10 @@ struct ExperienceSettingsSection: View {
 // MARK: - Content Settings Section
 
 struct ContentSettingsSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
+        @Bindable var model = model
         SettingsSection(title: "Content", icon: "slider.horizontal.3", color: BrandTheme.info) {
             VStack(spacing: DesignSystem.spacing.md) {
                 // PRO Teasers
@@ -225,7 +228,7 @@ struct ContentSettingsSection: View {
 }
 
 struct DimensionToggleRow: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let dimension: LifeDimension
     
     private var isEnabled: Bool {
@@ -260,9 +263,10 @@ struct DimensionToggleRow: View {
 // MARK: - Visual Settings Section
 
 struct VisualSettingsSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
+        @Bindable var model = model
         SettingsSection(title: "Appearance", icon: "paintbrush.fill", color: BrandTheme.mind) {
             VStack(spacing: DesignSystem.spacing.md) {
                 // Theme
@@ -313,10 +317,11 @@ struct VisualSettingsSection: View {
 // MARK: - Home Customization Section
 
 struct HomeCustomizationSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     @State private var isExpanded = false
     
     var body: some View {
+        @Bindable var model = model
         SettingsSection(title: "Home Screen", icon: "house.fill", color: BrandTheme.love) {
             VStack(spacing: DesignSystem.spacing.md) {
                 // Essential toggles
@@ -423,7 +428,7 @@ struct HomeCustomizationSection: View {
 // MARK: - Data Reset Section
 
 struct DataResetSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     @Binding var showResetOptions: Bool
     @Binding var confirmResetAll: Bool
     @Binding var confirmResetArcs: Bool
@@ -653,9 +658,10 @@ struct QuickTutorialButton: View {
 // MARK: - Developer Section
 
 struct DeveloperSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
+        @Bindable var model = model
         SettingsSection(title: "Developer", icon: "hammer.fill", color: BrandTheme.warning) {
             VStack(spacing: DesignSystem.spacing.md) {
                 SettingsToggle(

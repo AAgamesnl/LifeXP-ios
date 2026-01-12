@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Challenge View
 
 struct ChallengeView: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
 
     private var board: (arc: Arc?, quests: [Quest]) {
         model.nextQuestBoard(limit: 3)
@@ -44,7 +44,7 @@ struct ChallengeView: View {
 // MARK: - Challenge Header Card
 
 struct ChallengeHeaderCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -100,7 +100,7 @@ struct ChallengeHeaderCard: View {
 // MARK: - Arc Challenge Section
 
 struct ArcChallengeSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let arc: Arc?
     let quests: [Quest]
 
@@ -190,7 +190,7 @@ struct ArcChallengeSection: View {
 }
 
 struct ChallengeQuestRow: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let quest: Quest
     let accent: Color
     
@@ -279,7 +279,7 @@ struct ChallengeQuestRow: View {
 // MARK: - Boss Fights Section
 
 struct BossFightsSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -355,7 +355,7 @@ struct BossFightRow: View {
 // MARK: - Micro Wins Challenge Section
 
 struct MicroWinsChallengeSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -426,7 +426,7 @@ struct MicroWinChallengeRow: View {
 // MARK: - Recovery Section
 
 struct RecoverySection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -487,7 +487,7 @@ struct EmptyMiniState: View {
 // MARK: - Badges View
 
 struct BadgesView: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     @State private var selectedTab: BadgeTab = .unlocked
 
@@ -579,7 +579,7 @@ struct BadgesView: View {
 // MARK: - Badge Stats Card
 
 struct BadgeStatsCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
 
     var body: some View {
         HStack(spacing: DesignSystem.spacing.lg) {
@@ -663,7 +663,7 @@ struct BadgeStatsCard: View {
 // MARK: - Unlocked Badges Section
 
 struct UnlockedBadgesSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {

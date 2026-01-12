@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Main Content View
 
 struct ContentView: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     @AppStorage("lifeXP.hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     @AppStorage("lifeXP.hasSeenWelcomeTutorial") private var hasSeenWelcomeTutorial: Bool = false
@@ -192,11 +192,11 @@ struct ContentView: View {
                     }
                 }
             }
-            .environmentObject(model)
+            .environment(model)
         }
         .sheet(isPresented: $showQuickAdd) {
             QuickAddSheet()
-                .environmentObject(model)
+                .environment(model)
         }
         .sheet(isPresented: $showMoreMenu) {
             MoreFeaturesSheet(selectedFeature: $selectedFeature)
@@ -213,7 +213,7 @@ struct ContentView: View {
                         }
                     }
             }
-            .environmentObject(model)
+            .environment(model)
         }
     }
     

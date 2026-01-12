@@ -145,7 +145,7 @@ struct ComboDisplay: View {
                 if reduceMotion {
                     StaticComboCounter(combo: combo.currentCombo)
                 } else {
-                    TimelineView(.animation(minimumInterval: 1.0/120, paused: false)) { timeline in
+                    AdaptiveTimelineView(minimumInterval: 1.0 / 120) { timeline in
                         let scale = computeScale(for: timeline.date)
                         
                         ZStack {
@@ -1354,7 +1354,7 @@ struct AnimatedMascot: View {
         if reduceMotion {
             StaticMascotContent(mood: mood)
         } else {
-            TimelineView(.animation(minimumInterval: 1.0/120, paused: false)) { timeline in
+            AdaptiveTimelineView(minimumInterval: 1.0 / 120) { timeline in
                 let (bounce, blink) = computeAnimationState(for: timeline.date)
                 
                 ZStack {

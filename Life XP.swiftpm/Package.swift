@@ -52,4 +52,14 @@ let package = Package(
             path: "Tests"
         )
     ]
+#endif
+}()
+
+let package = Package(
+    name: "Life XP",
+    platforms: [
+        .iOS("18.1")
+    ],
+    products: products,
+    targets: targets
 )

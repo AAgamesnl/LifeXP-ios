@@ -762,7 +762,7 @@ final class JournalManager: ObservableObject {
 
 /// Main Journal View
 struct JournalView: View {
-    @EnvironmentObject private var appModel: AppModel
+    @Environment(AppModel.self) private var appModel
     @StateObject private var manager = JournalManager()
     
     @State private var showingNewEntry = false
