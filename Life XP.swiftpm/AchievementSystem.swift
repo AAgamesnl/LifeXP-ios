@@ -883,7 +883,7 @@ final class AchievementManager: ObservableObject {
 
 /// Main Trophy Case View
 struct TrophyCaseView: View {
-    @EnvironmentObject private var appModel: AppModel
+    @Environment(AppModel.self) private var appModel
     @StateObject private var manager = AchievementManager()
     
     @State private var selectedCategory: AchievementCategory?

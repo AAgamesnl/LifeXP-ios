@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Arcs View
 
 struct ArcsView: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     @State private var showHero = false
     @State private var pendingArcToStart: Arc?
     @State private var showArcLimitDialog = false
@@ -103,7 +103,7 @@ struct ArcsView: View {
 // MARK: - Arc Hero Card 2.0
 
 struct ArcHeroCard2: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let arc: Arc
     var startAction: ((Arc) -> Void)?
     var stopAction: ((Arc) -> Void)?
@@ -233,7 +233,7 @@ struct ArcHeroCard2: View {
 // MARK: - Chapter Row
 
 struct ChapterRow: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let chapter: Chapter
     let accent: Color
     
@@ -276,7 +276,7 @@ struct ChapterRow: View {
 // MARK: - Quest Row Compact
 
 struct QuestRowCompact: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let quest: Quest
     let accent: Color
     
@@ -347,7 +347,7 @@ struct QuestRowCompact: View {
 // MARK: - Arc Empty State 2.0
 
 struct ArcEmptyState2: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let suggestions: [Arc]
     var startAction: ((Arc) -> Void)?
 
@@ -414,7 +414,7 @@ struct ActiveArcsSection2: View {
 // MARK: - Quest Board Section
 
 struct QuestBoardSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let arc: Arc?
     let quests: [Quest]
 
@@ -464,7 +464,7 @@ struct QuestBoardSection: View {
 // MARK: - Quest Row 2.0
 
 struct QuestRow2: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let quest: Quest
     let accent: Color
     
@@ -571,7 +571,7 @@ struct QuestRow2: View {
 // MARK: - Suggested Arcs Section
 
 struct SuggestedArcsSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let suggestions: [Arc]
     var startAction: ((Arc) -> Void)?
 
@@ -604,7 +604,7 @@ struct SuggestedArcsSection: View {
 // MARK: - Arc Tile 2.0
 
 struct ArcTile2: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let arc: Arc
     var startAction: ((Arc) -> Void)?
 
@@ -665,7 +665,7 @@ struct ArcTile2: View {
 // MARK: - All Arcs Section
 
 struct AllArcsSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     var startAction: ((Arc) -> Void)?
     
     @State private var isExpanded = false
@@ -745,7 +745,7 @@ struct ToolsSection: View {
 // MARK: - Arc Detail View
 
 struct ArcDetailView: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let arc: Arc
     
     @State private var pendingArcToStart: Arc?
@@ -816,7 +816,7 @@ struct ArcDetailView: View {
 // MARK: - Arc Detail Header
 
 struct ArcDetailHeader: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let arc: Arc
     
     private var accent: Color { Color(hex: arc.accentColorHex, default: BrandTheme.accent) }
@@ -916,7 +916,7 @@ struct ArcDetailHeader: View {
 // MARK: - Chapter Section
 
 struct ChapterSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let chapter: Chapter
     let accent: Color
     
@@ -965,36 +965,36 @@ struct ChapterSection: View {
 // MARK: - Legacy Support
 
 struct QuestRow: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let quest: Quest
     let accent: Color
     
     var body: some View {
         QuestRow2(quest: quest, accent: accent)
-            .environmentObject(model)
+            .environment(model)
     }
 }
 
 struct ArcHeroCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let arc: Arc
     var startAction: ((Arc) -> Void)?
     var stopAction: ((Arc) -> Void)?
     
     var body: some View {
         ArcHeroCard2(arc: arc, startAction: startAction, stopAction: stopAction)
-            .environmentObject(model)
+            .environment(model)
     }
 }
 
 struct ArcEmptyState: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let suggestions: [Arc]
     var startAction: ((Arc) -> Void)?
     
     var body: some View {
         ArcEmptyState2(suggestions: suggestions, startAction: startAction)
-            .environmentObject(model)
+            .environment(model)
     }
 }
 
@@ -1008,35 +1008,35 @@ struct ActiveArcsSection: View {
 }
 
 struct SuggestedArcsGrid: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let suggestions: [Arc]
     var startAction: ((Arc) -> Void)?
     
     var body: some View {
         SuggestedArcsSection(suggestions: suggestions, startAction: startAction)
-            .environmentObject(model)
+            .environment(model)
     }
 }
 
 struct QuestBoardView: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let arc: Arc?
     let quests: [Quest]
     
     var body: some View {
         QuestBoardSection(arc: arc, quests: quests)
-            .environmentObject(model)
+            .environment(model)
     }
 }
 
 struct ArcTile: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let arc: Arc
     var startAction: ((Arc) -> Void)?
     
     var body: some View {
         ArcTile2(arc: arc, startAction: startAction)
-            .environmentObject(model)
+            .environment(model)
     }
 }
 

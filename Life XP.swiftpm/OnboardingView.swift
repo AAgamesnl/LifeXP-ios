@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Onboarding View
 
 struct OnboardingView: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     var onDone: () -> Void
 
     @State private var selectedFocuses: Set<LifeDimension> = []

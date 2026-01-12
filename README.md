@@ -1,10 +1,10 @@
 # Life XP (SwiftUI)
 
-Life XP is an iOS 17 SwiftUI prototype that treats personal growth like a balanced RPG. The project is structured as a Swift Playgrounds app but can also be opened in Xcode for simulator/device builds.
+Life XP is an iOS 18.1 SwiftUI prototype that treats personal growth like a balanced RPG. The project is structured as a Swift Playgrounds app but can also be opened in Xcode for simulator/device builds.
 
 ## Tech stack
-- SwiftUI + Observation/`ObservableObject` for state-driven UI.
-- iOS 17 target with multiplatform (iPhone + iPad) support configured in `Package.swift`.
+- SwiftUI + Swift Observation for state-driven UI.
+- iOS 18.1 target with multiplatform (iPhone + iPad) support configured in `Package.swift`.
 - `UserDefaults` persistence for tone, safe-mode, streaks, arc starts, and home layout preferences.
 - Sample content generated in-code (no external storage or networking).
 
@@ -33,11 +33,16 @@ Life XP is an iOS 17 SwiftUI prototype that treats personal growth like a balanc
 - **Arcs:** Each `Arc` contains chapters with `Quest` nodes; `arcProgress(arc:)` returns percentage + completed counts.
 - **Weekend challenge:** Generated inside `ArcsView` from random visible items split by dimension and duration (seeded by user mood selection).
 
+## iOS 18.1 architecture & performance updates
+- **Observation-first state model:** AppModel now uses Swift Observation for reactive state, and SwiftUI views pull it from the environment for lighter updates and clearer dependency flow.
+- **Adaptive animation timing:** Timeline-driven effects pause when inactive or reduce-motion is enabled and run at 120fps for smoother, steadier animations on device.
+- **Intentional dark surfaces:** Background gradients and ambient glows are tuned to avoid pure black and provide consistent depth across light/dark mode.
+
 ## Running the project
 ### Xcode
 1. Clone the repo.
 2. Open `Life XP.swiftpm` as a package or convert to an Xcode project as needed.
-3. Select an iOS 17+ simulator or device and build/run.
+3. Select an iOS 18.1+ simulator or device and build/run.
 
 ### Swift Playgrounds (iPad or macOS)
 1. Copy or clone the repository (e.g., via Working Copy).

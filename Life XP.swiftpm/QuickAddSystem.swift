@@ -244,7 +244,7 @@ struct QuickAddButtonStyle: ButtonStyle {
 /// Quick Add Modal Sheet
 struct QuickAddSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var appModel: AppModel
+    @Environment(AppModel.self) private var appModel
     @StateObject private var manager = QuickAddManager()
     
     @State private var selectedAction: QuickActionType?
@@ -532,7 +532,7 @@ struct RecentActionRow: View {
 
 struct ItemPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var appModel: AppModel
+    @Environment(AppModel.self) private var appModel
     
     let onSelect: (ChecklistItem) -> Void
     
@@ -674,7 +674,7 @@ struct DimensionFilterPill: View {
 // MARK: - Spotlight Search Style Input
 
 struct SpotlightSearchView: View {
-    @EnvironmentObject private var appModel: AppModel
+    @Environment(AppModel.self) private var appModel
     @Binding var isPresented: Bool
     @State private var searchText = ""
     @State private var selectedIndex = 0

@@ -89,7 +89,7 @@ private let targets: [Target] = {
 let package = Package(
     name: "Life XP",
     platforms: [
-        .iOS("17.0")
+        .iOS("18.1")
     ],
     products: products,
     targets: targets

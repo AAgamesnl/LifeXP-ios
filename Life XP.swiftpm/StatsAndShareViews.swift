@@ -5,7 +5,7 @@ import UniformTypeIdentifiers
 // MARK: - Stats View
 
 struct StatsView: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     @State private var selectedTimeframe: Timeframe = .allTime
     
     enum Timeframe: String, CaseIterable {
@@ -65,7 +65,7 @@ struct StatsView: View {
 // MARK: - Level Hero Card
 
 struct LevelHeroCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     @State private var animatePulse = false
     
     var body: some View {
@@ -147,7 +147,7 @@ struct LevelHeroCard: View {
 // MARK: - Progress Snapshot Card 2.0
 
 struct ProgressSnapshotCard2: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -234,7 +234,7 @@ struct SnapshotTile2: View {
 // MARK: - Arc Focus Card
 
 struct ArcFocusCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let arc: Arc
     
     private var accent: Color { Color(hex: arc.accentColorHex, default: BrandTheme.accent) }
@@ -318,7 +318,7 @@ struct ArcFocusCard: View {
 // MARK: - Overall Progress Card
 
 struct OverallProgressCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -372,7 +372,7 @@ struct OverallProgressCard: View {
 // MARK: - Insights Card 2.0
 
 struct InsightsCard2: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -458,7 +458,7 @@ struct InsightsCard2: View {
 // MARK: - Dimension Stats Card
 
 struct DimensionStatsCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -475,7 +475,7 @@ struct DimensionStatsCard: View {
 }
 
 struct DimensionStatRow: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let dimension: LifeDimension
     
     private var earned: Int { model.xp(for: dimension) }
@@ -518,7 +518,7 @@ struct DimensionStatRow: View {
 // MARK: - Arc Progress Card
 
 struct ArcProgressCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -543,7 +543,7 @@ struct ArcProgressCard: View {
 }
 
 struct ArcProgressRow2: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let arc: Arc
     
     private var accent: Color { Color(hex: arc.accentColorHex, default: BrandTheme.accent) }
@@ -593,7 +593,7 @@ struct ArcProgressRow2: View {
 // MARK: - Badges Preview Card
 
 struct BadgesPreviewCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -666,7 +666,7 @@ struct BadgeRow2: View {
 // MARK: - Share Entry Card 2.0
 
 struct ShareEntryCard2: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     @State private var shareCard: ShareCardImage?
     @State private var isRendering = false
 
@@ -770,7 +770,7 @@ struct ShareCardImage: Transferable {
 }
 
 struct SharePreviewView: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     @State private var shareCard: ShareCardImage?
     @State private var isRendering = false
 
@@ -831,7 +831,7 @@ struct SharePreviewView: View {
 }
 
 struct ShareCardView: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
 
     private func ratio(for dimension: LifeDimension) -> Double {
         let maxXP = model.maxXP(for: dimension)
@@ -980,7 +980,7 @@ struct ShareCardView: View {
 @MainActor
 private func renderShareCard(for model: AppModel, size: CGSize = CGSize(width: 360, height: 640)) -> ShareCardImage? {
     let card = ShareCardView()
-        .environmentObject(model)
+        .environment(model)
         .frame(width: size.width, height: size.height)
 
     let renderer = ImageRenderer(content: card)
@@ -993,12 +993,12 @@ private func renderShareCard(for model: AppModel, size: CGSize = CGSize(width: 3
 // MARK: - Legacy Support
 
 struct StatsDimensionCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let dimension: LifeDimension
     
     var body: some View {
         DimensionStatRow(dimension: dimension)
-            .environmentObject(model)
+            .environment(model)
     }
 }
 
@@ -1025,12 +1025,12 @@ struct LevelSummaryCard: View {
 }
 
 struct ArcProgressRow: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let arc: Arc
     
     var body: some View {
         ArcProgressRow2(arc: arc)
-            .environmentObject(model)
+            .environment(model)
     }
 }
 
@@ -1057,10 +1057,10 @@ struct ArcSnapshotCard: View {
 }
 
 struct ShareEntryCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         ShareEntryCard2()
-            .environmentObject(model)
+            .environment(model)
     }
 }

@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Home View
 
 struct HomeView: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     @State private var showHeroCard = false
     @State private var scrollOffset: CGFloat = 0
     @State private var showQuickAdd = false
@@ -134,7 +134,7 @@ struct BadgeCountButton: View {
 // MARK: - Hero Section
 
 struct HeroSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         VStack(spacing: DesignSystem.spacing.lg) {
@@ -230,7 +230,7 @@ struct StreakBadge: View {
                 StaticStreakContent(days: days)
             } else {
                 // Animated version using TimelineView for smooth performance
-                TimelineView(.animation(minimumInterval: 1.0/120, paused: false)) { timeline in
+                AdaptiveTimelineView(minimumInterval: 1.0 / 120) { timeline in
                     let scale = computeGlowScale(for: timeline.date)
                     
                     ZStack {
@@ -357,7 +357,7 @@ struct StatRow: View {
 // MARK: - Daily Briefing Card 2.0
 
 struct DailyBriefingCard2: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     @State private var isExpanded: Bool = true
     
     var body: some View {
@@ -533,7 +533,7 @@ struct LifeChecklistCard2: View {
 // MARK: - Level Progress Card
 
 struct LevelProgressCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     @State private var showDetails = true
     
     var body: some View {
@@ -613,7 +613,7 @@ struct LevelProgressCard: View {
 // MARK: - Dimension Balance Card
 
 struct DimensionBalanceCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -655,7 +655,7 @@ struct DimensionBalanceCard: View {
 }
 
 struct DimensionBar: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let dimension: LifeDimension
     
     private var ratio: Double {
@@ -695,7 +695,7 @@ struct DimensionBar: View {
 // MARK: - Momentum Section
 
 struct MomentumSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -759,7 +759,7 @@ struct MomentumTile2: View {
 // MARK: - Micro Wins Section
 
 struct MicroWinsSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -825,7 +825,7 @@ struct MicroWinRow2: View {
 // MARK: - Arc Preview Card
 
 struct ArcPreviewCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let arc: Arc
     
     private var accent: Color {
@@ -926,7 +926,7 @@ struct ArcPreviewCard: View {
 // MARK: - Booster Packs Section
 
 struct BoosterPacksSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -1064,7 +1064,7 @@ struct QuickActionRow2: View {
 // MARK: - Optional Cards Section
 
 struct OptionalCardsSection: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         VStack(spacing: DesignSystem.spacing.lg) {
@@ -1122,7 +1122,7 @@ struct OptionalCardsSection: View {
 // MARK: - Energy Check Card 2.0
 
 struct EnergyCheckCard2: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     @State private var isExpanded = true
     
     var body: some View {
@@ -1185,7 +1185,7 @@ struct EnergyCheckCard2: View {
 // MARK: - Weekly Blueprint Card 2.0
 
 struct WeeklyBlueprintCard2: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {

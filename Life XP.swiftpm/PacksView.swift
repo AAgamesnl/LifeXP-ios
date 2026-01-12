@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Packs View
 
 struct PacksView: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     @State private var searchText = ""
     @State private var selectedFilter: PackFilter = .all
     
@@ -86,7 +86,7 @@ struct PacksView: View {
 // MARK: - Packs Stats Header
 
 struct PacksStatsHeader: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     
     private var completedPacks: Int {
         model.packs.filter { model.progress(for: $0) >= 1 }.count
@@ -205,7 +205,7 @@ struct FilterChip: View {
 // MARK: - Pack Card
 
 struct PackCard: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let pack: CategoryPack
     
     private var accent: Color {
@@ -305,7 +305,7 @@ struct ProBadge: View {
 // MARK: - Pack Detail View
 
 struct PackDetailView: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let pack: CategoryPack
     
     @State private var showCompletedItems = true
@@ -519,7 +519,7 @@ struct PackDetailHeader: View {
 // MARK: - Checklist Item Row
 
 struct ChecklistItemRow: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let item: ChecklistItem
     let accent: Color
     
@@ -648,22 +648,22 @@ struct ChecklistItemRow: View {
 // MARK: - Legacy Support
 
 struct PackCardView: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let pack: CategoryPack
     
     var body: some View {
         PackCard(pack: pack)
-            .environmentObject(model)
+            .environment(model)
     }
 }
 
 struct ChecklistRow: View {
-    @EnvironmentObject var model: AppModel
+    @Environment(AppModel.self) private var model
     let item: ChecklistItem
     let accent: Color
     
     var body: some View {
         ChecklistItemRow(item: item, accent: accent)
-            .environmentObject(model)
+            .environment(model)
     }
 }

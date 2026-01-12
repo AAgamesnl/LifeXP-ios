@@ -4,16 +4,22 @@ Instructions for AI coding agents working on the Life XP codebase.
 
 ## Project Overview
 
-Life XP is an iOS 17+ SwiftUI app structured as a Swift Playgrounds package. It treats personal growth like a balanced RPG, letting users track progress across life dimensions (Love, Money, Mind, Adventure) through packs of checklist items and narrative arcs with quests.
+Life XP is an iOS 18.1+ SwiftUI app structured as a Swift Playgrounds package. It treats personal growth like a balanced RPG, letting users track progress across life dimensions (Love, Money, Mind, Adventure) through packs of checklist items and narrative arcs with quests.
 
 ## Tech Stack
 
 - **Language:** Swift 5.9+ (uses `BareSlashRegexLiterals`)
-- **UI Framework:** SwiftUI with iOS 17 APIs
-- **State Management:** `ObservableObject` pattern with `@Published` properties
+- **UI Framework:** SwiftUI with iOS 18.1 APIs
+- **State Management:** Swift Observation for reactive state updates
 - **Persistence:** `UserDefaults` via `PersistenceManager` (no external database)
 - **Dependencies:** None—the project is self-contained with no third-party packages
-- **Platforms:** iOS 17+ (iPhone and iPad); includes Linux placeholder for CI builds
+- **Platforms:** iOS 18.1+ (iPhone and iPad); includes Linux placeholder for CI builds
+
+## iOS 18.1 Architecture/Performance/Theming Updates
+
+- **Observation-first state:** AppModel now uses Swift Observation to reduce overhead and keep state propagation crisp.
+- **Adaptive animation scheduling:** Timeline-based effects pause when off-screen or in reduce-motion, and run at 120fps for steadier motion.
+- **Intentional dark surfaces:** Background gradients and ambient glows are tuned to avoid pure black while keeping contrast and depth.
 
 ## Repository Structure
 
@@ -115,7 +121,7 @@ The package conditionally compiles a placeholder target that doesn't depend on S
 ### Xcode
 
 1. Open `Life XP.swiftpm` as a Swift Package in Xcode
-2. Select an iOS 17+ simulator or device
+2. Select an iOS 18.1+ simulator or device
 3. Build and run (⌘R)
 
 ### Swift Playgrounds

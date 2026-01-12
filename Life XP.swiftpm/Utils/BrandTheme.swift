@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Design System 3.0 - Premium Visual Experience
 
 /// Comprehensive design system with spacing, typography, colors, and components.
-/// Optimized for smooth 60fps animations and modern visual aesthetics.
+/// Optimized for smooth 120fps animations and modern visual aesthetics.
 struct DesignSystem {
     // MARK: - Spacing Scale
     struct Spacing {
@@ -87,22 +87,22 @@ struct DesignSystem {
         static let dramatic: Double = 0.8
     }
 
-    // MARK: - 60fps Optimized Animation Curves
+    // MARK: - 120fps Optimized Animation Curves
     struct AnimationCurves {
         /// Ultra-fast micro-interaction (button taps)
-        static let micro = Animation.spring(response: 0.2, dampingFraction: 0.9)
+        static let micro = Animation.spring(response: 0.22, dampingFraction: 0.92)
         /// Quick response for immediate feedback
-        static let quick = Animation.spring(response: 0.25, dampingFraction: 0.85)
+        static let quick = Animation.spring(response: 0.28, dampingFraction: 0.88)
         /// Snappy spring for interactions
-        static let snappy = Animation.spring(response: 0.3, dampingFraction: 0.8)
+        static let snappy = Animation.spring(response: 0.32, dampingFraction: 0.84)
         /// Smooth spring for state changes
-        static let smooth = Animation.spring(response: 0.4, dampingFraction: 0.85)
+        static let smooth = Animation.spring(response: 0.48, dampingFraction: 0.88)
         /// Gentle spring for subtle transitions
-        static let gentle = Animation.spring(response: 0.5, dampingFraction: 0.9)
+        static let gentle = Animation.spring(response: 0.6, dampingFraction: 0.92)
         /// Bouncy spring for celebrations
-        static let bouncy = Animation.spring(response: 0.45, dampingFraction: 0.65)
+        static let bouncy = Animation.spring(response: 0.5, dampingFraction: 0.68)
         /// Linear for continuous animations
-        static let linear = Animation.linear(duration: 0.3)
+        static let linear = Animation.linear(duration: 0.35)
     }
 
     // MARK: - Icon Sizes
@@ -309,17 +309,17 @@ struct BrandTheme {
     // MARK: - Background Colors (Rich Depth)
     static let backgroundTop = Color.dynamic(
         light: Color(hex: "F8FAFC", default: .white),
-        dark: Color(hex: "0F0F1A", default: .black)
+        dark: Color(hex: "121225", default: .black)
     )
     
     static let backgroundMiddle = Color.dynamic(
         light: Color(hex: "EEF2FF", default: .indigo.opacity(0.1)),
-        dark: Color(hex: "1A1A2E", default: .indigo.opacity(0.2))
+        dark: Color(hex: "1B1B35", default: .indigo.opacity(0.2))
     )
     
     static let backgroundBottom = Color.dynamic(
         light: Color(hex: "E0E7FF", default: .indigo.opacity(0.15)),
-        dark: Color(hex: "16162A", default: .indigo.opacity(0.3))
+        dark: Color(hex: "19192F", default: .indigo.opacity(0.3))
     )
     
     // Legacy aliases
@@ -450,7 +450,7 @@ struct BrandTheme {
 
 // MARK: - Premium Animated Background
 
-/// Beautiful mesh-gradient inspired background with silky smooth 60fps animations.
+/// Beautiful mesh-gradient inspired background with silky smooth 120fps animations.
 struct BrandBackground: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -460,7 +460,7 @@ struct BrandBackground: View {
     
     var body: some View {
         if animated && !reduceMotion {
-            TimelineView(.animation(minimumInterval: 1.0/120, paused: false)) { timeline in
+            AdaptiveTimelineView(minimumInterval: 1.0 / 120) { timeline in
                 PremiumBackgroundCanvas(
                     time: timeline.date.timeIntervalSinceReferenceDate,
                     intensity: intensity,
@@ -484,13 +484,13 @@ private struct PremiumBackgroundCanvas: View {
             Canvas { context, size in
                 // Base gradient
                 let baseGradient = Gradient(colors: isDark ? [
-                    Color(hex: "0F0F1A", default: .black),
-                    Color(hex: "1A1A2E", default: .black),
-                    Color(hex: "16162A", default: .black)
+                    BrandTheme.backgroundTop,
+                    BrandTheme.backgroundMiddle,
+                    BrandTheme.backgroundBottom
                 ] : [
-                    Color(hex: "F8FAFC", default: .white),
-                    Color(hex: "EEF2FF", default: .white),
-                    Color(hex: "E0E7FF", default: .white)
+                    BrandTheme.backgroundTop,
+                    BrandTheme.backgroundMiddle,
+                    BrandTheme.backgroundBottom
                 ])
                 
                 let baseRect = CGRect(origin: .zero, size: size)
@@ -594,15 +594,7 @@ private struct StaticPremiumBackground: View {
         ZStack {
             // Base gradient
             LinearGradient(
-                colors: colorScheme == .dark ? [
-                    Color(hex: "0F0F1A", default: .black),
-                    Color(hex: "1A1A2E", default: .black),
-                    Color(hex: "16162A", default: .black)
-                ] : [
-                    Color(hex: "F8FAFC", default: .white),
-                    Color(hex: "EEF2FF", default: .white),
-                    Color(hex: "E0E7FF", default: .white)
-                ],
+                colors: [BrandTheme.backgroundTop, BrandTheme.backgroundMiddle, BrandTheme.backgroundBottom],
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -652,15 +644,7 @@ struct BrandBackgroundStatic: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: colorScheme == .dark ? [
-                    Color(hex: "0F0F1A", default: .black),
-                    Color(hex: "1A1A2E", default: .black),
-                    Color(hex: "16162A", default: .black)
-                ] : [
-                    Color(hex: "F8FAFC", default: .white),
-                    Color(hex: "EEF2FF", default: .white),
-                    Color(hex: "E0E7FF", default: .white)
-                ],
+                colors: [BrandTheme.backgroundTop, BrandTheme.backgroundMiddle, BrandTheme.backgroundBottom],
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -674,6 +658,32 @@ struct BrandBackgroundStatic: View {
                 center: UnitPoint(x: 0.3, y: 0.2),
                 startRadius: 0,
                 endRadius: 400
+            )
+
+            // Secondary ambient glow for depth
+            RadialGradient(
+                colors: [
+                    Color(hex: "0EA5E9", default: .cyan).opacity(colorScheme == .dark ? 0.06 : 0.04),
+                    Color.clear
+                ],
+                center: UnitPoint(x: 0.85, y: 0.8),
+                startRadius: 0,
+                endRadius: 520
+            )
+
+            // Soft vignette to keep contrast intentional in dark mode
+            LinearGradient(
+                colors: colorScheme == .dark ? [
+                    Color.black.opacity(0.18),
+                    Color.clear,
+                    Color.black.opacity(0.28)
+                ] : [
+                    Color.black.opacity(0.04),
+                    Color.clear,
+                    Color.black.opacity(0.06)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
             )
         }
         .ignoresSafeArea()
@@ -1019,7 +1029,7 @@ extension View {
     }
 }
 
-// MARK: - 60fps Animation Modifiers
+// MARK: - 120fps Animation Modifiers
 
 private struct ShimmerModifier: ViewModifier {
     let isActive: Bool
@@ -1027,7 +1037,7 @@ private struct ShimmerModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         if isActive && !reduceMotion {
-            TimelineView(.animation(minimumInterval: 1.0/120, paused: false)) { timeline in
+            AdaptiveTimelineView(minimumInterval: 1.0 / 120) { timeline in
                 let phase = computePhase(for: timeline.date)
                 
                 content
@@ -1066,7 +1076,7 @@ private struct PulseModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         if isActive && !reduceMotion {
-            TimelineView(.animation(minimumInterval: 1.0/120, paused: false)) { timeline in
+            AdaptiveTimelineView(minimumInterval: 1.0 / 120) { timeline in
                 let scale = computeScale(for: timeline.date)
                 
                 content
@@ -1452,7 +1462,7 @@ struct LoadingView: View {
                         .frame(width: 48, height: 48)
                 }
             } else {
-                TimelineView(.animation(minimumInterval: 1.0/120, paused: false)) { timeline in
+                AdaptiveTimelineView(minimumInterval: 1.0 / 120) { timeline in
                     let rotation = computeRotation(for: timeline.date)
                     
                     ZStack {
