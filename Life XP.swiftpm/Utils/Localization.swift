@@ -37,6 +37,6 @@ enum L10n {
 extension String {
     /// Convenience for localized strings outside SwiftUI views.
     var localized: String {
-        String(localized: .init(self))
+        String(localized: .init(self), bundle: .module)
     }
 }

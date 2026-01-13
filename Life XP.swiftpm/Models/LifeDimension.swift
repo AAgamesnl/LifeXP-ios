@@ -11,7 +11,7 @@ enum LifeDimension: String, CaseIterable, Codable, Identifiable, Hashable {
 
     /// User-facing label for the dimension.
     var label: String {
-        String(localized: "dimension.\(rawValue)")
+        String(localized: "dimension.\(rawValue)", bundle: .module)
     }
 
     /// Symbol that visually represents the dimension.
@@ -47,6 +47,6 @@ enum ToneMode: String, CaseIterable, Identifiable, Hashable, Codable {
 
     /// Human-friendly label for the tone option.
     var label: String {
-        String(localized: "tone.\(rawValue)")
+        String(localized: "tone.\(rawValue)", bundle: .module)
     }
 }
