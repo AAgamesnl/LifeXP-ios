@@ -1212,8 +1212,10 @@ struct TutorialProgressBar: View {
                 Capsule()
                     .fill(index <= currentStep ? color : BrandTheme.borderSubtle.opacity(0.5))
                     .frame(width: index == currentStep ? 24 : 8, height: 8)
-                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: currentStep)
             }
+        }
+        .transaction { transaction in
+            transaction.animation = nil
         }
     }
 }
