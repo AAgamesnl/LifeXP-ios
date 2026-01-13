@@ -314,8 +314,6 @@ struct WelcomePage: View {
         .onChange(of: isActive) { _, newValue in
             if newValue {
                 animateIn()
-            } else {
-                resetState()
             }
         }
     }
@@ -331,11 +329,6 @@ struct WelcomePage: View {
         }
     }
     
-    private func resetState() {
-        showContent = false
-        showFeatures = false
-        iconScale = 0.5
-    }
 }
 
 struct FeatureRow: View {
@@ -438,8 +431,6 @@ struct FocusPage: View {
         .onChange(of: isActive) { _, newValue in
             if newValue {
                 animateIn()
-            } else {
-                showContent = false
             }
         }
     }
@@ -624,8 +615,6 @@ struct EnergyPage: View {
         .onChange(of: isActive) { _, newValue in
             if newValue {
                 animateIn()
-            } else {
-                showContent = false
             }
         }
     }
@@ -733,8 +722,6 @@ struct TonePage: View {
         .onChange(of: isActive) { _, newValue in
             if newValue {
                 animateIn()
-            } else {
-                showContent = false
             }
         }
     }
