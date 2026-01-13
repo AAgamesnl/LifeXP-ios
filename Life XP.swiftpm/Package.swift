@@ -19,7 +19,7 @@ let package = Package(
             targets: ["AppModule"],
             bundleIdentifier: "com.ayoub.LifeXP",
             teamIdentifier: "26TUM3453K",
-            displayVersion: "0.8.9",
+            displayVersion: "0.8.91",
             bundleVersion: "1",
             appIcon: .asset("AppIcon"),
             accentColor: .presetColor(.blue),
