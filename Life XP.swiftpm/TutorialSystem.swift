@@ -591,6 +591,12 @@ struct TutorialOverlay: View {
     @State private var showSparkles: Bool = false
     @State private var showConfetti: Bool = false
     @State private var pulseScale: CGFloat = 1.0
+    @State private var transitionDirection: TransitionDirection = .forward
+    
+    private enum TransitionDirection {
+        case forward
+        case backward
+    }
     
     var body: some View {
         if manager.isShowingTutorial, let step = manager.currentStep {
@@ -617,8 +623,10 @@ struct TutorialOverlay: View {
                 }
                 
                 // Floating particles in background
+                TutorialParticlesView(color: step.accentColor, intensity: .subtle)
+                
                 if showSparkles {
-                    TutorialParticlesView(color: step.accentColor)
+                    TutorialParticlesView(color: step.accentColor, intensity: .sparkle)
                 }
                 
                 // Confetti for special moments
@@ -650,6 +658,8 @@ struct TutorialOverlay: View {
                     .scaleEffect(cardScale)
                     .opacity(cardOpacity)
                     .offset(y: cardOffset)
+                    .id(step.id)
+                    .transition(cardTransition)
                     .padding(.horizontal, DesignSystem.spacing.lg)
                     .padding(.bottom, DesignSystem.spacing.xxxl)
                 }
@@ -657,12 +667,23 @@ struct TutorialOverlay: View {
             .onAppear {
                 appearAnimation(for: step)
             }
-            .onChange(of: manager.currentStepIndex) { _, _ in
+            .onChange(of: manager.currentStepIndex) { oldValue, newValue in
+                transitionDirection = newValue >= oldValue ? .forward : .backward
                 if let newStep = manager.currentStep {
                     transitionAnimation(to: newStep)
                 }
             }
+            .animation(.spring(response: 0.45, dampingFraction: 0.85), value: manager.currentStepIndex)
         }
+    }
+    
+    private var cardTransition: AnyTransition {
+        let insertionEdge: Edge = transitionDirection == .forward ? .trailing : .leading
+        let removalEdge: Edge = transitionDirection == .forward ? .leading : .trailing
+        return .asymmetric(
+            insertion: .move(edge: insertionEdge).combined(with: .opacity),
+            removal: .move(edge: removalEdge).combined(with: .opacity)
+        )
     }
     
     private func appearAnimation(for step: TutorialStep) {
@@ -744,6 +765,12 @@ struct TutorialOverlay: View {
 struct TutorialParticlesView: View {
     let color: Color
     @State private var particles: [TutorialParticle] = []
+    let intensity: Intensity
+    
+    enum Intensity {
+        case subtle
+        case sparkle
+    }
     
     struct TutorialParticle: Identifiable {
         let id = UUID()
@@ -787,17 +814,71 @@ struct TutorialParticlesView: View {
     }
     
     private func createParticles(in size: CGSize) {
-        particles = (0..<20).map { _ in
+        particles = (0..<particleCount).map { _ in
             TutorialParticle(
                 baseX: CGFloat.random(in: 12...max(12, size.width - 12)),
                 offsetY: CGFloat.random(in: -40...40),
-                scale: CGFloat.random(in: 0.6...1.3),
-                opacity: Double.random(in: 0.35...0.7),
-                driftSpeed: Double.random(in: 18...32),
-                swayAmplitude: CGFloat.random(in: 6...16),
+                scale: CGFloat.random(in: scaleRange),
+                opacity: Double.random(in: opacityRange),
+                driftSpeed: Double.random(in: driftSpeedRange),
+                swayAmplitude: CGFloat.random(in: swayRange),
                 phase: Double.random(in: 0...120),
-                rotationSpeed: Double.random(in: -20...20)
+                rotationSpeed: Double.random(in: rotationRange)
             )
+        }
+    }
+    
+    private var particleCount: Int {
+        switch intensity {
+        case .subtle:
+            return 14
+        case .sparkle:
+            return 26
+        }
+    }
+    
+    private var opacityRange: ClosedRange<Double> {
+        switch intensity {
+        case .subtle:
+            return 0.18...0.35
+        case .sparkle:
+            return 0.35...0.75
+        }
+    }
+    
+    private var scaleRange: ClosedRange<CGFloat> {
+        switch intensity {
+        case .subtle:
+            return 0.5...1.0
+        case .sparkle:
+            return 0.7...1.4
+        }
+    }
+    
+    private var driftSpeedRange: ClosedRange<Double> {
+        switch intensity {
+        case .subtle:
+            return 14...26
+        case .sparkle:
+            return 20...36
+        }
+    }
+    
+    private var swayRange: ClosedRange<CGFloat> {
+        switch intensity {
+        case .subtle:
+            return 4...10
+        case .sparkle:
+            return 8...18
+        }
+    }
+    
+    private var rotationRange: ClosedRange<Double> {
+        switch intensity {
+        case .subtle:
+            return -12...12
+        case .sparkle:
+            return -24...24
         }
     }
 }
@@ -840,12 +921,12 @@ private struct TutorialCardParticlesView: View {
     }
     
     private func createParticles(in size: CGSize) {
-        particles = (0..<10).map { _ in
+        particles = (0..<14).map { _ in
             TutorialCardParticle(
                 baseX: CGFloat.random(in: 20...max(20, size.width - 20)),
                 baseY: CGFloat.random(in: 20...max(20, size.height - 20)),
                 scale: CGFloat.random(in: 0.6...1.2),
-                opacity: Double.random(in: 0.08...0.18),
+                opacity: Double.random(in: 0.12...0.24),
                 driftSpeed: Double.random(in: 0.4...0.8),
                 phase: Double.random(in: 0...6.28)
             )
