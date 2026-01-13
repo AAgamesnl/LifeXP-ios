@@ -623,7 +623,7 @@ struct TutorialOverlay: View {
                 
                 // Confetti for special moments
                 if showConfetti {
-                    ConfettiView(isActive: .constant(true), particleCount: 40)
+                    ConfettiView(isActive: $showConfetti, particleCount: 40)
                 }
                 
                 // Tutorial card

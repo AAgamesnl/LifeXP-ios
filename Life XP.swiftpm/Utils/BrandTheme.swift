@@ -1324,8 +1324,24 @@ struct ConfettiView: View {
     var particleCount: Int = 40
     
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var particles: [(id: Int, x: CGFloat, y: CGFloat, scale: CGFloat, rotation: Double, colorIndex: Int)] = []
+    @State private var particles: [ConfettiParticle] = []
     @State private var containerSize: CGSize = .zero
+    @State private var animationStartTime: TimeInterval = 0
+    
+    private let animationDuration: TimeInterval = 1.2
+    private let gravity: CGFloat = 520
+    
+    private struct ConfettiParticle: Identifiable {
+        let id: Int
+        let startX: CGFloat
+        let startY: CGFloat
+        let velocityX: CGFloat
+        let velocityY: CGFloat
+        let scale: CGFloat
+        let rotation: Double
+        let spin: Double
+        let colorIndex: Int
+    }
     
     private let colors: [Color] = [
         BrandTheme.accent,
@@ -1338,20 +1354,36 @@ struct ConfettiView: View {
     
     var body: some View {
         GeometryReader { geo in
-            Canvas { context, size in
-                for particle in particles {
-                    let particleSize = 8 * particle.scale
-                    let rect = CGRect(
-                        x: particle.x - particleSize / 2,
-                        y: particle.y - particleSize / 2,
-                        width: particleSize,
-                        height: particleSize
-                    )
+            TimelineView(.animation) { timeline in
+                let currentTime = timeline.date.timeIntervalSinceReferenceDate
+                Canvas { context, size in
+                    guard animationStartTime > 0 else { return }
+                    let elapsed = max(0, currentTime - animationStartTime)
+                    let progress = min(elapsed / animationDuration, 1)
+                    let fade = 1 - progress
                     
-                    context.fill(
-                        Circle().path(in: rect),
-                        with: .color(colors[particle.colorIndex % colors.count])
-                    )
+                    for particle in particles {
+                        let x = particle.startX + particle.velocityX * CGFloat(elapsed)
+                        let y = particle.startY + particle.velocityY * CGFloat(elapsed) + 0.5 * gravity * CGFloat(elapsed * elapsed)
+                        let rotation = particle.rotation + particle.spin * elapsed
+                        let particleScale = particle.scale * CGFloat(fade)
+                        let particleSize = 8 * particleScale
+                        let rect = CGRect(
+                            x: -particleSize / 2,
+                            y: -particleSize / 2,
+                            width: particleSize,
+                            height: particleSize
+                        )
+                        
+                        var particleContext = context
+                        particleContext.opacity = fade
+                        particleContext.translateBy(x: x, y: y)
+                        particleContext.rotate(by: .degrees(rotation))
+                        particleContext.fill(
+                            Circle().path(in: rect),
+                            with: .color(colors[particle.colorIndex % colors.count])
+                        )
+                    }
                 }
             }
             .onAppear {
@@ -1392,39 +1424,29 @@ struct ConfettiView: View {
     }
     
     private func triggerConfetti(in size: CGSize) {
+        animationStartTime = Date().timeIntervalSinceReferenceDate
+        let centerX = size.width / 2
+        let centerY = size.height / 2
         particles = (0..<particleCount).map { i in
-            (
+            let speed = CGFloat.random(in: 120...320)
+            let angle = CGFloat.random(in: -CGFloat.pi...CGFloat.pi)
+            return ConfettiParticle(
                 id: i,
-                x: size.width / 2,
-                y: size.height / 2,
-                scale: CGFloat.random(in: 0.5...1.4),
+                startX: centerX,
+                startY: centerY,
+                velocityX: cos(angle) * speed,
+                velocityY: sin(angle) * speed - CGFloat.random(in: 80...180),
+                scale: CGFloat.random(in: 0.6...1.3),
                 rotation: Double.random(in: 0...360),
+                spin: Double.random(in: -180...180),
                 colorIndex: Int.random(in: 0..<colors.count)
             )
         }
         
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.65)) {
-            particles = particles.map { particle in
-                var p = particle
-                p.x = CGFloat.random(in: size.width * 0.05...size.width * 0.95)
-                p.y = CGFloat.random(in: size.height * 0.05...size.height * 0.95)
-                return p
-            }
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-            withAnimation(.easeOut(duration: 0.35)) {
-                particles = particles.map { particle in
-                    var p = particle
-                    p.scale = 0
-                    return p
-                }
-            }
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                isActive = false
-                particles = []
-            }
+        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
+            isActive = false
+            particles = []
+            animationStartTime = 0
         }
     }
 }
