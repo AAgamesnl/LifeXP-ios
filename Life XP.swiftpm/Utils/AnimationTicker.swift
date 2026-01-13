@@ -9,6 +9,7 @@ struct AdaptiveTimelineView<Content: View>: View {
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.isScrolling) private var isScrolling
     @State private var isVisible = false
 
     init(
@@ -22,7 +23,7 @@ struct AdaptiveTimelineView<Content: View>: View {
     }
 
     private var shouldPause: Bool {
-        reduceMotion || scenePhase != .active || !isVisible || !isActive
+        reduceMotion || scenePhase != .active || !isVisible || !isActive || isScrolling
     }
 
     var body: some View {

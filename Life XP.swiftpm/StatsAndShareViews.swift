@@ -56,6 +56,7 @@ struct StatsView: View {
                     }
                     .padding(.horizontal, DesignSystem.spacing.lg)
                 }
+                .trackScrollActivity()
             }
             .navigationTitle("Stats")
         }

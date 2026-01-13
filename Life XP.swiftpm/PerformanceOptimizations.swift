@@ -356,6 +356,17 @@ final class MemoryMonitor: ObservableObject {
 
 // MARK: - View Modifiers
 
+private struct ScrollActivityKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var isScrolling: Bool {
+        get { self[ScrollActivityKey.self] }
+        set { self[ScrollActivityKey.self] = newValue }
+    }
+}
+
 /// Adds lazy loading behavior to any view
 struct LazyLoadingModifier: ViewModifier {
     @State private var isLoaded = false
@@ -384,6 +395,11 @@ extension View {
     func lazyLoading(threshold: CGFloat = 100) -> some View {
         modifier(LazyLoadingModifier(threshold: threshold))
     }
+
+    /// Tracks scroll phase changes and pauses high-frequency updates while scrolling.
+    func trackScrollActivity() -> some View {
+        modifier(ScrollActivityModifier())
+    }
 }
 
 /// Prevents view updates during scroll
@@ -403,6 +419,30 @@ struct ScrollingPreferenceKey: PreferenceKey {
     static var defaultValue: Bool = false
     static func reduce(value: inout Bool, nextValue: () -> Bool) {
         value = value || nextValue()
+    }
+}
+
+struct ScrollActivityModifier: ViewModifier {
+    @State private var isScrolling = false
+
+    func body(content: Content) -> some View {
+        content
+            .environment(\.isScrolling, isScrolling)
+            .transaction { transaction in
+                if isScrolling {
+                    transaction.disablesAnimations = true
+                }
+            }
+            .onScrollPhaseChange { phase in
+                switch phase {
+                case .idle:
+                    isScrolling = false
+                case .tracking, .decelerating, .animating:
+                    isScrolling = true
+                @unknown default:
+                    isScrolling = false
+                }
+            }
     }
 }
 

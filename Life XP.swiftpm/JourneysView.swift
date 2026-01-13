@@ -77,6 +77,7 @@ struct ArcsView: View {
                     }
                     .padding(.horizontal, DesignSystem.spacing.lg)
                 }
+                .trackScrollActivity()
             }
             .navigationTitle(L10n.tabArcs)
             .onAppear {

@@ -82,6 +82,7 @@ struct PacksView: View {
                     .padding(.horizontal, DesignSystem.spacing.lg)
                     .padding(.bottom, DesignSystem.spacing.xxl)
                 }
+                .trackScrollActivity()
             }
             .navigationTitle(L10n.packsScreenTitle)
             .searchable(text: $searchText, prompt: L10n.packsSearchPrompt)

@@ -56,6 +56,7 @@ struct SettingsView: View {
                     }
                     .padding(.horizontal, DesignSystem.spacing.lg)
                 }
+                .trackScrollActivity()
             }
             .navigationTitle(L10n.tabSettings)
             .confirmationDialog("Reset Everything?", isPresented: $confirmResetAll, titleVisibility: .visible) {

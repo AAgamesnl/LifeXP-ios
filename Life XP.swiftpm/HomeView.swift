@@ -72,6 +72,7 @@ struct HomeView: View {
                     .padding(.horizontal, DesignSystem.spacing.lg)
                     .padding(.top, DesignSystem.spacing.md)
                 }
+                .trackScrollActivity()
             }
             .navigationTitle(L10n.appTitle)
             .navigationBarTitleDisplayMode(.large)
