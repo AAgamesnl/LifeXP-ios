@@ -39,6 +39,8 @@ struct ArcsView: View {
 
                 ScrollView {
                     VStack(spacing: DesignSystem.spacing.xl) {
+                        StoryModeHeader()
+
                         // Current Arc Hero
                         if let arc = currentArc {
                             ArcHeroCard2(
@@ -80,7 +82,7 @@ struct ArcsView: View {
                 }
                 .trackScrollActivity()
             }
-            .navigationTitle(L10n.tabArcs)
+            .navigationTitle(L10n.storyModeTitle)
             .onAppear {
                 showHero = true
             }
@@ -101,6 +103,23 @@ struct ArcsView: View {
                 Text("You have \(model.settings.maxConcurrentArcs) active arcs. Choose which one to pause to start \(pending.title).")
             }
         }
+    }
+}
+
+// MARK: - Story Mode Header
+
+struct StoryModeHeader: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+            Text(L10n.storyModeTitle)
+                .font(DesignSystem.text.headlineLarge)
+                .foregroundColor(BrandTheme.textPrimary)
+
+            Text(L10n.storyModeSubtitle)
+                .font(DesignSystem.text.bodySmall)
+                .foregroundColor(BrandTheme.mutedText)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -396,20 +415,25 @@ struct ActiveArcsSection2: View {
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
             HStack {
-                Text("Other Active Arcs")
+                Text(L10n.storyModeActive)
                     .font(DesignSystem.text.headlineMedium)
                     .foregroundColor(BrandTheme.textPrimary)
-                
+
                 Spacer()
-                
+
                 ChipView(text: "Live", icon: "dot.radiowaves.left.and.right", color: BrandTheme.success, size: .small)
             }
 
-            ForEach(arcs) { arc in
-                NavigationLink(destination: ArcDetailView(arc: arc)) {
-                    ArcTile2(arc: arc, startAction: startAction)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: DesignSystem.spacing.md) {
+                    ForEach(arcs) { arc in
+                        NavigationLink(destination: ArcDetailView(arc: arc)) {
+                            ArcStoryCard(arc: arc, startAction: startAction)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
-                .buttonStyle(CardButtonStyle())
+                .padding(.horizontal, 2)
             }
         }
     }
@@ -583,7 +607,7 @@ struct SuggestedArcsSection: View {
         if !suggestions.isEmpty {
             VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
                 HStack {
-                    Text("Suggested Arcs")
+                    Text(L10n.storyModeSuggested)
                         .font(DesignSystem.text.headlineMedium)
                         .foregroundColor(BrandTheme.textPrimary)
                     
@@ -594,11 +618,16 @@ struct SuggestedArcsSection: View {
                     }
                 }
 
-                ForEach(suggestions.prefix(3)) { arc in
-                    NavigationLink(destination: ArcDetailView(arc: arc)) {
-                        ArcTile2(arc: arc, startAction: startAction)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: DesignSystem.spacing.md) {
+                        ForEach(suggestions.prefix(6)) { arc in
+                            NavigationLink(destination: ArcDetailView(arc: arc)) {
+                                ArcStoryCard(arc: arc, startAction: startAction)
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
-                    .buttonStyle(CardButtonStyle())
+                    .padding(.horizontal, 2)
                 }
             }
         }
@@ -666,51 +695,92 @@ struct ArcTile2: View {
     }
 }
 
+// MARK: - Arc Story Card
+
+struct ArcStoryCard: View {
+    @Environment(AppModel.self) private var model
+    let arc: Arc
+    var startAction: ((Arc) -> Void)?
+
+    private var accent: Color { Color(hex: arc.accentColorHex, default: BrandTheme.accent) }
+    private var progress: Double { model.arcProgress(arc) }
+    private var isActive: Bool { model.arcStartDates[arc.id] != nil && progress < 1 }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            HStack {
+                IconContainer(systemName: arc.iconSystemName, color: accent, size: .small, style: .gradient)
+
+                Spacer()
+
+                if isActive {
+                    ChipView(text: String(localized: "status.live", bundle: .module), icon: "dot.radiowaves.left.and.right", color: BrandTheme.success, size: .small)
+                } else if progress >= 1 {
+                    ChipView(text: String(localized: "status.completed", bundle: .module), icon: "checkmark.seal.fill", color: accent, size: .small)
+                }
+            }
+
+            Text(arc.title)
+                .font(DesignSystem.text.headlineSmall)
+                .foregroundColor(BrandTheme.textPrimary)
+                .lineLimit(2)
+
+            Text(arc.subtitle)
+                .font(DesignSystem.text.bodySmall)
+                .foregroundColor(BrandTheme.mutedText)
+                .lineLimit(2)
+
+            AnimatedProgressBar(progress: progress, height: 8, color: accent)
+
+            Text(String(format: String(localized: "progress.percentComplete", bundle: .module), Int(progress * 100)))
+                .font(.caption)
+                .foregroundColor(BrandTheme.mutedText)
+        }
+        .frame(width: 240, alignment: .leading)
+        .padding(DesignSystem.spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                .fill(BrandTheme.cardBackground.opacity(0.9))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                .strokeBorder(accent.opacity(0.2), lineWidth: 1)
+        )
+    }
+}
+
 // MARK: - All Arcs Section
 
 struct AllArcsSection: View {
     @Environment(AppModel.self) private var model
     var startAction: ((Arc) -> Void)?
-    
-    @State private var isExpanded = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
-            Button {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.85, blendDuration: 0.1)) {
-                    isExpanded.toggle()
-                }
-                HapticsEngine.lightImpact()
-            } label: {
-                HStack {
-                    Text("All Arcs")
-                        .font(DesignSystem.text.headlineMedium)
-                        .foregroundColor(BrandTheme.textPrimary)
-                    
-                    Spacer()
-                    
-                    Text("\(model.visibleArcs.count) arcs")
-                        .font(.caption)
-                        .foregroundColor(BrandTheme.mutedText)
-                    
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(BrandTheme.mutedText)
-                        .rotationEffect(.degrees(isExpanded ? -180 : 0))
-                }
+            HStack {
+                Text(L10n.storyModeLibrary)
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+
+                Spacer()
+
+                Text("\(model.visibleArcs.count) arcs")
+                    .font(.caption)
+                    .foregroundColor(BrandTheme.mutedText)
             }
-            .buttonStyle(.plain)
-            
-            if isExpanded {
-                ForEach(model.visibleArcs) { arc in
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: DesignSystem.spacing.md) {
+                    ForEach(model.visibleArcs) { arc in
                     NavigationLink(destination: ArcDetailView(arc: arc)) {
-                        ArcTile2(arc: arc, startAction: startAction)
+                        ArcStoryCard(arc: arc, startAction: startAction)
                     }
-                    .buttonStyle(CardButtonStyle())
+                    .buttonStyle(.plain)
+                    }
                 }
+                .padding(.horizontal, 2)
             }
         }
-        .brandCard()
     }
 }
 

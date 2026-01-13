@@ -8,7 +8,7 @@ struct ContentView: View {
     @AppStorage("lifeXP.hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     @AppStorage("lifeXP.hasSeenWelcomeTutorial") private var hasSeenWelcomeTutorial: Bool = false
     @State private var showOnboarding: Bool = false
-    @State private var selectedTab: Tab = .home
+    @State private var selectedTab: Tab = .hub
     @State private var showCelebration: Bool = false
     @State private var previousLevel: Int = 1
     @State private var isReady: Bool = false
@@ -19,34 +19,34 @@ struct ContentView: View {
     @StateObject private var tutorialManager = TutorialManager()
     
     enum Tab: String, CaseIterable {
-        case home, arcs, packs, stats, settings
+        case hub, arcs, packs, journal, settings
         
         var title: String {
             switch self {
-            case .home: return String(localized: "tab.home")
-            case .arcs: return String(localized: "tab.arcs")
-            case .packs: return String(localized: "tab.packs")
-            case .stats: return String(localized: "tab.stats")
+            case .hub: return String(localized: "tab.hub")
+            case .arcs: return String(localized: "tab.story")
+            case .packs: return String(localized: "tab.training")
+            case .journal: return String(localized: "tab.reflection")
             case .settings: return String(localized: "tab.settings")
             }
         }
         
         var icon: String {
             switch self {
-            case .home: return "sparkles"
-            case .arcs: return "map.fill"
-            case .packs: return "checklist"
-            case .stats: return "chart.bar.fill"
+            case .hub: return "house.fill"
+            case .arcs: return "book.fill"
+            case .packs: return "rectangle.stack.fill"
+            case .journal: return "quote.bubble.fill"
             case .settings: return "gearshape.fill"
             }
         }
         
         var selectedIcon: String {
             switch self {
-            case .home: return "sparkles"
-            case .arcs: return "map.fill"
-            case .packs: return "checklist.checked"
-            case .stats: return "chart.bar.fill"
+            case .hub: return "house.fill"
+            case .arcs: return "book.fill"
+            case .packs: return "rectangle.stack.fill"
+            case .journal: return "quote.bubble.fill"
             case .settings: return "gearshape.fill"
             }
         }
@@ -54,7 +54,7 @@ struct ContentView: View {
     
     /// Additional features accessible from more menu
     enum MoreFeature: String, CaseIterable, Identifiable {
-        case habits, journal, focus, analytics, trophies
+        case habits, stats, focus, analytics, trophies
         
         var id: String { rawValue }
         
@@ -65,7 +65,7 @@ struct ContentView: View {
         var icon: String {
             switch self {
             case .habits: return "repeat.circle.fill"
-            case .journal: return "book.fill"
+            case .stats: return "chart.bar.fill"
             case .focus: return "timer"
             case .analytics: return "chart.xyaxis.line"
             case .trophies: return "trophy.fill"
@@ -75,7 +75,7 @@ struct ContentView: View {
         var color: Color {
             switch self {
             case .habits: return .purple
-            case .journal: return .orange
+            case .stats: return .orange
             case .focus: return .blue
             case .analytics: return .green
             case .trophies: return .yellow
@@ -96,7 +96,7 @@ struct ContentView: View {
                     // Tab content - optimized transitions
                     ZStack {
                         switch selectedTab {
-                        case .home:
+                        case .hub:
                             HomeView()
                                 .transition(.opacity)
                         case .arcs:
@@ -105,8 +105,8 @@ struct ContentView: View {
                         case .packs:
                             PacksView()
                                 .transition(.opacity)
-                        case .stats:
-                            StatsView()
+                        case .journal:
+                            JournalView(manager: model.journalManager)
                                 .transition(.opacity)
                         case .settings:
                             SettingsView()
@@ -215,8 +215,8 @@ struct ContentView: View {
         switch feature {
         case .habits:
             HabitsView()
-        case .journal:
-            JournalView(manager: model.journalManager)
+        case .stats:
+            StatsView()
         case .focus:
             FocusTimerView()
         case .analytics:

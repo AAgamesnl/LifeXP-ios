@@ -1,10 +1,67 @@
 "app.title" = "Life XP";
 
-"tab.home" = "Home";
-"tab.arcs" = "Arcs";
-"tab.packs" = "Packs";
-"tab.stats" = "Stats";
+"tab.hub" = "Hub";
+"tab.story" = "Story";
+"tab.training" = "Training";
+"tab.reflection" = "Reflection";
 "tab.settings" = "Settings";
+
+"hub.title" = "Hub";
+"hub.dailyQuest.title" = "Daily Quest";
+"hub.dailyQuest.subtitle" = "Lock in a focused win for today.";
+"hub.progress.title" = "Progress Snapshot";
+"hub.cta.startAdventure" = "Start Adventure";
+"hub.cta.continueArc" = "Continue Arc";
+"hub.cta.claimReward" = "Claim Reward";
+"hub.cta.exploreArcs" = "Explore Arcs";
+"hub.cta.claimReward.subtitle" = "Bonus XP ready to collect.";
+"hub.cta.exploreArcs.subtitle" = "Find a story arc to start today.";
+"hub.modes.title" = "Choose a Mode";
+"hub.mode.story.title" = "Story Mode";
+"hub.mode.story.subtitle" = "Narratives, chapters, and quests.";
+"hub.mode.training.title" = "Training Mode";
+"hub.mode.training.subtitle" = "Compact pack decks to grind XP.";
+"hub.mode.reflection.title" = "Reflection Mode";
+"hub.mode.reflection.subtitle" = "Daily ritual and achievements.";
+"hub.dailyQuest.completed" = "Quest complete";
+"hub.dailyQuest.empty" = "Start a quest to light up your day.";
+"hub.progress.totalXp" = "Total XP";
+"hub.progress.nextLevel" = "To next level";
+"hub.progress.streak" = "Streak";
+"hub.progress.xpRemaining" = "%d XP";
+"hub.progress.streakDays" = "%d days";
+"hub.progress.level" = "Level %d";
+
+"story.title" = "Story Mode";
+"story.subtitle" = "Step into narrative arcs with chapters and quests.";
+"story.section.active" = "Active Storylines";
+"story.section.suggested" = "Suggested Storylines";
+"story.section.library" = "Story Library";
+
+"training.title" = "Training Mode";
+"training.subtitle" = "Decks of compact packs for focused progress.";
+"training.section.inProgress" = "In Progress";
+"training.section.recommended" = "Recommended Decks";
+"training.section.completed" = "Completed";
+"training.section.premium" = "Premium Decks";
+
+"reflection.title" = "Reflection Mode";
+"reflection.subtitle" = "Rituals, moods, and wins to close the loop.";
+"reflection.ritual.title" = "Daily Ritual";
+"reflection.ritual.subtitle" = "A quick prompt to anchor your day.";
+"reflection.achievements.title" = "Achievements";
+"reflection.achievements.subtitle" = "Streaks, badges, and growth signals.";
+"reflection.checkIn.title" = "Daily Check-in";
+"reflection.achievement.level" = "Level %d";
+"reflection.achievement.xp" = "%d XP";
+"reflection.achievement.streak" = "%d day streak";
+"reflection.achievement.badges" = "%d badges";
+"reflection.achievement.momentum" = "Best momentum";
+"reflection.achievement.unlocked" = "Unlocked";
+
+"status.live" = "Live";
+"status.completed" = "Completed";
+"progress.percentComplete" = "%d%% complete";
 
 "home.quickActions.title" = "Quick Actions";
 "home.packs.title" = "Packs";
@@ -28,7 +85,7 @@
 
 "moreFeatures.title" = "More Features";
 "moreFeature.habits" = "Habits";
-"moreFeature.journal" = "Journal";
+"moreFeature.stats" = "Stats";
 "moreFeature.focus" = "Focus Timer";
 "moreFeature.analytics" = "Analytics";
 "moreFeature.trophies" = "Trophies";

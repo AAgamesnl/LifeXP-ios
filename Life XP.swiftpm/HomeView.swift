@@ -4,77 +4,56 @@ import SwiftUI
 
 struct HomeView: View {
     @Environment(AppModel.self) private var model
-    @State private var showHeroCard = false
-    @State private var scrollOffset: CGFloat = 0
     @State private var showLogMood = false
     
+    private var dailyQuest: DailyChallenge? {
+        model.dailyChallengeManager.todaysChallenges.first
+    }
+
+    private var primaryCTA: HubCTA {
+        if let activeArc = model.activeArc {
+            return .continueArc(activeArc)
+        }
+
+        if model.dailyChallengeManager.allChallengesCompleted {
+            return .claimReward
+        }
+
+        if let item = (model.focusSuggestions.first ?? model.microWins.first),
+           let pack = model.pack(for: item.id) {
+            return .startAdventure(pack)
+        }
+
+        return .exploreArcs
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
-                // Scroll content
+                BrandBackgroundStatic()
+
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: model.compactHomeLayout ? DesignSystem.spacing.lg : DesignSystem.spacing.xl) {
-                        // Hero Section with Time-of-Day Greeting
-                        HeroSection()
-                            .opacity(showHeroCard ? 1 : 0)
-                            .offset(y: showHeroCard ? 0 : 20)
-                        
-                        // Daily Briefing
-                        DailyBriefingCard2()
-                        
-                        // Life Checklist Entry
-                        if let lifeChecklist = model.packs.first(where: { $0.id == "life_checklist_classic" }) {
-                            NavigationLink(destination: PackDetailView(pack: lifeChecklist)) {
-                                LifeChecklistCard2(
-                                    pack: lifeChecklist,
-                                    progress: model.progress(for: lifeChecklist)
-                                )
-                            }
-                            .buttonStyle(CardButtonStyle())
-                        }
-                        
-                        // Level Progress
-                        LevelProgressCard()
-                        
-                        // Dimension Balance
-                        DimensionBalanceCard()
-                        
-                        // Momentum Section
-                        if model.showMomentumGrid {
-                            MomentumSection()
-                        }
-                        
-                        // Arc Preview
-                        if model.showHeroCards {
-                            if let activeArc = model.activeArc {
-                                ArcPreviewCard(arc: activeArc)
-                            } else {
-                                StartArcCard()
-                            }
-                        }
-                        
-                        // Packs
-                        if !model.featuredPacks.isEmpty {
-                            FeaturedPacksSection()
-                        }
-                        
-                        // Quick Actions
-                        if model.showQuickActions {
-                            QuickActionsSection(showLogMood: $showLogMood)
-                        }
-                        
-                        // Optional Cards
-                        OptionalCardsSection()
-                        
-                        // Bottom padding
-                        Color.clear.frame(height: 20)
+                    VStack(spacing: DesignSystem.spacing.xl) {
+                        HubDailyQuestCard(challenge: dailyQuest)
+                            .opacity(model.showHeroCards ? 1 : 0)
+                            .offset(y: model.showHeroCards ? 0 : 16)
+                            .animation(.spring(response: 0.6, dampingFraction: 0.8), value: model.showHeroCards)
+
+                        HubProgressSummaryCard()
+
+                        HubPrimaryCTA(cta: primaryCTA)
+
+                        HubModeSwitcher()
+
+                        HubCheckInCard(showLogMood: $showLogMood)
+
+                        Color.clear.frame(height: DesignSystem.spacing.xxl)
                     }
                     .padding(.horizontal, DesignSystem.spacing.lg)
                     .padding(.top, DesignSystem.spacing.md)
                 }
-                .trackScrollActivity()
             }
-            .navigationTitle(L10n.appTitle)
+            .navigationTitle(L10n.hubTitle)
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -86,15 +65,345 @@ struct HomeView: View {
                     }
                 }
             }
-            .onAppear {
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                    showHeroCard = true
-                }
-            }
             .sheet(isPresented: $showLogMood) {
                 LogMoodSheet(manager: model.journalManager)
             }
         }
+    }
+}
+
+// MARK: - Hub CTA Model
+
+struct HubCTA {
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey?
+    let icon: String
+    let color: Color
+    let destination: AnyView
+
+    static func continueArc(_ arc: Arc) -> HubCTA {
+        HubCTA(
+            title: L10n.hubCTAContinueArc,
+            subtitle: LocalizedStringKey(arc.title),
+            icon: "book.fill",
+            color: Color(hex: arc.accentColorHex, default: BrandTheme.accent),
+            destination: AnyView(ArcDetailView(arc: arc))
+        )
+    }
+
+    static func startAdventure(_ pack: CategoryPack) -> HubCTA {
+        HubCTA(
+            title: L10n.hubCTAStartAdventure,
+            subtitle: LocalizedStringKey(pack.title),
+            icon: pack.iconSystemName,
+            color: Color(hex: pack.accentColorHex, default: BrandTheme.accent),
+            destination: AnyView(PackDetailView(pack: pack))
+        )
+    }
+
+    static var claimReward: HubCTA {
+        HubCTA(
+            title: L10n.hubCTAClaimReward,
+            subtitle: L10n.hubCTAClaimSubtitle,
+            icon: "trophy.fill",
+            color: BrandTheme.warning,
+            destination: AnyView(BadgesView())
+        )
+    }
+
+    static var exploreArcs: HubCTA {
+        HubCTA(
+            title: L10n.hubCTAExploreArcs,
+            subtitle: L10n.hubCTAExploreSubtitle,
+            icon: "map.fill",
+            color: BrandTheme.accent,
+            destination: AnyView(ArcsView())
+        )
+    }
+}
+
+// MARK: - Hub Daily Quest Card
+
+struct HubDailyQuestCard: View {
+    @Environment(AppModel.self) private var model
+    let challenge: DailyChallenge?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.lg) {
+            HStack(spacing: DesignSystem.spacing.md) {
+                IconContainer(systemName: "sparkles", color: BrandTheme.accent, size: .medium, style: .gradient)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L10n.hubDailyQuestTitle)
+                        .font(DesignSystem.text.headlineLarge)
+                        .foregroundColor(BrandTheme.textPrimary)
+
+                    Text(L10n.hubDailyQuestSubtitle)
+                        .font(DesignSystem.text.bodySmall)
+                        .foregroundColor(BrandTheme.mutedText)
+                }
+
+                Spacer()
+
+                XPChip(xp: model.dailyChallengeManager.totalBonusXPAvailable, size: .small)
+            }
+
+            if let challenge {
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+                    HStack {
+                        Text(challenge.title)
+                            .font(DesignSystem.text.labelLarge)
+                            .foregroundColor(BrandTheme.textPrimary)
+
+                        Spacer()
+
+                        Text("\(challenge.progress)/\(challenge.targetCount)")
+                            .font(DesignSystem.text.labelSmall)
+                            .foregroundColor(BrandTheme.mutedText)
+                    }
+
+                    Text(challenge.description)
+                        .font(DesignSystem.text.bodySmall)
+                        .foregroundColor(BrandTheme.textSecondary)
+                        .lineLimit(2)
+
+                    AnimatedProgressBar(
+                        progress: challenge.progressRatio,
+                        height: 10,
+                        color: challenge.isCompleted ? BrandTheme.success : BrandTheme.accent,
+                        showGlow: true
+                    )
+
+                    if challenge.isCompleted {
+                        ChipView(text: String(localized: "hub.dailyQuest.completed", bundle: .module), icon: "checkmark.seal.fill", color: BrandTheme.success, size: .small)
+                    }
+                }
+            } else {
+                Text(L10n.hubDailyQuestEmpty)
+                    .font(DesignSystem.text.bodySmall)
+                    .foregroundColor(BrandTheme.textSecondary)
+            }
+        }
+        .elevatedCard(accentColor: BrandTheme.accent)
+    }
+}
+
+// MARK: - Hub Progress Summary
+
+struct HubProgressSummaryCard: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.lg) {
+            HStack {
+                Text(L10n.hubProgressTitle)
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+
+                Spacer()
+
+                ChipView(
+                    text: String(format: String(localized: "hub.progress.level", bundle: .module), model.level),
+                    icon: "star.fill",
+                    color: BrandTheme.accent,
+                    size: .small
+                )
+            }
+
+            HStack(spacing: DesignSystem.spacing.xl) {
+                AnimatedProgressRing(
+                    progress: model.levelProgress,
+                    lineWidth: 12,
+                    showPercentage: true
+                )
+                .frame(width: 96, height: 96)
+
+                VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+                    StatRow(
+                        icon: "star.fill",
+                        label: String(localized: "hub.progress.totalXp", bundle: .module),
+                        value: "\(model.totalXP)",
+                        color: BrandTheme.warning
+                    )
+
+                    StatRow(
+                        icon: "bolt.fill",
+                        label: String(localized: "hub.progress.nextLevel", bundle: .module),
+                        value: String(format: String(localized: "hub.progress.xpRemaining", bundle: .module), model.xpToNextLevel),
+                        color: BrandTheme.accent
+                    )
+
+                    StatRow(
+                        icon: "flame.fill",
+                        label: String(localized: "hub.progress.streak", bundle: .module),
+                        value: String(format: String(localized: "hub.progress.streakDays", bundle: .module), model.currentStreak),
+                        color: BrandTheme.success
+                    )
+                }
+
+                Spacer()
+            }
+        }
+        .brandCard()
+    }
+}
+
+// MARK: - Hub Primary CTA
+
+struct HubPrimaryCTA: View {
+    let cta: HubCTA
+
+    var body: some View {
+        NavigationLink(destination: cta.destination) {
+            HStack(spacing: DesignSystem.spacing.md) {
+                IconContainer(systemName: cta.icon, color: cta.color, size: .medium, style: .soft)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(cta.title)
+                        .font(DesignSystem.text.headlineMedium)
+                        .foregroundColor(BrandTheme.textPrimary)
+
+                    if let subtitle = cta.subtitle {
+                        Text(subtitle)
+                            .font(DesignSystem.text.bodySmall)
+                            .foregroundColor(BrandTheme.mutedText)
+                    }
+                }
+
+                Spacer()
+
+                Image(systemName: "arrow.right.circle.fill")
+                    .font(.system(size: 22))
+                    .foregroundColor(cta.color)
+            }
+            .padding(DesignSystem.spacing.lg)
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
+                    .fill(BrandTheme.cardBackgroundElevated.opacity(0.9))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
+                    .strokeBorder(cta.color.opacity(0.35), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Hub Mode Switcher
+
+struct HubModeSwitcher: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            Text(L10n.hubModesTitle)
+                .font(DesignSystem.text.headlineMedium)
+                .foregroundColor(BrandTheme.textPrimary)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: DesignSystem.spacing.md) {
+                    NavigationLink(destination: ArcsView()) {
+                        HubModeCard(
+                            title: L10n.hubModeStoryTitle,
+                            subtitle: L10n.hubModeStorySubtitle,
+                            icon: "book.fill",
+                            color: BrandTheme.love
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    NavigationLink(destination: PacksView()) {
+                        HubModeCard(
+                            title: L10n.hubModeTrainingTitle,
+                            subtitle: L10n.hubModeTrainingSubtitle,
+                            icon: "rectangle.stack.fill",
+                            color: BrandTheme.success
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    NavigationLink(destination: JournalView(manager: model.journalManager)) {
+                        HubModeCard(
+                            title: L10n.hubModeReflectionTitle,
+                            subtitle: L10n.hubModeReflectionSubtitle,
+                            icon: "quote.bubble.fill",
+                            color: BrandTheme.mind
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 2)
+            }
+        }
+    }
+}
+
+struct HubModeCard: View {
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
+    let icon: String
+    let color: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            IconContainer(systemName: icon, color: color, size: .small, style: .gradient)
+
+            Text(title)
+                .font(DesignSystem.text.headlineSmall)
+                .foregroundColor(BrandTheme.textPrimary)
+
+            Text(subtitle)
+                .font(DesignSystem.text.bodySmall)
+                .foregroundColor(BrandTheme.mutedText)
+                .lineLimit(2)
+        }
+        .frame(width: 210, alignment: .leading)
+        .padding(DesignSystem.spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                .fill(BrandTheme.cardBackground.opacity(0.9))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                .strokeBorder(color.opacity(0.2), lineWidth: 1)
+        )
+    }
+}
+
+// MARK: - Hub Check-in Card
+
+struct HubCheckInCard: View {
+    @Environment(AppModel.self) private var model
+    @Binding var showLogMood: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            HStack {
+                IconContainer(systemName: "heart.circle.fill", color: BrandTheme.adventure, size: .small, style: .soft)
+
+                Text(L10n.reflectionCheckInTitle)
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+
+                Spacer()
+            }
+
+            Text(model.dailyAffirmation)
+                .font(DesignSystem.text.bodySmall)
+                .foregroundColor(BrandTheme.textSecondary)
+
+            Button {
+                showLogMood = true
+            } label: {
+                HStack {
+                    Image(systemName: "square.and.pencil")
+                    Text(L10n.actionLogMoodTitle)
+                }
+            }
+            .buttonStyle(GlowButtonStyle(size: .medium))
+        }
+        .brandCard()
     }
 }
 

@@ -23,7 +23,7 @@ struct TutorialStep: Identifiable {
         case custom(CGRect)
         
         enum Tab: String {
-            case home, journeys, packs, stats, settings
+            case hub, story, training, reflection, settings
         }
     }
     
@@ -89,40 +89,40 @@ enum TutorialSequence: String, CaseIterable {
                 ),
                 TutorialStep(
                     id: "welcome_2",
-                    title: "Your Command Center",
-                    message: "Home is your daily dashboard. Check momentum, grab quick wins, and reset your focus.",
+                    title: "Your Hub",
+                    message: "The Hub is your daily command center. Grab your daily quest, track XP, and launch into a mode.",
                     iconSystemName: "house.fill",
-                    highlightAnchor: .tab(.home),
+                    highlightAnchor: .tab(.hub),
                     action: nil,
                     celebrationType: .pulse,
                     accentColor: BrandTheme.accent
                 ),
                 TutorialStep(
                     id: "welcome_3",
-                    title: "Story Journeys",
-                    message: "Journeys are guided arcs with quests and chapters. Pick a storyline and make real progress.",
+                    title: "Story Mode",
+                    message: "Story Mode is where arcs live. Chapters and quests guide you through narrative progress.",
                     iconSystemName: "book.fill",
-                    highlightAnchor: .tab(.journeys),
+                    highlightAnchor: .tab(.story),
                     action: nil,
                     celebrationType: .sparkle,
                     accentColor: BrandTheme.love
                 ),
                 TutorialStep(
                     id: "welcome_4",
-                    title: "Packs = Action Lists",
-                    message: "Packs hold your checklist items. Tap into any pack to earn XP with quick, focused actions.",
+                    title: "Training Mode",
+                    message: "Training Mode holds your packs. Tap into compact decks for quick, focused XP.",
                     iconSystemName: "checklist",
-                    highlightAnchor: .tab(.packs),
+                    highlightAnchor: .tab(.training),
                     action: nil,
                     celebrationType: .pulse,
                     accentColor: BrandTheme.success
                 ),
                 TutorialStep(
                     id: "welcome_5",
-                    title: "Stats & Achievements",
-                    message: "Stats shows your XP, streaks, and badges. Track growth and celebrate milestones.",
-                    iconSystemName: "chart.bar.xaxis",
-                    highlightAnchor: .tab(.stats),
+                    title: "Reflection Mode",
+                    message: "Reflection Mode is your daily ritual. Log moods, journal, and celebrate achievements.",
+                    iconSystemName: "quote.bubble.fill",
+                    highlightAnchor: .tab(.reflection),
                     action: nil,
                     celebrationType: .bounce,
                     accentColor: BrandTheme.warning
@@ -210,7 +210,7 @@ enum TutorialSequence: String, CaseIterable {
                     title: "Epic Story Arcs 📖",
                     message: "Arcs are guided quests for real life change. Like chapters in your personal story.",
                     iconSystemName: "book.fill",
-                    highlightAnchor: .tab(.journeys),
+                    highlightAnchor: .tab(.story),
                     action: nil,
                     celebrationType: .sparkle,
                     accentColor: BrandTheme.accent
@@ -362,7 +362,7 @@ enum TutorialSequence: String, CaseIterable {
                     title: "Your Trophy Case",
                     message: "All your achievements in one place. Show off your collection and aim for 100%!",
                     iconSystemName: "trophy.fill",
-                    highlightAnchor: .tab(.stats),
+                    highlightAnchor: .tab(.reflection),
                     action: nil,
                     celebrationType: .confetti,
                     accentColor: BrandTheme.warning

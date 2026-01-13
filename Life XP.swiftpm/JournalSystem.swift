@@ -762,6 +762,7 @@ final class JournalManager: ObservableObject {
 
 /// Main Journal View
 struct JournalView: View {
+    @Environment(AppModel.self) private var model
     @ObservedObject var manager: JournalManager
     
     @State private var showingNewEntry = false
@@ -778,8 +779,19 @@ struct JournalView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: DesignSystem.Spacing.lg) {
+                    ReflectionModeHeader()
+
                     // Header with streak
                     JournalHeaderCard(manager: manager)
+
+                    ReflectionRitualCard(ritual: model.ritualOfTheDay, energyCheckIn: model.energyCheckIn)
+
+                    ReflectionAchievementsCard(
+                        level: model.level,
+                        totalXP: model.totalXP,
+                        streak: model.currentStreak,
+                        badges: model.unlockedBadges.count
+                    )
                     
                     // Today's mood quick capture
                     TodayMoodCard(manager: manager, showingQuickMood: $showingQuickMood)
@@ -818,7 +830,7 @@ struct JournalView: View {
                 .padding(.bottom, 100)
             }
             .background(BrandBackgroundStatic())
-            .navigationTitle("Journal")
+            .navigationTitle(L10n.reflectionModeTitle)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 12) {
@@ -860,6 +872,147 @@ struct JournalView: View {
                 JournalStatsSheet(manager: manager)
             }
         }
+    }
+}
+
+// MARK: - Reflection Mode Header
+
+struct ReflectionModeHeader: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
+            Text(L10n.reflectionModeTitle)
+                .font(.largeTitle.bold())
+                .foregroundStyle(BrandTheme.textPrimary)
+
+            Text(L10n.reflectionModeSubtitle)
+                .font(.subheadline)
+                .foregroundStyle(BrandTheme.mutedText)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+// MARK: - Reflection Ritual Card
+
+struct ReflectionRitualCard: View {
+    let ritual: String
+    let energyCheckIn: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.md) {
+            HStack {
+                IconContainer(systemName: "sun.max.fill", color: BrandTheme.accent, size: .small, style: .gradient)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L10n.reflectionRitualTitle)
+                        .font(.headline)
+                        .foregroundStyle(BrandTheme.textPrimary)
+
+                    Text(L10n.reflectionRitualSubtitle)
+                        .font(.caption)
+                        .foregroundStyle(BrandTheme.mutedText)
+                }
+
+                Spacer()
+            }
+
+            Text(ritual)
+                .font(.body)
+                .foregroundStyle(BrandTheme.textPrimary)
+
+            Text(energyCheckIn)
+                .font(.subheadline)
+                .foregroundStyle(BrandTheme.textSecondary)
+        }
+        .padding()
+        .modifier(BrandCardModifier())
+    }
+}
+
+// MARK: - Reflection Achievements Card
+
+struct ReflectionAchievementsCard: View {
+    let level: Int
+    let totalXP: Int
+    let streak: Int
+    let badges: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.md) {
+            HStack {
+                IconContainer(systemName: "trophy.fill", color: BrandTheme.warning, size: .small, style: .gradient)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L10n.reflectionAchievementsTitle)
+                        .font(.headline)
+                        .foregroundStyle(BrandTheme.textPrimary)
+
+                    Text(L10n.reflectionAchievementsSubtitle)
+                        .font(.caption)
+                        .foregroundStyle(BrandTheme.mutedText)
+                }
+
+                Spacer()
+            }
+
+            HStack(spacing: DesignSystem.Spacing.sm) {
+                ReflectionAchievementPill(
+                    title: String(format: String(localized: "reflection.achievement.level", bundle: .module), level),
+                    subtitle: String(format: String(localized: "reflection.achievement.xp", bundle: .module), totalXP),
+                    icon: "star.fill",
+                    color: BrandTheme.accent
+                )
+
+                ReflectionAchievementPill(
+                    title: String(format: String(localized: "reflection.achievement.streak", bundle: .module), streak),
+                    subtitle: String(localized: "reflection.achievement.momentum", bundle: .module),
+                    icon: "flame.fill",
+                    color: BrandTheme.success
+                )
+
+                ReflectionAchievementPill(
+                    title: String(format: String(localized: "reflection.achievement.badges", bundle: .module), badges),
+                    subtitle: String(localized: "reflection.achievement.unlocked", bundle: .module),
+                    icon: "rosette",
+                    color: BrandTheme.warning
+                )
+            }
+        }
+        .padding()
+        .modifier(BrandCardModifier())
+    }
+}
+
+struct ReflectionAchievementPill: View {
+    let title: String
+    let subtitle: String
+    let icon: String
+    let color: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .foregroundStyle(color)
+                Text(title)
+                    .font(.subheadline.bold())
+                    .foregroundStyle(BrandTheme.textPrimary)
+            }
+
+            Text(subtitle)
+                .font(.caption)
+                .foregroundStyle(BrandTheme.mutedText)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(BrandTheme.cardBackgroundElevated.opacity(0.7))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .strokeBorder(color.opacity(0.2), lineWidth: 1)
+        )
     }
 }
 

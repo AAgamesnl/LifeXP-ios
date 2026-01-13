@@ -5,45 +5,36 @@ import SwiftUI
 struct PacksView: View {
     @Environment(AppModel.self) private var model
     @State private var searchText = ""
-    @State private var selectedFilter: PackFilter = .all
-    
-    enum PackFilter: String, CaseIterable, Identifiable {
-        case all
-        case inProgress
-        case completed
-        case premium
-
-        var id: String { rawValue }
-
-        var label: String {
-            String(localized: "packs.filter.\(rawValue)")
-        }
-    }
     
     private var filteredPacks: [CategoryPack] {
-        var packs = model.packs
-        
-        // Apply search
-        if !searchText.isEmpty {
-            packs = packs.filter { pack in
-                pack.title.localizedCaseInsensitiveContains(searchText) ||
-                pack.subtitle.localizedCaseInsensitiveContains(searchText)
-            }
+        guard !searchText.isEmpty else { return model.packs }
+        return model.packs.filter { pack in
+            pack.title.localizedCaseInsensitiveContains(searchText) ||
+            pack.subtitle.localizedCaseInsensitiveContains(searchText)
         }
-        
-        // Apply filter
-        switch selectedFilter {
-        case .all:
-            break
-        case .inProgress:
-            packs = packs.filter { model.progress(for: $0) > 0 && model.progress(for: $0) < 1 }
-        case .completed:
-            packs = packs.filter { model.progress(for: $0) >= 1 }
-        case .premium:
-            packs = packs.filter { $0.isPremium }
+    }
+
+    private var inProgressPacks: [CategoryPack] {
+        model.packs.filter { model.progress(for: $0) > 0 && model.progress(for: $0) < 1 }
+    }
+
+    private var completedPacks: [CategoryPack] {
+        model.packs.filter { model.progress(for: $0) >= 1 }
+    }
+
+    private var premiumPacks: [CategoryPack] {
+        model.packs.filter { $0.isPremium }
+    }
+
+    private var recommendedPacks: [CategoryPack] {
+        let inProgressIDs = Set(inProgressPacks.map(\.id))
+        let completedIDs = Set(completedPacks.map(\.id))
+        let premiumIDs = Set(premiumPacks.map(\.id))
+        return model.featuredPacks.filter { pack in
+            !inProgressIDs.contains(pack.id) &&
+            !completedIDs.contains(pack.id) &&
+            !premiumIDs.contains(pack.id)
         }
-        
-        return packs
     }
     
     var body: some View {
@@ -53,30 +44,17 @@ struct PacksView: View {
                 
                 ScrollView {
                     VStack(spacing: DesignSystem.spacing.lg) {
-                        // Stats header
+                        TrainingModeHeader()
+
                         PacksStatsHeader()
-                        
-                        // Filter chips
-                        FilterChipsRow(selectedFilter: $selectedFilter)
-                        
-                        // Pack list
-                        LazyVStack(spacing: DesignSystem.spacing.md) {
-                            ForEach(filteredPacks) { pack in
-                                NavigationLink(destination: PackDetailView(pack: pack)) {
-                                    PackCard(pack: pack)
-                                }
-                                .buttonStyle(CardButtonStyle())
-                            }
-                        }
-                        
-                        // Empty state
-                        if filteredPacks.isEmpty {
-                            EmptyStateView(
-                                icon: "checklist",
-                                title: String(localized: "packs.empty.title"),
-                                message: String(localized: "packs.empty.message")
-                            )
-                            .padding(.top, DesignSystem.spacing.xxl)
+
+                        if !searchText.isEmpty {
+                            PackSearchResultsSection(packs: filteredPacks)
+                        } else {
+                            PackDeckSection(title: L10n.trainingSectionInProgress, packs: inProgressPacks)
+                            PackDeckSection(title: L10n.trainingSectionRecommended, packs: recommendedPacks)
+                            PackDeckSection(title: L10n.trainingSectionCompleted, packs: completedPacks)
+                            PackDeckSection(title: L10n.trainingSectionPremium, packs: premiumPacks)
                         }
                     }
                     .padding(.horizontal, DesignSystem.spacing.lg)
@@ -84,9 +62,26 @@ struct PacksView: View {
                 }
                 .trackScrollActivity()
             }
-            .navigationTitle(L10n.packsScreenTitle)
+            .navigationTitle(L10n.trainingModeTitle)
             .searchable(text: $searchText, prompt: L10n.packsSearchPrompt)
         }
+    }
+}
+
+// MARK: - Training Mode Header
+
+struct TrainingModeHeader: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.sm) {
+            Text(L10n.trainingModeTitle)
+                .font(DesignSystem.text.headlineLarge)
+                .foregroundColor(BrandTheme.textPrimary)
+
+            Text(L10n.trainingModeSubtitle)
+                .font(DesignSystem.text.bodySmall)
+                .foregroundColor(BrandTheme.mutedText)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -158,54 +153,109 @@ struct PackStatTile: View {
     }
 }
 
-// MARK: - Filter Chips Row
+// MARK: - Pack Deck Section
 
-struct FilterChipsRow: View {
-    @Binding var selectedFilter: PacksView.PackFilter
-    
+struct PackDeckSection: View {
+    let title: LocalizedStringKey
+    let packs: [CategoryPack]
+
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: DesignSystem.spacing.sm) {
-                ForEach(PacksView.PackFilter.allCases) { filter in
-                    FilterChip(
-                        title: filter.label,
-                        isSelected: selectedFilter == filter
-                    ) {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.85, blendDuration: 0.08)) {
-                            selectedFilter = filter
+        if !packs.isEmpty {
+            VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+                Text(title)
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: DesignSystem.spacing.md) {
+                        ForEach(packs) { pack in
+                            NavigationLink(destination: PackDetailView(pack: pack)) {
+                                PackDeckCard(pack: pack)
+                            }
+                            .buttonStyle(.plain)
                         }
-                        HapticsEngine.lightImpact()
                     }
+                    .padding(.horizontal, 2)
                 }
             }
         }
     }
 }
 
-struct FilterChip: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-    
+struct PackDeckCard: View {
+    @Environment(AppModel.self) private var model
+    let pack: CategoryPack
+
+    private var accent: Color {
+        Color(hex: pack.accentColorHex, default: BrandTheme.accent)
+    }
+
+    private var progress: Double {
+        model.progress(for: pack)
+    }
+
     var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(DesignSystem.text.labelSmall)
-                .foregroundColor(isSelected ? .white : BrandTheme.textSecondary)
-                .padding(.horizontal, DesignSystem.spacing.md)
-                .padding(.vertical, DesignSystem.spacing.sm)
-                .background(
-                    Capsule()
-                        .fill(isSelected ? BrandTheme.accent : BrandTheme.cardBackground.opacity(0.8))
-                )
-                .overlay(
-                    Capsule()
-                        .strokeBorder(isSelected ? Color.clear : BrandTheme.borderSubtle, lineWidth: 1)
-                )
-                .scaleEffect(isSelected ? 1.02 : 1)
+        VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
+            HStack {
+                IconContainer(systemName: pack.iconSystemName, color: accent, size: .small, style: .gradient)
+
+                Spacer()
+
+                XPChip(xp: pack.items.reduce(0) { $0 + $1.xp }, size: .small)
+            }
+
+            Text(pack.title)
+                .font(DesignSystem.text.headlineSmall)
+                .foregroundColor(BrandTheme.textPrimary)
+                .lineLimit(2)
+
+            Text(pack.subtitle)
+                .font(DesignSystem.text.bodySmall)
+                .foregroundColor(BrandTheme.mutedText)
+                .lineLimit(2)
+
+            AnimatedProgressBar(progress: progress, height: 8, color: accent)
+
+            Text(String(format: String(localized: "progress.percentComplete", bundle: .module), Int(progress * 100)))
+                .font(.caption)
+                .foregroundColor(BrandTheme.mutedText)
         }
-        .buttonStyle(.plain)
-        .animation(.spring(response: 0.25, dampingFraction: 0.85), value: isSelected)
+        .frame(width: 220, alignment: .leading)
+        .padding(DesignSystem.spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                .fill(BrandTheme.cardBackground.opacity(0.9))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DesignSystem.radius.md, style: .continuous)
+                .strokeBorder(accent.opacity(0.2), lineWidth: 1)
+        )
+    }
+}
+
+// MARK: - Pack Search Results
+
+struct PackSearchResultsSection: View {
+    let packs: [CategoryPack]
+
+    var body: some View {
+        if packs.isEmpty {
+            EmptyStateView(
+                icon: "checklist",
+                title: String(localized: "packs.empty.title"),
+                message: String(localized: "packs.empty.message")
+            )
+            .padding(.top, DesignSystem.spacing.xxl)
+        } else {
+            LazyVStack(spacing: DesignSystem.spacing.md) {
+                ForEach(packs) { pack in
+                    NavigationLink(destination: PackDetailView(pack: pack)) {
+                        PackCard(pack: pack)
+                    }
+                    .buttonStyle(CardButtonStyle())
+                }
+            }
+        }
     }
 }
 
