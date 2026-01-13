@@ -16,7 +16,8 @@ struct ArcsView: View {
     private func attemptStartArc(_ arc: Arc) {
         let wasActive = model.arcStartDates[arc.id] != nil
         if model.startArcIfNeeded(arc), !wasActive {
-            HapticsEngine.lightImpact()
+            HapticsEngine.softCelebrate()
+            model.soundManager.play(.celebration)
         } else if !wasActive && model.remainingArcSlots == 0 {
             pendingArcToStart = arc
             showArcLimitDialog = true
@@ -671,7 +672,7 @@ struct AllArcsSection: View {
     @Environment(AppModel.self) private var model
     var startAction: ((Arc) -> Void)?
     
-    @State private var isExpanded = false
+    @State private var isExpanded = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.spacing.md) {
@@ -749,10 +750,12 @@ struct ToolsSection: View {
 
 struct ArcDetailView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.dismiss) private var dismiss
     let arc: Arc
     
     @State private var pendingArcToStart: Arc?
     @State private var showArcLimitDialog = false
+    @State private var showStartCelebration = false
 
     private var accent: Color { Color(hex: arc.accentColorHex, default: BrandTheme.accent) }
     private var progress: Double { model.arcProgress(arc) }
@@ -761,7 +764,17 @@ struct ArcDetailView: View {
     private func attemptStartArc() {
         let wasActive = model.arcStartDates[arc.id] != nil
         if model.startArcIfNeeded(arc), !wasActive {
-            HapticsEngine.lightImpact()
+            HapticsEngine.softCelebrate()
+            model.soundManager.play(.celebration)
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                showStartCelebration = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.85) {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showStartCelebration = false
+                }
+                dismiss()
+            }
         } else if !wasActive && model.remainingArcSlots == 0 {
             pendingArcToStart = arc
             showArcLimitDialog = true
@@ -783,7 +796,11 @@ struct ArcDetailView: View {
             ScrollView {
                 VStack(spacing: DesignSystem.spacing.lg) {
                     // Header
-                    ArcDetailHeader(arc: arc)
+                    ArcDetailHeader(
+                        arc: arc,
+                        startAction: attemptStartArc,
+                        stopAction: { model.resetArcStart(arc) }
+                    )
                     
                     // Chapters
                     ForEach(arc.chapters) { chapter in
@@ -793,6 +810,12 @@ struct ArcDetailView: View {
                     Color.clear.frame(height: DesignSystem.spacing.xxl)
                 }
                 .padding(.horizontal, DesignSystem.spacing.lg)
+            }
+        }
+        .overlay {
+            if showStartCelebration {
+                ArcStartCelebrationOverlay(arc: arc)
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
             }
         }
         .navigationTitle(arc.title)
@@ -816,11 +839,67 @@ struct ArcDetailView: View {
     }
 }
 
+// MARK: - Arc Start Celebration Overlay
+
+struct ArcStartCelebrationOverlay: View {
+    let arc: Arc
+
+    @State private var showConfetti = false
+    @State private var scale: CGFloat = 0.9
+    @State private var opacity: Double = 0
+
+    private var accent: Color { Color(hex: arc.accentColorHex, default: BrandTheme.accent) }
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.25)
+                .ignoresSafeArea()
+
+            if showConfetti {
+                ConfettiView(isActive: $showConfetti, particleCount: 35)
+                    .transition(.opacity)
+            }
+
+            VStack(spacing: DesignSystem.spacing.sm) {
+                IconContainer(systemName: arc.iconSystemName, color: accent, size: .hero, style: .gradient)
+
+                Text("Arc Started!")
+                    .font(DesignSystem.text.headlineLarge)
+                    .foregroundColor(BrandTheme.textPrimary)
+
+                Text("Great pick. Your next quests are ready.")
+                    .font(DesignSystem.text.bodySmall)
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+            .padding(DesignSystem.spacing.xl)
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
+                    .fill(BrandTheme.cardBackgroundElevated)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignSystem.radius.lg, style: .continuous)
+                    .strokeBorder(accent.opacity(0.4), lineWidth: 1)
+            )
+            .scaleEffect(scale)
+            .opacity(opacity)
+        }
+        .onAppear {
+            showConfetti = true
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                scale = 1
+                opacity = 1
+            }
+        }
+    }
+}
+
 // MARK: - Arc Detail Header
 
 struct ArcDetailHeader: View {
     @Environment(AppModel.self) private var model
     let arc: Arc
+    var startAction: (() -> Void)?
+    var stopAction: (() -> Void)?
     
     private var accent: Color { Color(hex: arc.accentColorHex, default: BrandTheme.accent) }
     private var progress: Double { model.arcProgress(arc) }
@@ -884,10 +963,7 @@ struct ArcDetailHeader: View {
             HStack(spacing: DesignSystem.spacing.md) {
                 if !isActive && progress < 1 {
                     Button {
-                        _ = model.startArcIfNeeded(arc)
-                        if model.arcStartDates[arc.id] != nil {
-                            HapticsEngine.lightImpact()
-                        }
+                        startAction?()
                     } label: {
                         HStack {
                             Image(systemName: "play.fill")
@@ -900,7 +976,7 @@ struct ArcDetailHeader: View {
                 
                 if isActive || progress >= 1 {
                     Button {
-                        model.resetArcStart(arc)
+                        stopAction?()
                     } label: {
                         HStack {
                             Image(systemName: "stop.circle")

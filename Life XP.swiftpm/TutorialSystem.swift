@@ -80,7 +80,7 @@ enum TutorialSequence: String, CaseIterable {
                 TutorialStep(
                     id: "welcome_1",
                     title: "Welcome to Life XP! 🎮",
-                    message: "Your life is about to become an epic adventure. Ready to level up in real life?",
+                    message: "Your life is about to become an epic story arc. Ready to level up in real life?",
                     iconSystemName: "sparkles",
                     highlightAnchor: nil,
                     action: nil,
