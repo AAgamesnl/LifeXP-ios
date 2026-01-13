@@ -20,29 +20,22 @@ struct StatsView: View {
                 BrandBackgroundStatic()
 
                 ScrollView {
-                    VStack(spacing: DesignSystem.spacing.xl) {
+                    LazyVStack(spacing: DesignSystem.spacing.xl) {
                         // Level Hero Card
                         LevelHeroCard()
                         
-                        // Progress Snapshot
-                        ProgressSnapshotCard2()
+                        StatsSectionHeader(title: "Highlights", subtitle: "Your momentum at a glance.", icon: "sparkles")
+                        StatsFeatureCarousel()
                         
                         // Arc Focus
                         if let arc = model.highlightedArc {
                             ArcFocusCard(arc: arc)
                         }
                         
-                        // Overall Progress
-                        OverallProgressCard()
-                        
-                        // Insights Card
-                        InsightsCard2()
+                        StatsSectionHeader(title: "Deep Dive", subtitle: "Balance and growth across dimensions.", icon: "chart.line.uptrend.xyaxis")
                         
                         // Dimension Stats
                         DimensionStatsCard()
-                        
-                        // Arc Progress
-                        ArcProgressCard()
                         
                         // Badges Preview
                         if !model.unlockedBadges.isEmpty {
@@ -60,6 +53,73 @@ struct StatsView: View {
             }
             .navigationTitle("Stats")
         }
+    }
+}
+
+// MARK: - Stats Section Header
+
+struct StatsSectionHeader: View {
+    let title: String
+    let subtitle: String
+    let icon: String
+
+    var body: some View {
+        HStack(spacing: DesignSystem.spacing.md) {
+            IconContainer(systemName: icon, color: BrandTheme.accent, size: .small, style: .soft)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(DesignSystem.text.headlineMedium)
+                    .foregroundColor(BrandTheme.textPrimary)
+
+                Text(subtitle)
+                    .font(DesignSystem.text.captionRegular)
+                    .foregroundColor(BrandTheme.mutedText)
+            }
+
+            Spacer()
+        }
+    }
+}
+
+// MARK: - Stats Feature Carousel
+
+struct StatsFeatureCarousel: View {
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: DesignSystem.spacing.lg) {
+                StatsCarouselItem {
+                    ProgressSnapshotCard2()
+                }
+
+                StatsCarouselItem {
+                    OverallProgressCard()
+                }
+
+                StatsCarouselItem {
+                    InsightsCard2()
+                }
+            }
+            .scrollTargetLayout()
+            .padding(.horizontal, DesignSystem.spacing.lg)
+        }
+        .scrollTargetBehavior(.viewAligned)
+        .scrollClipDisabled()
+        .padding(.horizontal, -DesignSystem.spacing.lg)
+    }
+}
+
+struct StatsCarouselItem<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        content
+            .frame(width: min(360, UIScreen.main.bounds.width - 72))
+            .scrollTransition(axis: .horizontal) { view, phase in
+                view
+                    .scaleEffect(phase.isIdentity ? 1.0 : 0.96)
+                    .opacity(phase.isIdentity ? 1.0 : 0.85)
+            }
     }
 }
 
@@ -394,15 +454,15 @@ struct InsightsCard2: View {
                     .foregroundColor(BrandTheme.textSecondary)
             }
             
-            // Daily ritual
+            // Momentum note
             HStack(spacing: DesignSystem.spacing.md) {
                 IconContainer(systemName: "sparkles", color: BrandTheme.accent, size: .small, style: .soft)
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Ritual of the Day")
+                    Text("Momentum Note")
                         .font(DesignSystem.text.labelSmall)
                         .foregroundColor(BrandTheme.mutedText)
-                    Text(model.ritualOfTheDay)
+                    Text(model.dailyAffirmation)
                         .font(DesignSystem.text.bodySmall)
                         .foregroundColor(BrandTheme.textSecondary)
                 }
