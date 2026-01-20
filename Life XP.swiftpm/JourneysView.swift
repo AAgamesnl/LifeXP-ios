@@ -34,9 +34,7 @@ struct ArcsView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                BrandBackgroundStatic()
-
+            ScreenBackground {
                 ScrollView {
                     VStack(spacing: DesignSystem.spacing.xl) {
                         StoryModeHeader()

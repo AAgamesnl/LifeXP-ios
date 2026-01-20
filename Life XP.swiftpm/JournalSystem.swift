@@ -777,59 +777,60 @@ struct JournalView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: DesignSystem.Spacing.lg) {
-                    ReflectionModeHeader()
+            ScreenBackground {
+                ScrollView {
+                    VStack(spacing: DesignSystem.Spacing.lg) {
+                        ReflectionModeHeader()
 
-                    // Header with streak
-                    JournalHeaderCard(manager: manager)
+                        // Header with streak
+                        JournalHeaderCard(manager: manager)
 
-                    ReflectionRitualCard(ritual: model.ritualOfTheDay, energyCheckIn: model.energyCheckIn)
+                        ReflectionRitualCard(ritual: model.ritualOfTheDay, energyCheckIn: model.energyCheckIn)
 
-                    ReflectionAchievementsCard(
-                        level: model.level,
-                        totalXP: model.totalXP,
-                        streak: model.currentStreak,
-                        badges: model.unlockedBadges.count
-                    )
-                    
-                    // Today's mood quick capture
-                    TodayMoodCard(manager: manager, showingQuickMood: $showingQuickMood)
-                    
-                    // Prompt of the day
-                    PromptCard(manager: manager, showingNewEntry: $showingNewEntry)
-                    
-                    // Today's entry or CTA
-                    if let entry = manager.todaysEntry {
-                        TodaysEntryCard(entry: entry, onEdit: {
-                            selectedEntry = entry
-                            showingNewEntry = true
-                        })
-                    } else {
-                        StartJournalingCard(showingNewEntry: $showingNewEntry)
-                    }
-                    
-                    // Mood insights
-                    if !manager.moodInsights.isEmpty {
-                        MoodInsightsCard(insights: manager.moodInsights)
-                    }
-                    
-                    // Mood trend visualization
-                    MoodTrendCard(manager: manager)
-                    
-                    // Recent entries
-                    RecentEntriesCard(
-                        entries: Array(manager.entries.suffix(5).reversed()),
-                        onSelectEntry: { entry in
-                            selectedEntry = entry
-                            showingNewEntry = true
+                        ReflectionAchievementsCard(
+                            level: model.level,
+                            totalXP: model.totalXP,
+                            streak: model.currentStreak,
+                            badges: model.unlockedBadges.count
+                        )
+                        
+                        // Today's mood quick capture
+                        TodayMoodCard(manager: manager, showingQuickMood: $showingQuickMood)
+                        
+                        // Prompt of the day
+                        PromptCard(manager: manager, showingNewEntry: $showingNewEntry)
+                        
+                        // Today's entry or CTA
+                        if let entry = manager.todaysEntry {
+                            TodaysEntryCard(entry: entry, onEdit: {
+                                selectedEntry = entry
+                                showingNewEntry = true
+                            })
+                        } else {
+                            StartJournalingCard(showingNewEntry: $showingNewEntry)
                         }
-                    )
+                        
+                        // Mood insights
+                        if !manager.moodInsights.isEmpty {
+                            MoodInsightsCard(insights: manager.moodInsights)
+                        }
+                        
+                        // Mood trend visualization
+                        MoodTrendCard(manager: manager)
+                        
+                        // Recent entries
+                        RecentEntriesCard(
+                            entries: Array(manager.entries.suffix(5).reversed()),
+                            onSelectEntry: { entry in
+                                selectedEntry = entry
+                                showingNewEntry = true
+                            }
+                        )
+                    }
+                    .padding(.horizontal, DesignSystem.Spacing.md)
+                    .padding(.bottom, 100)
                 }
-                .padding(.horizontal, DesignSystem.Spacing.md)
-                .padding(.bottom, 100)
             }
-            .background(BrandBackgroundStatic())
             .navigationTitle(L10n.reflectionModeTitle)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
