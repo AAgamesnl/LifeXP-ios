@@ -14,9 +14,7 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                BrandBackgroundStatic()
-
+            ScreenBackground {
                 ScrollView {
                     VStack(spacing: DesignSystem.spacing.xl) {
                         // Profile Summary

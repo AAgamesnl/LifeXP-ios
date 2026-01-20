@@ -39,9 +39,7 @@ struct PacksView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                BrandBackgroundStatic()
-                
+            ScreenBackground {
                 ScrollView {
                     VStack(spacing: DesignSystem.spacing.lg) {
                         TrainingModeHeader()

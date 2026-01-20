@@ -690,6 +690,25 @@ struct BrandBackgroundStatic: View {
     }
 }
 
+// MARK: - Screen Background Container
+
+/// Ensures consistent full-screen background and layout alignment.
+struct ScreenBackground<Content: View>: View {
+    private let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        ZStack {
+            BrandBackgroundStatic()
+            content
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+}
+
 // MARK: - Card Modifiers
 
 /// Modern glassmorphic card style

@@ -29,9 +29,7 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                BrandBackgroundStatic()
-
+            ScreenBackground {
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: DesignSystem.spacing.xl) {
                         HubDailyQuestCard(challenge: dailyQuest)
